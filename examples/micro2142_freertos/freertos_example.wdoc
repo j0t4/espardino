@@ -1,0 +1,68 @@
+/*==FILE examples/freertos/basic_example.txt */
+
+/*==INTRO
+This is an example of the lib/rt/[[lib:rt:FreeRTOS]] library. 
+
+Your startup.s should have this:
+<code>
+SWI_Addr:		.word vPortYieldProcessor       
+</code>
+instead of the normal:
+<code>
+SWI_Addr:		.word   SWI_Handler
+</code>
+
+*/
+
+
+/*==SECTION FreeRTOS basic example
+
+<code c>
+==INCLUDE main.c
+</code>
+
+*/
+
+
+
+/*==SECTION FreeRTOSConfig.h
+
+You may want to change the default FreeRTOSConfig.h shipped with Espardino:
+<code C>
+==INCLUDE FreeRTOSConfig.h
+</code>
+
+You can go to Espardino/src/FreeRTOS, change it, and do a "make install"
+*/
+
+/*==SECTION Linking directly with sources
+
+If you want to include FreeRTOS from source files you can add the following
+
+changes to your Makefile:
+
+<code make>
+
+RTOS_DIR=$(ESPARDINO)/src/FreeRTOS
+RTOS_SOURCE_DIR=$(RTOS_DIR)/Source
+
+# c-only (16bit compressed thumb mode)
+SRC = main.c $(RTOS_DIR)/espardino_timer.c $(RTOS_SOURCE_DIR)/tasks.c $(RTOS_SOURCE_DIR)/queue.c $(RTOS_SOURCE_DIR)/list.c \
+	 $(RTOS_SOURCE_DIR)/portable/MemMang/heap_3.c $(RTOS_SOURCE_DIR)/portable/GCC/ARM7_LPC2000/port.c
+
+
+# c-only (32bit arm mode)
+SRCARM = $(RTOS_SOURCE_DIR)/portable/GCC/ARM7_LPC2000/portISR.c 		
+
+
+# System libraries to be linked with
+MY_LIBS = -lvcom_rtos -lmicro214x -lm
+
+# set the first CFLAGS assignment in makefile like this
+CFLAGS =-D GCC_ARM7  -D THUMB_INTERWORK -I. -I$(RTOS_SOURCE_DIR)/include 
+
+</code>
+
+Adjust FreeRTOS settings in the FreeRTOSConfig.h File (just after copying it to your project directory).
+
+*/

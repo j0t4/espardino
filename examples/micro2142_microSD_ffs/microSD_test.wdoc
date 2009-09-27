@@ -1,0 +1,20 @@
+/*==FILE examples/microsd/ffs.txt */
+
+/*==INTRO
+This is an example of the microSD filesystem access using the [[lib:microsd:ffs]] library.
+
+<note important>
+Currently the FFS library only supports both microSD and microSDHC.
+
+the microSD/HC card needs to support SPI mode for correct operation.
+</note>
+
+*/
+
+/*==SECTION microSD EFSL Example
+
+<code c>
+==INCLUDE main.c
+</code>
+
+*/

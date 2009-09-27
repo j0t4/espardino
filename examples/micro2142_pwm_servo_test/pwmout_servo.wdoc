@@ -1,0 +1,14 @@
+/*==FILE examples/pwm_servo.txt */
+
+/*==INTRO
+This is an example of the [[lib:pwm]] library. We control a servo using the
+button from the board.
+*/
+
+/*==SECTION PWM servo control example
+
+<code c>
+==INCLUDE main.c
+</code>
+
+*/
