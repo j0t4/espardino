@@ -1,0 +1,13 @@
+<Project name="micro2142_microSD">
+<Folder name="config">
+    <File path="Makefile"></File>
+</Folder>
+<Folder name="code">
+    <File path="Startup.s"></File>
+    <File path="main.c"></File>
+    <File path="blockdev_sd.c"></File>
+    <File path="lpc2000_spi.c"></File>
+    <File path="msc_bot.c"></File>
+    <File path="msc_scsi.c"></File>
+</Folder>
+</Project>
