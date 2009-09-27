@@ -1,0 +1,1 @@
+<Project name="micro2142_microSD"><Folder name="config"><File path="Makefile"></File></Folder><Folder name="code"><File path="Startup.s"></File><File path="main.c"></File></Folder></Project>

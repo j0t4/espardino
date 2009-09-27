@@ -1,0 +1,34 @@
+/*==FILE examples/cpp.txt */
+
+/*==INTRO
+This is an example of CPP Project.
+
+*/
+
+
+
+/*==SECTION CPP Example: main.cpp
+
+<code c>
+==INCLUDE main.cpp
+</code>
+
+*/
+
+
+/*==SECTION CPP Example: servo.hpp
+
+<code cpp>
+==INCLUDE servo.hpp
+</code>
+
+*/
+
+/*==SECTION CPP Example: servo.cpp
+
+<code cpp>
+==INCLUDE servo.cpp
+</code>
+
+*/
+

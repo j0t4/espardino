@@ -1,0 +1,14 @@
+/*==FILE examples/adc.txt */
+
+/*==INTRO
+This is an example of Analog to Digital conversion using the [[lib:adc]] library.
+
+*/
+
+/*==SECTION ADC Example
+
+<code c>
+==INCLUDE main.c
+</code>
+
+*/
