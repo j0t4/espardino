@@ -1,0 +1,20 @@
+D/interfaces////
+/debug.h/1.36/Wed Jan 18 17:41:25 2006//
+/dir.h/1.24/Wed Jan 18 17:43:43 2006//
+/disc.h/1.19/Wed Jan 18 17:43:43 2006//
+/efs.h/1.19/Wed Jan 18 17:43:43 2006//
+/error.h/1.5/Wed Jan 18 17:43:43 2006//
+/extract.h/1.11/Wed Jan 18 17:43:43 2006//
+/fat.h/1.25/Wed Jan 18 17:43:43 2006//
+/file.h/1.43/Wed Jan 18 17:43:43 2006//
+/fs.h/1.36/Wed Jan 18 17:43:43 2006//
+/interface.h/1.12/Wed Jan 18 17:43:44 2006//
+/ioman.h/1.28/Wed Jan 18 17:43:44 2006//
+/ioman_v2.h/1.4/Wed Jan 18 17:43:44 2006//
+/ls.h/1.5/Wed Jan 18 17:43:44 2006//
+/mkfs.h/1.9/Wed Jan 18 17:43:44 2006//
+/partition.h/1.25/Wed Jan 18 17:43:44 2006//
+/plibc.h/1.16/Wed Jan 18 17:43:44 2006//
+/time.h/1.3/Wed Jan 18 17:43:44 2006//
+/types.h/1.13/Wed Jan 18 17:44:21 2006//
+/ui.h/1.12/Wed Jan 18 17:44:39 2006//

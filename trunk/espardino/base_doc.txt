@@ -1,0 +1,74 @@
+
+/*==FILE lib/xxxxxx.txt */
+
+/*==INTRO
+
+
+
+*/
+
+/*==RESOURCES VIC Interrupt level xxxx.  */
+
+
+/*==USAGE Using the xxxxxxx in your applications
+    
+1st) Edit your makefile to include the **"micro214x"** library at linking time. You can modify the espardino base projects adding "-lvcom" to the MY_LIBS var.
+
+<code c>
+  # System libraries to be linked with
+  MY_LIBS = -lmicro214x
+</code>
+	
+2nd) Include the "micro214x.h" headers in your application.
+
+<code c>
+  #include <micro214x.h>
+</code>
+
+3rd) Call XXXXXX_init() inside your application, during startup.It will setup all the VIC  interrupt vectors and underlying software to emulate a virtual COM port over the USB connection.
+
+<code c>
+  XXXXX_init();	// init the 
+</code>
+
+*/
+
+/*==SECTION xxxxxxxxxx */
+
+/*==FUN  ===================================================
+==ACTION
+
+==RESULT
+
+*/
+
+/*==FUN  ===================================================
+==ACTION
+
+==RESULT
+
+*/
+
+/*==FUN  ===================================================
+==ACTION
+
+==RESULT
+
+*/
+
+/*==FUN  ===================================================
+==ACTION
+
+==RESULT
+
+*/
+
+/*==SECTION Extra info... or not...
+
+......
+
+<code c>
+   printf_output(&VCOM_putchar);
+</code>
+
+*/
