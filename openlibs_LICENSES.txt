@@ -1,0 +1,4 @@
+check every license inside each project folder.
+
+LGPL, BSD, and public domain.
+

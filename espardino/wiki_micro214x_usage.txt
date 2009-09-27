@@ -1,0 +1,16 @@
+1st) Edit your makefile to include the **"micro214x"** library at linking time.
+You can modify the espardino base projects adding "-lmicro214x" to the MY_LIBS var.
+
+<code c>
+  # System libraries to be linked with: 
+  # micro214x and lib math for floating point support
+  
+  MY_LIBS = -lmicro214x -lm
+	
+</code>
+	
+2nd) Include the "micro214x.h" headers in your application.
+
+<code c>
+  #include <micro214x.h>
+</code>

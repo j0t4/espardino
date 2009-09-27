@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en"><head>
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="start" title="Site Top" href="http://elm-chan.org/">
+<link rel="up" title="Freewares" href="http://elm-chan.org/fsw_e.html">
+<link rel="alternate" hreflang="ja" title="Japanese version" href="http://elm-chan.org/fsw/ff/00index_j.html">
+<link rel="stylesheet" href="patches-Dateien/css_e.css" type="text/css" media="screen" title="ELM Default">
+<title>Patches for FatFs R0.07a</title>
+</head><body>
+<h2>Patches for FatFs R0.07a</h2>
+<pre>May 18, 2009
+------------------------------------------------------------------------------
+Cached sector is left not reloaded when it gets dirty by direct data transfer
+in f_write function. As the result, subsequent read/write function can read/
+write wrong data. To fix this problem, apply following patch to the ff.c.
+
+ff.c line 1786:
+                if (disk_write(fp-&gt;fs-&gt;drive, wbuff, sect, (BYTE)cc) != RES_OK)
+                    ABORT(fp-&gt;fs, FR_DISK_ERR);
++#if _FS_TINY
++               if (fp-&gt;fs-&gt;winsect - sect &lt; cc) {  /* Refill sector cache if it gets dirty by the direct write */
++                   mem_cpy(fp-&gt;fs-&gt;win, wbuff + ((fp-&gt;fs-&gt;winsect - sect) * SS(fp-&gt;fs)), SS(fp-&gt;fs));
++                   fp-&gt;fs-&gt;wflag = 0;
++               }
++#else
++               if (fp-&gt;dsect - sect &lt; cc) {  /* Refill sector cache if it gets dirty by the direct write */
++                   mem_cpy(fp-&gt;buf, wbuff + ((fp-&gt;dsect - sect) * SS(fp-&gt;fs)), SS(fp-&gt;fs));
++                   fp-&gt;flag &amp;= ~FA__DIRTY;
++               }
++#endif
+                fp-&gt;csect += (BYTE)cc;
+                wcnt = SS(fp-&gt;fs) * cc;
+</pre>
+<pre>May 4, 2009
+------------------------------------------------------------------------------
+f_unlink function returns FR_OK regardless if the function succeeded or failed.
+To fix this problem, apply following patchs to the ff.c.
+
+ff.c line 2272:
+-    LEAVE_FF(dj.fs, FR_OK);
++    LEAVE_FF(dj.fs, res);
+
+</pre>
+<pre>April 18, 2009
+------------------------------------------------------------------------------
+Added some code pages. Replace ccsbcs.c with <a href="http://elm-chan.org/fsw/ff/ccsbcs.c">this</a> file.
+
+</pre>
+</body></html>
