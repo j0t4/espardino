@@ -165,10 +165,10 @@ static BOOL HandleClassRequest(TSetupPacket *pSetup, int *piLen, U8 **ppbData)
 	====
 **************************************************************************/
 int main(void)
-{
+{ 
 
 
-	IO_init(FAST_IO);
+	IO_init(SLOW_IO);
 	LEDS_init();	/* init the LEDs for this board  */
 	// initialise the SD card
 	BlockDevInit();
@@ -197,6 +197,7 @@ int main(void)
 	// connect to bus
 	USBHwConnect(TRUE);
 
+	LEDS_on(LED1);
 	// call USB interrupt handler continuously
 	while (1) {
 		USBHwISR();

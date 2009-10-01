@@ -1,0 +1,83 @@
+/*==FILE examples/debug/exception-capture.txt */
+
+/*==INTRO
+This is an example of the debugging handler libraries. Then can help you when your program
+crashes and stop responding for unknown reasons. It couldn't help on all situations, but
+it's usually a big help.
+
+This is an example output from the handler when we hit 'U' in the example:
+
+<code>
+ ============== UNDEFINED INSTRUCTION ===============
+
+ MODE=USR, ARM <Z> <C>
+ PC=000021c8 [000021c8] => e1200070 LR=00002307
+
+ r0 =00000015 r1 =00002408 r2 =40000060 r3 =00000000
+ r4 =00000055 r5 =00fe0000 r6 =e0028000 r7 =00000000
+ r8 =00000000 r9 =da83b2ea r10=400034ec r11=00000000
+ r12=0000306d
+
+ STACK DUMP: (SP=40003ce4)
+
+ 40003ce4> a0590585 00002178 d7fe5be5 4fe1c841
+ 40003cf4> c3743312 a649277d dbefb417 3dc3b610
+ 40003d04> e8c22181 a547231a fc379fa4 01fdae45
+ 40003d14> 143d9be9 4558cd07 3af47b0e 3dc3b610
+
+ ====================================================
+</code>
+
+It reached an undefined instruction at 0x21c8, and the bad instruction is 0xe1200070.
+
+If you add "lss" after everything at the "all: ....." line in your makefile you
+will get an main.lss output with all your program disasembled, in this case this
+is the output of the main.lss at this address:
+
+<code asm>
+
+
+000021c8 <test_und_ARM>:
+    21c8:	e1200070 	bkpt	0x00000000
+    21cc:	e12fff1e 	bx	lr
+
+</code>
+
+
+
+
+
+*/
+
+/*==SECTION Integrated debug Exception handling examples
+
+main.c
+<code c>
+==INCLUDE main.c
+</code>
+
+main_ARM.c
+<code c>
+==INCLUDE main_ARM.c
+</code>
+
+*/
+
+/*==SECTION Changes to Startup.s 
+
+
+The ABORT Stack should be increased to 0x140
+<code asm>
+        .equ    ABT_Stack_Size, 0x00000140
+		
+</code>
+
+And the UNDEF/Prefetch Abort/Data Abort handlers should be changed to this:
+<code asm>
+
+	Undef_Addr:     .word   _UND_Handler_espardino_debug
+	PAbt_Addr:      .word   _PABT_Handler_espardino_debug
+	DAbt_Addr:      .word   _DABT_Handler_espardino_debug
+</code>
+
+*/

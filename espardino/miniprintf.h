@@ -92,6 +92,14 @@ total number of printed characters.
 */		
     int xputs(const char *str);
 	
+/*==FUN int xputc(int c) ===================================================
+==ACTION
+Prints a character out using the character output function setup with the xprintf_output function
+==RESULT
+total number of printed characters.
+*/			
+	void xputc(int c);
+	
 /*==FUN int xprintf(const char *format, ...) ===================================================
 ==ACTION
 Prints a formatted string with the parameters, using the character output function setup with the printf_output function.

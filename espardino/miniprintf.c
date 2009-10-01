@@ -115,6 +115,10 @@ static void xprintf_putchar(char **s, int c)
 }
 
 
+void xputc(int c)
+{
+	xprintf_putchar(NULL,c);
+}
 
 int xputs(const char *s)
 {
