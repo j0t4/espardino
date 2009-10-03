@@ -40,7 +40,7 @@
 #include "lua_io_wrappers.h"
 
 /* from miniprintf.c */
-int print(char **out, int *varg);
+int xprintf_print(char **out, int *varg);
 
 FATFS* lua_fatfs;
 int my_stdin_eof = 0;
@@ -405,20 +405,20 @@ int my_fprintF(MY_FILE *f, const char *format, ...)
 	xprintf_output(&my_putchar);
 	int *varg = (int *)(&format);
 	my_f_out = f;
-	return print(0, varg);
+	return xprintf_print(0, varg);
 	xprintf_output(&VCOM_putchar_nl);
 }
 
 int my_printF(const char *format, ...)
 {
 	int *varg = (int *)(&format);
-	return print(0, varg);
+	return xprintf_print(0, varg);
 }
 
 int my_sprintF(char *out, const char *format, ...)
 {
 	int *varg = (int *)(&format);
-	return print(&out, varg);
+	return xprintf_print(&out, varg);
 }
 
 
