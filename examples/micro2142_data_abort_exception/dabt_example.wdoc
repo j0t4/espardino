@@ -5,6 +5,12 @@ This is an example of the debugging handler libraries. Then can help you when yo
 crashes and stop responding for unknown reasons. It couldn't help on all situations, but
 it's usually a big help.
 
+The code for the handler can be found in espardino library:
+
+  * [[http://code.google.com/p/espardino/source/browse/trunk/espardino/dabt_handler_asm.s]]
+  * [[http://code.google.com/p/espardino/source/browse/trunk/espardino/dabt_handler.c]]
+
+
 This is an example output from the handler when we hit 'U' in the example:
 
 <code>
