@@ -1,0 +1,372 @@
+Se incluyó el miembro del archivo debido al fichero (símbolo)
+
+c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+                              main.o (LEDS_init)
+c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+                              main.o (PWM_pulsewidth_us)
+c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+                              c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o) (VPB_get_speed)
+c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+                              main.o (IO_init)
+c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+                              c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o) (__divsi3)
+c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+                              c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o) (__div0)
+
+Asignando símbolos comunes
+Símbolo común       tamaño            fichero
+
+PWM_us_precalc_factor
+                    0x4               c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+PWM_pc_precalc_factor
+                    0x4               c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+
+Configuración de la Memoria
+
+Nombre           Origen             Longitud           Atributos
+ROM              0x00000000         0x00010000         xr
+RAM              0x40000000         0x00004000         rw
+*default*        0x00000000         0xffffffff
+
+Guión del enlazador y mapa de memoria
+
+LOAD startup.o
+LOAD main.o
+LOAD c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libc.a
+LOAD c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libm.a
+LOAD c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libc.a
+LOAD c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a
+LOAD c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libstdc++.a
+LOAD c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a
+LOAD c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libm.a
+START GROUP
+LOAD c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a
+LOAD c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a
+LOAD c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libc.a
+END GROUP
+                0x00000010                STACK_SIZE = 0x10
+                0x00004000                RAM_LENGTH = 0x4000
+
+.startup        0x40000000      0x1ac
+ *startup.o(.text)
+ .text          0x40000000      0x1ac startup.o
+                0x40000000                _boot
+                0x40000170                __exit_THUMB
+                0x4000016c                __exit_ARM
+
+.text           0x400001ac      0x6b4
+ *(.init)
+ *(.text .text.*)
+ .text          0x400001ac       0x7c main.o
+                0x400001ac                flashen_button
+                0x400001bc                main
+ .text          0x40000228       0x64 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+                0x4000025c                LEDS_on
+                0x40000228                LEDS_init
+                0x4000022c                LEDS_off
+ .text          0x4000028c      0x344 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+                0x400003b0                PWM_pulsewidth_us
+                0x400003c4                PWM_init
+                0x40000564                PWM_frequency
+                0x40000334                PWM_length
+                0x4000028c                PWM_dutycycle
+ .text          0x400005d0       0x30 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+                0x400005d0                VPB_set_speed
+                0x400005e8                SYSCLK_set_speed
+                0x400005dc                VPB_get_speed
+                0x400005f4                SYSCLK_get_speed
+ .text          0x40000600      0x168 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+                0x40000600                IO_init
+                0x40000744                IO_output_low
+                0x4000069c                IO_output
+                0x40000750                IO_output_high
+                0x40000620                IO_input
+                0x4000075c                IO_get_mode
+ .text          0x40000768       0xa4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+                0x40000768                __aeabi_idiv
+                0x40000768                __divsi3
+                0x400007fc                __aeabi_idivmod
+ .text          0x4000080c        0x4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+                0x4000080c                __aeabi_ldiv0
+                0x4000080c                __div0
+                0x4000080c                __aeabi_idiv0
+ *(.eh_frame)
+ .eh_frame      0x40000810       0x50 main.o
+ *(.gnu.linkonce.t.*)
+ *(.gcc_except_table)
+ *(.glue_7)
+ .glue_7        0x40000860        0x0 startup.o
+ .glue_7        0x40000860        0x0 main.o
+ .glue_7        0x40000860        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+ .glue_7        0x40000860        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+ .glue_7        0x40000860        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+ .glue_7        0x40000860        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+ .glue_7        0x40000860        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+ .glue_7        0x40000860        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+ *(.glue_7t)
+ .glue_7t       0x40000860        0x0 startup.o
+ .glue_7t       0x40000860        0x0 main.o
+ .glue_7t       0x40000860        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+ .glue_7t       0x40000860        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+ .glue_7t       0x40000860        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+ .glue_7t       0x40000860        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+ .glue_7t       0x40000860        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+ .glue_7t       0x40000860        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+ *(.rodata)
+ *(.rodata*)
+ *(.gnu.linkonce.r.*)
+
+.vfp11_veneer   0x00000000        0x0
+ .vfp11_veneer  0x00000000        0x0 startup.o
+ .vfp11_veneer  0x00000000        0x0 main.o
+ .vfp11_veneer  0x00000000        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+ .vfp11_veneer  0x00000000        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+ .vfp11_veneer  0x00000000        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+ .vfp11_veneer  0x00000000        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+ .vfp11_veneer  0x00000000        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+ .vfp11_veneer  0x00000000        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+                0x00000000                . = ALIGN (0x4)
+
+.ctors          0x40000860        0x0
+                0x40000860                PROVIDE (__ctors_start__, .)
+ *(SORT(.ctors.*))
+ *(.ctors)
+                0x40000860                PROVIDE (__ctors_end__, .)
+
+.dtors          0x40000860        0x0
+                0x40000860                PROVIDE (__dtors_start__, .)
+ *(SORT(.dtors.*))
+ *(.dtors)
+                0x40000860                PROVIDE (__dtors_end__, .)
+                0x40000860                . = ALIGN (0x4)
+                0x40000860                _etext = .
+                0x40000860                PROVIDE (etext, .)
+
+.data           0x40000860       0x24
+                0x40000860                _data = .
+ *(.data)
+ .data          0x40000860        0x0 startup.o
+ .data          0x40000860        0x0 main.o
+ .data          0x40000860        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+ .data          0x40000860       0x1c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+ .data          0x4000087c        0x8 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+                0x40000880                SYSCLK_speed_Hz
+                0x4000087c                VPB_speed_Hz
+ .data          0x40000884        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+ .data          0x40000884        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+ .data          0x40000884        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+ *(.data.*)
+ *(.gnu.linkonce.d*)
+                0x40000884                . = ALIGN (0x4)
+ *(.fastrun)
+                0x40000884                . = ALIGN (0x4)
+                0x40000884                _edata = .
+                0x40000884                PROVIDE (edata, .)
+
+.bss            0x40000884        0xc
+                0x40000884                __bss_start = .
+                0x40000884                __bss_start__ = .
+ *(.bss)
+ .bss           0x40000884        0x0 startup.o
+ .bss           0x40000884        0x0 main.o
+ .bss           0x40000884        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+ .bss           0x40000884        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+ .bss           0x40000884        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+ .bss           0x40000884        0x4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+ .bss           0x40000888        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+ .bss           0x40000888        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+ *(.gnu.linkonce.b*)
+ *(COMMON)
+ COMMON         0x40000888        0x8 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+                0x40000888                PWM_us_precalc_factor
+                0x4000088c                PWM_pc_precalc_factor
+                0x40000890                . = ALIGN (0x4)
+                0x40000890                . = ALIGN (0x4)
+                0x40000890                __bss_end__ = .
+                0x40000890                PROVIDE (__bss_end, .)
+
+.stack          0x40000900       0x10
+                0x40000910                . = (. + STACK_SIZE)
+ *fill*         0x40000900       0x10 00
+                0x40000910                PROVIDE (_stack, .)
+                0x40000910                _end = .
+                0x40000910                PROVIDE (end, .)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x00000000       0x5a
+ *(.comment)
+ .comment       0x00000000       0x12 main.o
+ .comment       0x00000012       0x12 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+ .comment       0x00000024       0x12 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+ .comment       0x00000036       0x12 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+ .comment       0x00000048       0x12 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000       0x80
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0x20 startup.o
+ .debug_aranges
+                0x00000020       0x20 main.o
+ .debug_aranges
+                0x00000040       0x20 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+ .debug_aranges
+                0x00000060       0x20 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+
+.debug_pubnames
+                0x00000000       0x2e
+ *(.debug_pubnames)
+ .debug_pubnames
+                0x00000000       0x2e main.o
+
+.debug_info     0x00000000      0x238
+ *(.debug_info .gnu.linkonce.wi.*)
+ .debug_info    0x00000000       0x55 startup.o
+ .debug_info    0x00000055       0xb3 main.o
+ .debug_info    0x00000108       0x98 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+ .debug_info    0x000001a0       0x98 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+
+.debug_abbrev   0x00000000       0x93
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000       0x14 startup.o
+ .debug_abbrev  0x00000014       0x57 main.o
+ .debug_abbrev  0x0000006b       0x14 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+ .debug_abbrev  0x0000007f       0x14 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+
+.debug_line     0x00000000      0x231
+ *(.debug_line)
+ .debug_line    0x00000000       0x93 startup.o
+ .debug_line    0x00000093       0x9c main.o
+ .debug_line    0x0000012f       0x92 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+ .debug_line    0x000001c1       0x70 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+
+.debug_frame    0x00000000       0x28
+ *(.debug_frame)
+ .debug_frame   0x00000000       0x28 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+
+.debug_str      0x00000000       0xa7
+ *(.debug_str)
+ .debug_str     0x00000000       0xa7 main.o
+                                 0xe0 (tamaño antes de la relajación)
+
+.debug_loc      0x00000000       0x28
+ *(.debug_loc)
+ .debug_loc     0x00000000       0x28 main.o
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+OUTPUT(main.elf elf32-littlearm)
+
+.ARM.attributes
+                0x00000000       0x10
+ .ARM.attributes
+                0x00000000       0x10 startup.o
+ .ARM.attributes
+                0x00000010       0x10 main.o
+ .ARM.attributes
+                0x00000020       0x10 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+ .ARM.attributes
+                0x00000030       0x10 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+ .ARM.attributes
+                0x00000040       0x10 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+ .ARM.attributes
+                0x00000050       0x10 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+
+Tabla de Referencias Cruzadas
+
+Símbolo                                           Fichero
+IO_get_mode                                       c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+IO_init                                           c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+                                                  main.o
+IO_input                                          c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+                                                  main.o
+IO_output                                         c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+IO_output_high                                    c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+                                                  c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+IO_output_low                                     c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+                                                  c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+LEDS_init                                         c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+                                                  main.o
+LEDS_off                                          c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+                                                  main.o
+LEDS_on                                           c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+                                                  main.o
+PWM_dutycycle                                     c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+PWM_frequency                                     c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+                                                  main.o
+PWM_init                                          c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+                                                  main.o
+PWM_length                                        c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+PWM_pc_precalc_factor                             c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+PWM_pulsewidth_us                                 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+                                                  main.o
+PWM_us_precalc_factor                             c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+RAM_LENGTH                                        startup.o
+SYSCLK_get_speed                                  c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+SYSCLK_set_speed                                  c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+SYSCLK_speed_Hz                                   c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+VPB_get_speed                                     c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+                                                  c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+VPB_set_speed                                     c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+VPB_speed_Hz                                      c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+__aeabi_idiv                                      c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+__aeabi_idiv0                                     c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+__aeabi_idivmod                                   c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+__aeabi_ldiv0                                     c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+__bss_end__                                       startup.o
+__bss_start__                                     startup.o
+__ctors_end__                                     startup.o
+__ctors_start__                                   startup.o
+__div0                                            c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+                                                  c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+__divsi3                                          c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+                                                  c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+__exit_ARM                                        startup.o
+__exit_THUMB                                      startup.o
+_boot                                             startup.o
+_data                                             startup.o
+_edata                                            startup.o
+_etext                                            startup.o
+flashen_button                                    main.o
+main                                              main.o
+                                                  startup.o

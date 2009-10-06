@@ -46,7 +46,7 @@
 */
 /*-----------------------------------------------------------------------*/
 
-#define USE_SOCKSWITCHES  1
+#define USE_SOCKSWITCHES  0
 #define USE_POWERCONTROL  0 /* not available on Olimex LPC-P2148 */
 #define USE_FIFO          0
 
