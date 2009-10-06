@@ -12,7 +12,7 @@
 #
 
 # flash drive for DRIVE programming
-FLASH_DRIVE = H:
+FLASH_DRIVE = N:
 FLASH_TOOL = DRIVE
 
 # c-only (16bit compressed thumb mode)
