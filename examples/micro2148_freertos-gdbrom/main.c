@@ -21,7 +21,6 @@
 //
 
 #include <LPC214x.h>
-#include <vcom.h>
 #include <string.h>
 #include <micro214x.h>
 #include <stdio.h>
@@ -41,12 +40,10 @@ int main(void)
 
 	xTaskHandle xHandleA,xHandleB,xHandleC;
 
+        IO_init(FAST_IO);
+
 	LEDS_init();	/* init the LEDs for this board  */
-	VCOM_RT_init();	/* init the USB Virtual COM port */
-	                /* We link with vcom_rtos lib, that's better designed 
-						for use with freertos */
-	
-	xprintf_output(&VCOM_putchar);	/* define the output for the printf/puts */
+
 
     
 	xTaskCreate( vATaskFunction, (const signed char*)"TASKLEDS_A", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+1, &xHandleA );
@@ -72,8 +69,6 @@ void vATaskFunction( void *pvParameters )
 		vTaskDelayUntil (&lastTickTime, 100);	/* wait until lastTickTime + 100ms */
 		LEDS_off(LED1);
 		
-		xprintf("** [A] TICK: %d\r\n",(int)lastTickTime);
-		
 		vTaskDelayUntil (&lastTickTime, 400);  /* wait until lastTickTime + 400ms */
 		
 		
@@ -95,7 +90,6 @@ void vBTaskFunction( void *pvParameters )
 		vTaskDelayUntil (&lastTickTime, 50);
 		LEDS_off(LED2);
 		
-		xprintf("** [B] TICK: %d\r\n",(int)lastTickTime);
 		
 		vTaskDelayUntil (&lastTickTime, 400);
 		
