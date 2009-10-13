@@ -90,8 +90,8 @@ static void xprintf_putchar(char **s, int c)
 {
 	printFuncPt pf;
 
-	
-	if (s) 
+
+	if (s)
 	{
 	    if ((int)(*s)<0x10000000)  // is s in rom area?, then it should be a function
 		{
@@ -105,7 +105,7 @@ static void xprintf_putchar(char **s, int c)
 			(*s)++;
 		}
 	}
-	else 
+	else
 	{
 		if (printFunc!=NULL)
 		{
@@ -125,7 +125,7 @@ int xputs(const char *s)
 	int count=0;
 	if (printFunc!=NULL)
 	{
-		while (*s) 
+		while (*s)
 		{
 			printFunc(*s++);
 			count++;
@@ -141,16 +141,16 @@ static int xprintf_prints(char **out, const char *s, int width, int pad)
 	 int pad_count = 0;
 	 int padchar = ' ';
 
-	if (width > 0) 
+	if (width > 0)
 	{
 		int len = 0;
 		const char *ptr;
-		
+
 		for (ptr = s; *ptr; ptr++) len++;
-		
+
 		if (len >= width) width = 0;
 		else 		  width -= len;
-		
+
 		if (pad & PADDING_WITH_ZEROS) padchar = '0';
 	}
 	if (!(pad & PADDING_TO_RIGHT)) {
@@ -227,14 +227,14 @@ static int xprintf_print_float(char **out,double d, int width, int pad, int widt
 	int pad_count = 0;
 
 	int neg = (d<0.0f);
-	
+
 	pad_count += xprintf_print_integer (out, (int)d, 10, 1, width, pad, 'a' ,neg);
-	
+
 	if (neg) d=-d;
-	
+
 	d -= (int)floor(d);
-	
-	if ((!(pad_dec|PADDING_WITH_ZEROS)) && (fabs(d)<0.00000000000001)) 
+
+	if ((!(pad_dec|PADDING_WITH_ZEROS)) && (fabs(d)<0.00000000000001))
 	{
 		return pad_count;
 	}
@@ -248,11 +248,11 @@ static int xprintf_print_float(char **out,double d, int width, int pad, int widt
 		  xprintf_putchar(out,'0' +((int)floor(d)));
 		  d -= (int)floor(d);
 		}
-		
+
 	}
 
 	return pad_count;
-	
+
 }
 
 
@@ -262,7 +262,7 @@ int xprintf_print(char **out, int *varg)
 	char char_buffer[2];
 	int pad_count = 0;
 	char *format = (char *)(*varg++);
-	
+
 	while (*format) {
 		if ((format[0] == '%') && (format[1]!='%')) {
 			format++;
@@ -286,23 +286,35 @@ int xprintf_print(char **out, int *varg)
 			if( *format=='.')
 			{
 				format++;
-				
+
 				while (*format == '0') {
 				format++;
 				pad_dec |= PADDING_WITH_ZEROS;
 				}
-				
+
 				for ( ; *format >= '0' && *format <= '9'; format++) {
 					width_dec *= 10;
 					width_dec += *format - '0';
 				}
 			}
-				
+			if( *format == 'x' )
+			{
+				pad_count += xprintf_print_integer (out, *varg++, 16, 0, width, pad, 'a',0);
+				format++;
+				continue;
+			}
+			if( *format == 'X' ) {
+				pad_count += xprintf_print_integer (out, *varg++, 16, 0, width, pad, 'A',0);
+				format++;
+				continue;
+			}
 			if (*format=='g')
 			{
 				double d = *((double *)varg);
 				varg+=sizeof(double)/sizeof(int);
 				pad_count += xprintf_print_float (out,d,width,pad,width_dec,pad_dec);
+				format++;
+				continue;
 			}
 			if( *format == 's' )
 			{
@@ -311,7 +323,7 @@ int xprintf_print(char **out, int *varg)
 				format++;
 				continue;
 			}
-			
+
 			if( *format == 'd' )
 			{
 				pad_count += xprintf_print_integer (out, *varg++, 10, 1, width, pad, 'a',0);
@@ -323,7 +335,7 @@ int xprintf_print(char **out, int *varg)
 				pad_count += xprintf_print_integer (out,*varg++, 16,  0, width, pad, 'a',0);
 				format++;
 				continue;
-			}			
+			}
 			if( *format == 'u' )
 			{
 				pad_count += xprintf_print_integer (out, *varg++, 10, 0, width, pad, 'a',0);
@@ -345,10 +357,10 @@ int xprintf_print(char **out, int *varg)
 			xprintf_putchar (out, *format);
 			pad_count++;
 		}
-		
+
 		format++;
 	}
-	
+
 	if (out &&((int)(*out)>0x10000000)  ) **out = '\0';  // If it's a s (and not rom function), terminate ASCIIZ
 	return pad_count;
 }
