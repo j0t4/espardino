@@ -191,9 +191,9 @@
 0000a820 t __vPortISRStartFirstTask_from_thumb
 0000a824 T __vPortISRStartFirstTask_change_to_arm
 0000a828 T _global_impure_ptr
-0000a8fc D __ctors_end__
-0000a8fc D __ctors_start__
-0000a8fc A _etext
+0000a85c D __ctors_end__
+0000a85c D __ctors_start__
+0000a85c A _etext
 40000000 D _data
 40000000 D ulCriticalNesting
 40000004 D __malloc_av_

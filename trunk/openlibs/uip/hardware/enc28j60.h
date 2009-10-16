@@ -41,7 +41,7 @@ int enc28j60Receive (u8_t* data,int max_len);
 int  enc28j60Send (u8_t *data,int max_len);
 int   enc28j60WaitForData (int delay);
 
-st_net_driver_ops *enc28j60_GetNetIf();
+netif *enc28j60_GetNetIf();
 
 
 //

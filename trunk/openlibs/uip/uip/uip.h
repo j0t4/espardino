@@ -1,12 +1,3 @@
-//
-//  $Id: uip.h 305 2008-11-07 03:49:39Z jcw $
-//  $Revision: 305 $
-//  $Author: jcw $
-//  $Date: 2008-11-06 22:49:39 -0500 (Thu, 06 Nov 2008) $
-//  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/uip/uip/uip.h $
-//
-
-
 /**
  * \addtogroup uip
  * @{

@@ -247,12 +247,12 @@ END GROUP
  .debug_pubnames
                 0x00000000       0x2e main.o
 
-.debug_info     0x00000000      0x238
+.debug_info     0x00000000      0x250
  *(.debug_info .gnu.linkonce.wi.*)
- .debug_info    0x00000000       0x55 startup.o
- .debug_info    0x00000055       0xb3 main.o
- .debug_info    0x00000108       0x98 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
- .debug_info    0x000001a0       0x98 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+ .debug_info    0x00000000       0x6d startup.o
+ .debug_info    0x0000006d       0xb3 main.o
+ .debug_info    0x00000120       0x98 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+ .debug_info    0x000001b8       0x98 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
 
 .debug_abbrev   0x00000000       0x93
  *(.debug_abbrev)
@@ -272,10 +272,10 @@ END GROUP
  *(.debug_frame)
  .debug_frame   0x00000000       0x28 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
 
-.debug_str      0x00000000       0xa7
+.debug_str      0x00000000       0xbf
  *(.debug_str)
- .debug_str     0x00000000       0xa7 main.o
-                                 0xe0 (tamaño antes de la relajación)
+ .debug_str     0x00000000       0xbf main.o
+                                 0xf8 (tamaño antes de la relajación)
 
 .debug_loc      0x00000000       0x28
  *(.debug_loc)
@@ -295,6 +295,9 @@ END GROUP
 
 .debug_varnames
  *(.debug_varnames)
+
+/DISCARD/
+ *(.eh_frame)
 OUTPUT(main.elf elf32-littlearm)
 
 .ARM.attributes
