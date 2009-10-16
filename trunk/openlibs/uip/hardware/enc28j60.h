@@ -8,9 +8,9 @@
 #include <freertos/FreeRTOS.h>
 #include "../uip/uipopt.h"
 #include <micro214x.h>
-
+#include <netif.h>
 /*
-/INT -> P0.16 (EINT0) 
+/INT -> P0.16 (EINT0)
 /RST -> P0.21
 /CS -> P0.20     SSEL1
 
@@ -24,7 +24,7 @@ SDI -> P0.19     MOSI1
 #define ENC28J26_RESET_PIN P0_21
 
 //
-// 
+//
 //
 #define ENC28J60_Select()   IO_output_low(ENC28J26_SEL_PIN)
 #define ENC28J60_Deselect() IO_output_high(ENC28J26_SEL_PIN)
@@ -37,15 +37,18 @@ SDI -> P0.19     MOSI1
 //
 int   enc28j60Init (void);
 void  enc28j60Deinit (void);
-u16_t enc28j60Receive (void);
-void  enc28j60Send (void);
-signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
+int enc28j60Receive (u8_t* data,int max_len);
+int  enc28j60Send (u8_t *data,int max_len);
+int   enc28j60WaitForData (int delay);
+
+st_net_driver_ops *enc28j60_GetNetIf();
+
 
 //
-//  ENC28J60 Opcodes 
+//  ENC28J60 Opcodes
 //
-#define	RCR                 (0x00<<5)		    	
-#define RBM                 (0x01<<5)	| 0x1a 
+#define	RCR                 (0x00<<5)
+#define RBM                 (0x01<<5)	| 0x1a
 #define WCR                 (0x02<<5)
 #define WBM                 (0x03<<5) | 0x1a
 #define BFS                 (0x04<<5)
@@ -58,136 +61,136 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define BANK3 3
 
 //
-//  Bank 0 Registers 
+//  Bank 0 Registers
 //
-#define ERDPTL              0x00            // 
-#define ERDPTH              0x01            // 
-#define EWRPTL              0x02            // 
-#define EWRPTH              0x03            // 
-#define ETXSTL              0x04            // 
-#define ETXSTH              0x05            // 
-#define ETXNDL              0x06            // 
-#define ETXNDH              0x07            // 
-#define ERXSTL              0x08            // 
-#define ERXSTH              0x09            // 
-#define ERXNDL              0x0A            // 
-#define ERXNDH              0x0B            // 
-#define ERXRDPTL            0x0C            // 
-#define ERXRDPTH            0x0D            // 
-#define ERXWRPTL            0x0E            // 
-#define ERXWRPTH            0x0F            // 
-#define EDMASTL             0x10            // 
-#define EDMASTH             0x11            // 
-#define EDMANDL             0x12            // 
-#define EDMANDH             0x13            // 
-#define EDMADSTL            0x14            // 
-#define EDMADSTH            0x15            // 
-#define EDMACSL             0x16            // 
-#define EDMACSH             0x17            // 
-//                          0x18            // 
-//                          0x19            // 
-//                          0x1A            // 
-#define EIE                 0x1B            // 
-#define EIR                 0x1C            // 
-#define ESTAT               0x1D            // 
-#define ECON2               0x1E            // 
-#define ECON1               0x1F            // 
+#define ERDPTL              0x00            //
+#define ERDPTH              0x01            //
+#define EWRPTL              0x02            //
+#define EWRPTH              0x03            //
+#define ETXSTL              0x04            //
+#define ETXSTH              0x05            //
+#define ETXNDL              0x06            //
+#define ETXNDH              0x07            //
+#define ERXSTL              0x08            //
+#define ERXSTH              0x09            //
+#define ERXNDL              0x0A            //
+#define ERXNDH              0x0B            //
+#define ERXRDPTL            0x0C            //
+#define ERXRDPTH            0x0D            //
+#define ERXWRPTL            0x0E            //
+#define ERXWRPTH            0x0F            //
+#define EDMASTL             0x10            //
+#define EDMASTH             0x11            //
+#define EDMANDL             0x12            //
+#define EDMANDH             0x13            //
+#define EDMADSTL            0x14            //
+#define EDMADSTH            0x15            //
+#define EDMACSL             0x16            //
+#define EDMACSH             0x17            //
+//                          0x18            //
+//                          0x19            //
+//                          0x1A            //
+#define EIE                 0x1B            //
+#define EIR                 0x1C            //
+#define ESTAT               0x1D            //
+#define ECON2               0x1E            //
+#define ECON1               0x1F            //
 
 //
-//  Bank 1 Registers 
+//  Bank 1 Registers
 //
-#define EHT0                0x00            // 
-#define EHT1                0x01            // 
-#define EHT2                0x02            // 
-#define EHT3                0x03            // 
-#define EHT4                0x04            // 
-#define EHT5                0x05            // 
-#define EHT6                0x06            // 
-#define EHT7                0x07            // 
-#define EPMM0               0x08            // 
-#define EPMM1               0x09            // 
-#define EPMM2               0x0A            // 
-#define EPMM3               0x0B            // 
-#define EPMM4               0x0C            // 
-#define EPMM5               0x0D            // 
-#define EPMM6               0x0E            // 
-#define EPMM7               0x0F            // 
-#define EPMCSL              0x10            // 
-#define EPMCSh              0x11            // 
-//                          0x12            // 
-//                          0x13            // 
-#define EPMOL               0x14            // 
-#define EPMOH               0x15            // 
-#define EWOLIE              0x16            // 
-#define EWOLIR              0x17            // 
-#define ERXFCON             0x18            // 
-#define EPKTCNT             0x19            // 
-//                          0x1A-0x1F       // See Bank 0 
+#define EHT0                0x00            //
+#define EHT1                0x01            //
+#define EHT2                0x02            //
+#define EHT3                0x03            //
+#define EHT4                0x04            //
+#define EHT5                0x05            //
+#define EHT6                0x06            //
+#define EHT7                0x07            //
+#define EPMM0               0x08            //
+#define EPMM1               0x09            //
+#define EPMM2               0x0A            //
+#define EPMM3               0x0B            //
+#define EPMM4               0x0C            //
+#define EPMM5               0x0D            //
+#define EPMM6               0x0E            //
+#define EPMM7               0x0F            //
+#define EPMCSL              0x10            //
+#define EPMCSh              0x11            //
+//                          0x12            //
+//                          0x13            //
+#define EPMOL               0x14            //
+#define EPMOH               0x15            //
+#define EWOLIE              0x16            //
+#define EWOLIR              0x17            //
+#define ERXFCON             0x18            //
+#define EPKTCNT             0x19            //
+//                          0x1A-0x1F       // See Bank 0
 
 //
-//  Bank 2 Registers 
+//  Bank 2 Registers
 //
-#define MACON1              0x00            
-#define MACON2              0x01 
-#define MACON3              0x02 
-#define MACON4              0x03 
-#define MABBIPG             0x04            
-//                          0x05     
+#define MACON1              0x00
+#define MACON2              0x01
+#define MACON3              0x02
+#define MACON4              0x03
+#define MABBIPG             0x04
+//                          0x05
 #define MAIPGL              0x06
-#define MAIPGH              0x07 
-#define MACLCON1            0x08 
-#define MACLCON2            0x09 
-#define MAMXFLL             0x0A 
-#define MAMXFLH             0x0B 
+#define MAIPGH              0x07
+#define MACLCON1            0x08
+#define MACLCON2            0x09
+#define MAMXFLL             0x0A
+#define MAMXFLH             0x0B
 //                          0x0C
-#define MAPHSUP             0x0D 
+#define MAPHSUP             0x0D
 //                          0x0E
 //                          0x0F
-//                          0x10 
+//                          0x10
 #define MICON               0x11
 #define MICMD               0x12
 //                          0x13
-#define MIREGADR            0x14 
-//                          0x15 
-#define MIWRL               0x16  
-#define MIWRH               0x17  
-#define MIRDL               0x18 
-#define MIRDH               0x19        
-//                          0x1A-0x1F       // See Bank 0 
+#define MIREGADR            0x14
+//                          0x15
+#define MIWRL               0x16
+#define MIWRH               0x17
+#define MIRDL               0x18
+#define MIRDH               0x19
+//                          0x1A-0x1F       // See Bank 0
 
 //
-//  Bank 3 Registers 
+//  Bank 3 Registers
 //
-#define MAADR5              0x00            // 
-#define MAADR6              0x01            // 
-#define MAADR3              0x02            // 
-#define MAADR4              0x03            // 
-#define MAADR1              0x04            // 
-#define MAADR2              0x05            // 
-#define EBSTSD              0x06            // 
-#define EBSTCON             0x07            // 
-#define EBSTCSL             0x08            // 
-#define EBSTCSH             0x09            // 
-#define MISTAT              0x0A            // 
-//                          0x0B            // 
-//                          0x0C            // 
-//                          0x0D            // 
-//                          0x0E            // 
-//                          0x0F            // 
-//                          0x10            // 
-//                          0x11            // 
-#define EREVID              0x12            // 
-//                          0x13            // 
-//                          0x14            // 
-#define ECOCON              0x15            // 
-//                          0x16            // 
-#define EFLOCON             0x17            // 
-#define EPAUSL              0x18            // 
-#define EPAUSH              0x19            // 
-//                          0x1A-0x1F       // See Bank 0 
+#define MAADR5              0x00            //
+#define MAADR6              0x01            //
+#define MAADR3              0x02            //
+#define MAADR4              0x03            //
+#define MAADR1              0x04            //
+#define MAADR2              0x05            //
+#define EBSTSD              0x06            //
+#define EBSTCON             0x07            //
+#define EBSTCSL             0x08            //
+#define EBSTCSH             0x09            //
+#define MISTAT              0x0A            //
+//                          0x0B            //
+//                          0x0C            //
+//                          0x0D            //
+//                          0x0E            //
+//                          0x0F            //
+//                          0x10            //
+//                          0x11            //
+#define EREVID              0x12            //
+//                          0x13            //
+//                          0x14            //
+#define ECOCON              0x15            //
+//                          0x16            //
+#define EFLOCON             0x17            //
+#define EPAUSL              0x18            //
+#define EPAUSH              0x19            //
+//                          0x1A-0x1F       // See Bank 0
 
 //
-//  EIE bits 
+//  EIE bits
 //
 #define	EIE_INTIE		        (1<<7)
 #define	EIE_PKTIE		        (1<<6)
@@ -198,7 +201,7 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define	EIE_RXERIE		      (1<<0)
 
 //
-//  EIR bits 
+//  EIR bits
 //
 #define	EIR_PKTIF		        (1<<6)
 #define	EIR_DMAIF		        (1<<5)
@@ -206,9 +209,9 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define	EIR_TXIF		        (1<<3)
 #define	EIR_TXERIF		      (1<<1)
 #define	EIR_RXERIF		      (1<<0)
-	
+
 //
-//  ESTAT bits 
+//  ESTAT bits
 //
 #define	ESTAT_INT		        (1<<7)
 #define ESTAT_BUFER         (1<<6)
@@ -218,18 +221,18 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define	ESTAT_RXBUSY	      (1<<2)
 #define	ESTAT_TXABRT	      (1<<1)
 #define	ESTAT_CLKRDY	      (1<<0)
-	
+
 //
-//  ECON2 bits 
+//  ECON2 bits
 //
 #define	ECON2_AUTOINC	      (1<<7)
 #define	ECON2_PKTDEC	      (1<<6)
 #define	ECON2_PWRSV		      (1<<5)
 #define	ECON2_VRTP	      	(1<<4)
 #define	ECON2_VRPS		      (1<<3)
-	
+
 //
-//  ECON1 bits 
+//  ECON1 bits
 //
 #define	ECON1_TXRST		      (1<<7)
 #define	ECON1_RXRST		      (1<<6)
@@ -239,9 +242,9 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define	ECON1_RXEN		      (1<<2)
 #define	ECON1_BSEL1		      (1<<1)
 #define	ECON1_BSEL0		      (1<<0)
-	
+
 //
-//  EWOLIE bits 
+//  EWOLIE bits
 //
 #define	EWOLIE_UCWOLIE	    (1<<7)
 #define	EWOLIE_AWOLIE     	(1<<6)
@@ -250,9 +253,9 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define	EWOLIE_HTWOLIE	    (1<<2)
 #define	EWOLIE_MCWOLIE	    (1<<1)
 #define	EWOLIE_BCWOLIE	    (1<<0)
-	
+
 //
-//  EWOLIR bits 
+//  EWOLIR bits
 //
 #define	EWOLIR_UCWOLIF    	(1<<7)
 #define	EWOLIR_AWOLIF	      (1<<6)
@@ -261,9 +264,9 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define	EWOLIR_HTWOLIF	    (1<<2)
 #define	EWOLIR_MCWOLIF	    (1<<1)
 #define	EWOLIR_BCWOLIF	    (1<<0)
-	
+
 //
-//  ERXFCON bits 
+//  ERXFCON bits
 //
 #define	ERXFCON_UCEN	      (1<<7)
 #define	ERXFCON_ANDOR	      (1<<6)
@@ -273,18 +276,18 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define	ERXFCON_HTEN	      (1<<2)
 #define	ERXFCON_MCEN	      (1<<1)
 #define	ERXFCON_BCEN	      (1<<0)
-	
+
 //
-//  MACON1 bits 
+//  MACON1 bits
 //
 #define	MACON1_LOOPBK	      (1<<4)
 #define	MACON1_TXPAUS	      (1<<3)
 #define	MACON1_RXPAUS	      (1<<2)
 #define	MACON1_PASSALL	    (1<<1)
 #define	MACON1_MARXEN	      (1<<0)
-	
+
 //
-//  MACON2 bits 
+//  MACON2 bits
 //
 #define	MACON2_MARST	      (1<<7)
 #define	MACON2_RNDRST	      (1<<6)
@@ -292,9 +295,9 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define	MACON2_RFUNRST	    (1<<2)
 #define	MACON2_MATXRST	    (1<<1)
 #define	MACON2_TFUNRST	    (1<<0)
-	
+
 //
-//  MACON3 bits 
+//  MACON3 bits
 //
 #define	MACON3_PADCFG2	    (1<<7)
 #define	MACON3_PADCFG1	    (1<<6)
@@ -304,34 +307,34 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define	MACON3_HFRMEN	      (1<<2)
 #define	MACON3_FRMLNEN	    (1<<1)
 #define	MACON3_FULDPX	      (1<<0)
-	
+
 //
-//  MACON4 bits 
+//  MACON4 bits
 //
 #define	MACON4_DEFER	      (1<<6)
 #define	MACON4_BPEN	      	(1<<5)
 #define	MACON4_NOBKOFF	    (1<<4)
 #define	MACON4_LONGPRE	    (1<<1)
 #define	MACON4_PUREPRE	    (1<<0)
-	
+
 //
-//  MAPHSUP bits 
+//  MAPHSUP bits
 //
 #define	MAPHSUP_RSTRMII	    (1<<3)
-	
+
 //
-//  MICON bits 
+//  MICON bits
 //
 #define	MICON_RSTMII	      (1<<7)
-	
+
 //
-//  MICMD bits 
+//  MICMD bits
 //
 #define	MICMD_MIISCAN	      (1<<1)
 #define	MICMD_MIIRD		      (1<<0)
 
 //
-//  EBSTCON bits 
+//  EBSTCON bits
 //
 #define	EBSTCON_PSV2	      (1<<7)
 #define	EBSTCON_PSV1	      (1<<6)
@@ -343,21 +346,21 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define	EBSTCON_BISTST	    (1<<0)
 
 //
-//  MISTAT bits 
+//  MISTAT bits
 //
 #define	MISTAT_NVALID	      (1<<2)
 #define	MISTAT_SCAN		      (1<<1)
 #define	MISTAT_BUSY		      (1<<0)
-	
+
 //
-//  ECOCON bits 
+//  ECOCON bits
 //
 #define	ECOCON_COCON2     	(1<<2)
 #define	ECOCON_COCON1	      (1<<1)
 #define	ECOCON_COCON0	      (1<<0)
-	
+
 //
-//  EFLOCON bits 
+//  EFLOCON bits
 //
 #define	EFLOCON_FULDPXS	    (1<<2)
 #define	EFLOCON_FCEN1	      (1<<1)
@@ -365,11 +368,11 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 
 
 //
-//  PHY Registers 
+//  PHY Registers
 //
 #define PHCON1	            0x00
 #define PHSTAT1	            0x01
-#define PHID1	              0x02          
+#define PHID1	              0x02
 #define PHID2	              0x03
 #define PHCON2	            0x10
 #define PHSTAT2	            0x11
@@ -382,8 +385,8 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 //
 
 //
-// PHCON1 bits 
-// 
+// PHCON1 bits
+//
 #define	PHCON1_PRST		      (1<<15)
 #define	PHCON1_PLOOPBK	    (1<<14)
 #define	PHCON1_PPWRSV	      (1<<11)
@@ -397,8 +400,10 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define	PHSTAT1_LLSTAT	(1ul<<2)
 #define	PHSTAT1_JBSTAT	(1ul<<1)
 
+
+
 //
-// PHID2 bits 
+// PHID2 bits
 //
 #define	PHID2_PID24		(1ul<<15)
 #define	PHID2_PID23		(1ul<<14)
@@ -418,7 +423,7 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define	PHID2_PREV0		(1ul)
 
 //
-// PHCON2 bits 
+// PHCON2 bits
 //
 #define	PHCON2_FRCLNK	          (1<<14)
 #define	PHCON2_TXDIS	          (1<<13)
@@ -435,6 +440,8 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define	PHSTAT2_DPXSTAT	(1ul<<9)
 #define	PHSTAT2_PLRITY	(1ul<<5)
 
+
+
 //
 // PHIE bits
 //
@@ -448,7 +455,7 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay);
 #define	PHIR_PGIF		(1ul<<2)
 
 //
-// PHLCON bits 
+// PHLCON bits
 //
 #define	PHLCON_LACFG3	(1ul<<11)
 #define	PHLCON_LACFG2	(1ul<<10)

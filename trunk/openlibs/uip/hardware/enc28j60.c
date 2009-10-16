@@ -4,27 +4,27 @@
 // Title        : Driver for the Microchip ENC28J60 Ethernet controller
 // Author       : Bernard Debbasch - Copyright (C) 2005
 // Created      : 2005.08.17
-// Revised      : 2005.08.17
+// Revised      : 2009.10.15 NBEE Embedded Systems S.L.
 // Version      : 1.0
-// Target MCU   : Philips LPC213x series
+// Target MCU   : Philips LPC213x/214x series
 // Editor Tabs  : 2
 //
 //
 //
 // Copyright (C) 2005, Bernard Debbasch
-// All rights reserved. 
+// All rights reserved.
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met: 
-// 1. Redistributions of source code must retain the above copyright 
-//    notice, this list of conditions and the following disclaimer. 
-// 2. Redistributions in binary form must reproduce the above copyright 
-//    notice, this list of conditions and the following disclaimer in the  
-//    documentation and/or other materials provided with the distribution. 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
 // 3. The name of the author may not be used to endorse or promote
 //    products derived from this software without specific prior
-//    written permission.  
+//    written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
 // OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -43,9 +43,16 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef USE_FREERTOS
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/semphr.h>
+#else
+#define portTICK_RATE_MS 1
+#define vTaskDelay(x) delay_ms(x)
+#define xTaskGetTickCount(x) t1_get_ms(x)
+#endif
+
 
 #include "../uip/uip.h"
 #include "../uip/uip_arp.h"
@@ -53,12 +60,13 @@
 #include "enc28j60.h"
 
 #include <micro214x.h>
+#include <netif.h>
 
 //
-//  RX & TX memory organization 
-// 
+//  RX & TX memory organization
+//
 #define MAXFRAMESIZE    1518
-#define RAMSIZE       0x2000    
+#define RAMSIZE       0x2000
 #define TXSTART       0x0000
 #define TXEND         0x0fff
 #define RXSTART       0x1000
@@ -67,7 +75,7 @@
 
 //
 //  Chose one or the other
-//  
+//
 #undef  HALF_DUPLEX
 #define FULL_DUPLEX
 
@@ -80,7 +88,7 @@
 #define USE_INTERRUPTS
 
 //
-//  Local Prototypes 
+//  Local Prototypes
 //
 static u8_t encReadEthReg (u8_t address);
 static u8_t encReadMacReg (u8_t address);
@@ -98,11 +106,13 @@ static u8_t encMACread (void);
 static void encMACreadBulk (u8_t *buffer, u16_t length);
 
 //
-//  Global variable 
-//  
+//  Global variable
+//
 u16_t ethRxPointer = 0;
-xSemaphoreHandle xENC28J60Semaphore = NULL;
 
+#ifdef USE_FREERTOS
+xSemaphoreHandle xENC28J60Semaphore = NULL;
+#endif
 
 
 void enc28j60_eint0ISR (void);
@@ -123,7 +133,63 @@ void enc28j60_eint0ISR (void);
 
 #ifndef U8
 typedef unsigned char U8;
-#endif 
+#endif
+
+
+unsigned char enc28j60_mac[]={0xDE,0xAD,0xBE,0xEF,0x12,0x13};
+
+unsigned char *enc28j60_GetMacAddr(void)
+{
+
+	return enc28j60_mac;
+}
+
+void enc28j60_SetMacAddr(unsigned char *mac)
+{
+	memcpy(enc28j60_mac,mac,6);
+}
+
+int enc28j60_IsLinked()
+{
+	return (encReadPHYReg (PHSTAT1) && PHSTAT1_LLSTAT);
+}
+
+void enc28j60_Relink()
+{
+	return;
+}
+
+void enc28j60_Reset()
+{
+	enc28j60Deinit();
+	enc28j60Init();
+}
+
+void enc28j60_Process()
+{
+
+}
+
+
+st_net_driver_ops enc28j60_driver_ops =
+{
+	&enc28j60_GetMacAddr,   // get_mac_address
+	&enc28j60_SetMacAddr,   // set_mac_address
+	&enc28j60_IsLinked,     // is_linked
+	&enc28j60_Relink,       // relink
+	&enc28j60_Reset,		  // reset
+	&enc28j60WaitForData,     // wait_data
+	&enc28j60_Process,   // process
+	&enc28j60Send,       // tx_data
+	&enc28j60Receive        // rx_data
+};
+
+
+st_net_driver_ops *enc28j60_GetNetIf()
+{
+	return &enc28j60_driver_ops;
+}
+
 
 void enc28j60_spiInit(void);
 
@@ -131,19 +197,19 @@ void enc28j60_spiInit()
 {
 
 	SSPCR1 &= ~(1<<SSE);
-	
+
 	SSPCR0 = ((8-1)<<0) | (0<<CPOL) | (0x2<<SCR); //  (0xff<<SCR);  // 8 bit transfers
-	
+
 	PINSEL1 = (PINSEL1 & (~(3<<2)))|(2<<2); // SCK1
 	PINSEL1 = (PINSEL1 & (~(3<<4)))|(2<<4); // MISO1
 	PINSEL1 = (PINSEL1 & (~(3<<6)))|(2<<6); // MOSI1
-	
+
 	SPI_PRESCALE_REG = 2; //4 , 5
-	
+
 	SSPCR1 = (1<<SSE); // Enable SSP, as Master
-	
-	
-	
+
+
+
 }
 
 
@@ -153,13 +219,11 @@ U8 enc28j60_spiPut (U8 valueIn)
 {
 	U8 val;
 	while( !(SSPSR & (1<<TNF)) ) ; // while Transmit fifo full
-	SSPDR = valueIn;				
+	SSPDR = valueIn;
 	while( !(SSPSR & (1<<RNE)) ) ; // while receive fifo empty
-	
+
 	val = SSPDR;
-	
-	//xprintf("%02x->%02x\n",valueIn,val);
-	
+
 	return val;
 }
 
@@ -171,13 +235,13 @@ U8 enc28j60_spiPut (U8 valueIn)
  * Output:          None
  * Side Effects:    None
  *
- * Overview:        Initialize the ENC28J60 
+ * Overview:        Initialize the ENC28J60
  * Note:            None
  *****************************************************************************/
 int enc28j60Init (void)
 {
   volatile portTickType xTicks;
-    
+
   //
   //  If the current MAC address is 00:00:00:00:00:00, default to UIP_ETHADDR[0..5] values
   //
@@ -191,8 +255,10 @@ int enc28j60Init (void)
   //  It'd probably be better if the EINT initialization code took a pointer to
   //  the semaphore, rather than just "knowing" about it, but it's hard to make
   //  that sort of thing generic, since an interrupt routine may not really
-  //  want to use a semaphore, and instead use a queue or somesuch.  
+  //  want to use a semaphore, and instead use a queue or somesuch.
   //
+
+#ifdef USE_FREERTOS
   if (!xENC28J60Semaphore)
   {
     vSemaphoreCreateBinary (xENC28J60Semaphore);
@@ -202,49 +268,51 @@ int enc28j60Init (void)
   }
 
   xSemaphoreTake (xENC28J60Semaphore, 0);
+#endif
 
   ENC28J60_Reset ();
-	
+
   //
   //  Disable UART1 so we can use the RXD pin as EINT3
   //
-  
+
   // EINT0 init
-  
+
   PINSEL1= (PINSEL1 & (~3)) | 1; // EINT0 enabled on P0.16
   EXTMODE = EXTMODE | 1;   	      // EINT0 is edge sensitive
   EXTPOLAR = EXTPOLAR & (~1);    // EINT0 on falling edge
-  
+
   VICIntSelect &= ~(1<<14);    // enable as IRQ (not as FIQ)
   VICVectAddr6 = (unsigned long) enc28j60_eint0ISR;
   VICVectCntl6 = 0x20 | 14;
   VICIntEnable = (1<<14);
-  
-  
+
+
   // SPI1 init
   enc28j60_spiInit();
-  
-   
+
+
 
   //
   //  Now hold part in reset for 100ms
   //
   ENC28J60_Deselect ();
   ENC28J60_Reset ();
+
   vTaskDelay (100 / portTICK_RATE_MS);
   ENC28J60_Unreset ();
   vTaskDelay (100 / portTICK_RATE_MS);
 
   //
   //  Give the part 1 second for the PHY to become ready (CLKRDY == 1).  If it
-  //  doesn't, return an error to the user. 
+  //  doesn't, return an error to the user.
   //
   //  Note that we also check that bit 3 is 0.  The data sheet says this is
   //  unimplemented and will return 0.  We use this as a sanity check for the
   //  ENC28J60 actually being present, because the MISO line typically floats
   //  high.  If we only checked the CLKRDY, it will likely return 1 for when no
   //  ENC28J60 is present.
-  // 
+  //
   xTicks = xTaskGetTickCount ();
 
   while (((encReadEthReg (ESTAT) & (ESTAT_UNIMP | ESTAT_CLKRDY)) != ESTAT_CLKRDY))
@@ -253,8 +321,8 @@ int enc28j60Init (void)
 
   //
   //  Send a Soft Reset to the chip
-  //  
-  SendSystemCommand ();  
+  //
+  SendSystemCommand ();
   vTaskDelay (20 / portTICK_RATE_MS);
 
   encBankSelect (BANK0);
@@ -294,10 +362,10 @@ int enc28j60Init (void)
   encWriteReg (MAADR6, uip_ethaddr.addr [5]);
 
 #ifdef HALF_DUPLEX
-  encWritePHYReg (PHCON1, 0);           
+  encWritePHYReg (PHCON1, 0);
 #else
   encWritePHYReg (PHCON1, PHCON1_PDPXMD);
-#endif           
+#endif
 
   encWritePHYReg (PHCON2, PHCON2_HDLDIS);   // Disable half duplex loopback in PHY.
 
@@ -316,7 +384,7 @@ void enc28j60Deinit (void)
 //
 //
 //
-void enc28j60Send (void)
+int	 enc28j60Send (u8_t *uip_buf, int uip_len)
 {
   u16_t length;
   u16_t value;
@@ -329,23 +397,17 @@ void enc28j60Send (void)
 
   encMACwriteBulk (&uip_buf [0], 54);   // Send 40 + 14 = 54 bytes of header
 
-#ifdef ETHERNETDEBUG
-  for (value = 0; value < 54; value++)
-    printf ("%x ", uip_buf [value]);
-  printf ("\n");
-#endif
-
   //
-  // Send the rest of the packet, the application data 
+  // Send the rest of the packet, the application data
   //
-  if (uip_len > 54) 
+  if (uip_len > 54)
   {
     uip_len -= 54;
     encMACwriteBulk (uip_appdata, uip_len);
   }
 
-  // 
-  //  Configure the H/W with the TX Start and End addresses 
+  //
+  //  Configure the H/W with the TX Start and End addresses
   //
   encWriteReg16 (ETXSTL, TXSTART);  // Configure the H/W with the TX base address
   encWriteReg16 (ETXNDL, (TXSTART + length));
@@ -361,19 +423,21 @@ void enc28j60Send (void)
   encBFCReg (EIR, EIR_TXERIF | EIR_TXIF); // Errata for B5
 
   encBFSReg (ECON1, ECON1_TXRTS);
+
+  return uip_len;
 }
 
 //
 //
 //
-u16_t enc28j60Receive (void)
+int enc28j60Receive (u8_t *uip_buf,int max_len)
 {
   u16_t len = 0;
   u16_t u;
 
 #ifndef USE_INTERRUPTS
-  // 
-  //  Check if at least one packet has been received and is waiting 
+  //
+  //  Check if at least one packet has been received and is waiting
   //
   if ((encReadEthReg (EIR) & EIR_PKTIF) == 0)
     return 0;
@@ -388,7 +452,7 @@ u16_t enc28j60Receive (void)
 #endif
 
   //
-  //  Set read Pointer 
+  //  Set read Pointer
   //
   encBankSelect (BANK0);
   encWriteReg16 (ERDPTL, ethRxPointer);
@@ -399,7 +463,7 @@ u16_t enc28j60Receive (void)
   //
   //  Sanity check
   //
-  if (ethRxPointer > RXEND) 
+  if (ethRxPointer > RXEND)
   {
     enc28j60Init ();
     return 0;
@@ -417,11 +481,11 @@ u16_t enc28j60Receive (void)
   //
   //  If the frame is too big to handle, throw it away
   //
-  if (len > UIP_BUFSIZE) 
+  if (len > max_len)
   {
     for (u = 0; u < len; u++)
       encMACread ();
-    
+
     return 0;
   }
 
@@ -431,7 +495,7 @@ u16_t enc28j60Receive (void)
   encMACreadBulk (&uip_buf [0], len);
 
   //
-  //  Clean up for next packet.  Set the read pointer to the start of RX packet to free up space used by the current frame 
+  //  Clean up for next packet.  Set the read pointer to the start of RX packet to free up space used by the current frame
   //
   encBankSelect (BANK0);
   encWriteReg16 (ERXRDPTL, ethRxPointer);
@@ -444,30 +508,48 @@ u16_t enc28j60Receive (void)
   //
   //  Return the length - the 4 bytes of CRC (why?)
   //
-  return (len - 4);  
+  return (len - 4);
 }
 
 //
 //
 //
-signed portBASE_TYPE enc28j60WaitForData (portTickType delay)
+extern int enc28j60_had_interrupt;
+
+int enc28j60WaitForData (int  delay)
 {
-  portBASE_TYPE semStat;
+#ifdef USE_FREERTOS
+	portBASE_TYPE semStat;
+#endif
 
 #ifdef USE_INTERRUPTS
   encBFCReg (EIR, EIR_PKTIF);
   encWriteReg (EIE, EIE_INTIE | EIE_PKTIE);
 #endif
-
+#ifdef USE_FREERTOS
   if ((semStat = xSemaphoreTake (xENC28J60Semaphore, delay)) == pdPASS)
   {
-	
+
 #ifdef USE_INTERRUPTS
     encBFCReg (EIE, EIE_INTIE);
 #endif
   }
 
   return semStat;
+
+#else
+  if (enc28j60_had_interrupt)
+  {
+	  encBFCReg (EIE, EIE_INTIE);
+	  return 1;
+  }
+  return 0;
+
+#endif
+
+
+
+
 }
 
 /******************************************************************************
@@ -477,14 +559,14 @@ signed portBASE_TYPE enc28j60WaitForData (portTickType delay)
  * Output:          None
  * Side Effects:    All values are lost
  *
- * Overview:        Send the SC (Reset) command to the device 
+ * Overview:        Send the SC (Reset) command to the device
  * Note:            None
  *****************************************************************************/
 static void SendSystemCommand (void)
 {
   ENC28J60_Select ();
 
-  enc28j60_spiPut (SC); 
+  enc28j60_spiPut (SC);
 
   ENC28J60_Deselect ();
 }
@@ -509,8 +591,8 @@ static u8_t encReadEthReg (u8_t address)
   //
   ENC28J60_Select ();
 
-  enc28j60_spiPut (RCR | address);  
-  value = enc28j60_spiPut (0x00);             
+  enc28j60_spiPut (RCR | address);
+  value = enc28j60_spiPut (0x00);
 
   ENC28J60_Deselect ();
 
@@ -533,9 +615,9 @@ static u8_t encReadMacReg (u8_t address)
 
   ENC28J60_Select ();
 
-  enc28j60_spiPut (RCR | address);  
+  enc28j60_spiPut (RCR | address);
   enc28j60_spiPut (0x00);             /* Send a dummy byte */
-  value = enc28j60_spiPut (0x00);             
+  value = enc28j60_spiPut (0x00);
 
   ENC28J60_Deselect ();
 
@@ -682,7 +764,7 @@ static u16_t encReadPHYReg (u8_t address)
  * Output:          None
  * Side Effects:    None
  *
- * Overview:        Set the bank select 
+ * Overview:        Set the bank select
  * Note:            None
  *****************************************************************************/
 static void  encBankSelect (u8_t bank)
@@ -699,14 +781,14 @@ static void  encBankSelect (u8_t bank)
  * Side Effects:    None
  *
  * Overview:        Write a byte in the MAC memory with the intention
- *                  of sending a frame later 
+ *                  of sending a frame later
  * Note:            None
  *****************************************************************************/
 static void encMACwrite (u8_t data)
 {
   ENC28J60_Select ();
 
-  enc28j60_spiPut (WBM);                
+  enc28j60_spiPut (WBM);
   enc28j60_spiPut (data);
 
   ENC28J60_Deselect ();
@@ -720,18 +802,18 @@ static void encMACwrite (u8_t data)
  * Side Effects:    None
  *
  * Overview:        Multi Write in the MAC memory with the intention
- *                  of sending a frame later 
+ *                  of sending a frame later
  * Note:            None
  *****************************************************************************/
 static void encMACwriteBulk (u8_t *buffer, u16_t length)
 {
   ENC28J60_Select ();
 
-  enc28j60_spiPut (WBM);                
+  enc28j60_spiPut (WBM);
 
   while (length--)
     enc28j60_spiPut (*buffer++);
-  
+
   ENC28J60_Deselect ();
 }
 
@@ -752,7 +834,7 @@ static u8_t encMACread (void)
   ENC28J60_Select ();
 
   enc28j60_spiPut (RBM);
-  value = enc28j60_spiPut (0x00);             
+  value = enc28j60_spiPut (0x00);
 
   ENC28J60_Deselect ();
 
