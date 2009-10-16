@@ -171,7 +171,7 @@ void enc28j60_Process()
 }
 
 
-st_net_driver_ops enc28j60_driver_ops =
+netif enc28j60_driver_ops =
 {
 	&enc28j60_GetMacAddr,   // get_mac_address
 	&enc28j60_SetMacAddr,   // set_mac_address
@@ -185,7 +185,7 @@ st_net_driver_ops enc28j60_driver_ops =
 };
 
 
-st_net_driver_ops *enc28j60_GetNetIf()
+netif *enc28j60_GetNetIf()
 {
 	return &enc28j60_driver_ops;
 }

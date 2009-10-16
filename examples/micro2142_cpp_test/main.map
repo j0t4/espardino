@@ -96,6 +96,11 @@ PWM_pc_precalc_factor
                     0x4               c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
 errno               0x4               c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-reent.o)
 
+Discarded input sections
+
+ .eh_frame      0x00000000        0x0 main.o
+ .eh_frame      0x00000000        0x0 servo.o
+
 Configuración de la Memoria
 
 Nombre           Origen             Longitud           Atributos
@@ -131,7 +136,7 @@ END GROUP
                 0x00002178                __exit_THUMB
                 0x00002174                __exit_ARM
 
-.text           0x000021b4     0x4478
+.text           0x000021b4     0x440c
  *(.init)
  *(.text .text.*)
  .text          0x000021b4      0x1b4 main.o
@@ -257,327 +262,323 @@ END GROUP
                 0x00004380                IO_output_high
                 0x00004250                IO_input
                 0x0000438c                IO_get_mode
- .text          0x00004398      0x6b8 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
-                0x0000465c                print
+ .text          0x00004398      0x64c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
                 0x00004398                xprintf_output
-                0x00004a30                xprintf
-                0x00004404                xputs
-                0x00004a08                xsprintf
-                0x000049e0                xfprintf
- .text          0x00004a50      0x150 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libm.a(lib_a-s_floor.o)
-                0x00004a50                floor
- .text          0x00004ba0       0x8c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_udivsi3.o)
-                0x00004ba0                __udivsi3
-                0x00004ba0                __aeabi_uidiv
-                0x00004c1c                __aeabi_uidivmod
- .text          0x00004c2c       0xa4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
-                0x00004c2c                __aeabi_idiv
-                0x00004c2c                __divsi3
-                0x00004cc0                __aeabi_idivmod
- .text          0x00004cd0       0xc8 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_umodsi3.o)
-                0x00004cd0                __umodsi3
- .text          0x00004d98        0x4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
-                0x00004d98                __aeabi_ldiv0
-                0x00004d98                __div0
-                0x00004d98                __aeabi_idiv0
- .text          0x00004d9c       0x28 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-malloc.o)
-                0x00004db0                malloc
-                0x00004d9c                free
- .text          0x00004dc4      0x51c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mallocr.o)
-                0x00004dc4                _malloc_r
- .text          0x000052e0       0x80 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memcpy.o)
-                0x000052e0                memcpy
- .text          0x00005360        0x8 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mlock.o)
-                0x00005364                __malloc_unlock
-                0x00005360                __malloc_lock
- .text          0x00005368       0x28 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-sbrkr.o)
-                0x00005368                _sbrk_r
- .text          0x00005390      0x5e8 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
-                0x00005450                _getpid
-                0x00005390                initialise_monitor_handles
-                0x00005954                _fstat
-                0x000056d0                _isatty
-                0x00005634                _open
-                0x00005650                _sbrk
-                0x0000545c                _raise
-                0x0000548c                _times
-                0x00005918                _stat
-                0x0000587c                _lseek
-                0x00005454                _link
-                0x0000575c                _swiwrite
-                0x000054d0                _rename
-                0x000057e8                _swilseek
-                0x00005700                _swiclose
-                0x000055a8                _swiopen
-                0x0000556c                _unlink
-                0x00005784                _write
-                0x00005408                _kill
-                0x00005460                _gettimeofday
-                0x000058b8                _read
-                0x00005438                _exit
-                0x00005518                _system
-                0x00005890                _swiread
-                0x00005748                _close
- .text          0x00005978        0xc c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-errno.o)
-                0x00005978                __errno
- .text          0x00005984      0x1d4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-findfp.o)
-                0x00005a3c                __sinit
-                0x00005a98                __sfmoreglue
-                0x000059dc                _cleanup
-                0x000059cc                _cleanup_r
-                0x000059b4                __fp_lock_all
-                0x00005984                __sfp_lock_acquire
-                0x00005ac8                __sfp
-                0x00005990                __sinit_lock_release
-                0x0000599c                __fp_unlock_all
-                0x00005988                __sfp_lock_release
-                0x0000598c                __sinit_lock_acquire
- .text          0x00005b58      0x250 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-freer.o)
-                0x00005bfc                _free_r
-                0x00005b58                _malloc_trim_r
- .text          0x00005da8       0xc4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fwalk.o)
-                0x00005e0c                _fwalk
-                0x00005da8                _fwalk_reent
- .text          0x00005e6c        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
- .text          0x00005e6c       0x94 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memset.o)
-                0x00005e6c                memset
- .text          0x00005f00      0x10c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-reent.o)
-                0x00005f4c                cleanup_glue
-                0x00005f6c                _reclaim_reent
-                0x00005f00                _wrapup_reent
- .text          0x0000600c       0xa8 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-stdio.o)
-                0x0000601c                __sseek
-                0x00006088                __sread
-                0x0000600c                __sclose
-                0x0000604c                __swrite
- .text          0x000060b4       0x6c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-strlen.o)
-                0x000060b4                strlen
- .text          0x00006120       0x2c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-writer.o)
-                0x00006120                _write_r
- .text          0x0000614c       0x28 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-closer.o)
-                0x0000614c                _close_r
- .text          0x00006174       0xbc c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fclose.o)
-                0x00006174                _fclose_r
-                0x00006218                fclose
- .text          0x00006230      0x144 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fflush.o)
-                0x00006344                fflush
-                0x00006230                _fflush_r
- .text          0x00006374       0x2c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-lseekr.o)
-                0x00006374                _lseek_r
- .text          0x000063a0       0x2c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-readr.o)
-                0x000063a0                _read_r
+                0x00004658                xprintf_print
+                0x000049c4                xprintf
+                0x00004410                xputs
+                0x00004404                xputc
+                0x0000499c                xsprintf
+                0x00004974                xfprintf
+ .text          0x000049e4      0x150 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libm.a(lib_a-s_floor.o)
+                0x000049e4                floor
+ .text          0x00004b34       0x8c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_udivsi3.o)
+                0x00004b34                __udivsi3
+                0x00004b34                __aeabi_uidiv
+                0x00004bb0                __aeabi_uidivmod
+ .text          0x00004bc0       0xa4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+                0x00004bc0                __aeabi_idiv
+                0x00004bc0                __divsi3
+                0x00004c54                __aeabi_idivmod
+ .text          0x00004c64       0xc8 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_umodsi3.o)
+                0x00004c64                __umodsi3
+ .text          0x00004d2c        0x4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+                0x00004d2c                __aeabi_ldiv0
+                0x00004d2c                __div0
+                0x00004d2c                __aeabi_idiv0
+ .text          0x00004d30       0x28 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-malloc.o)
+                0x00004d44                malloc
+                0x00004d30                free
+ .text          0x00004d58      0x51c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mallocr.o)
+                0x00004d58                _malloc_r
+ .text          0x00005274       0x80 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memcpy.o)
+                0x00005274                memcpy
+ .text          0x000052f4        0x8 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mlock.o)
+                0x000052f8                __malloc_unlock
+                0x000052f4                __malloc_lock
+ .text          0x000052fc       0x28 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-sbrkr.o)
+                0x000052fc                _sbrk_r
+ .text          0x00005324      0x5e8 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
+                0x000053e4                _getpid
+                0x00005324                initialise_monitor_handles
+                0x000058e8                _fstat
+                0x00005664                _isatty
+                0x000055c8                _open
+                0x000055e4                _sbrk
+                0x000053f0                _raise
+                0x00005420                _times
+                0x000058ac                _stat
+                0x00005810                _lseek
+                0x000053e8                _link
+                0x000056f0                _swiwrite
+                0x00005464                _rename
+                0x0000577c                _swilseek
+                0x00005694                _swiclose
+                0x0000553c                _swiopen
+                0x00005500                _unlink
+                0x00005718                _write
+                0x0000539c                _kill
+                0x000053f4                _gettimeofday
+                0x0000584c                _read
+                0x000053cc                _exit
+                0x000054ac                _system
+                0x00005824                _swiread
+                0x000056dc                _close
+ .text          0x0000590c        0xc c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-errno.o)
+                0x0000590c                __errno
+ .text          0x00005918      0x1d4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-findfp.o)
+                0x000059d0                __sinit
+                0x00005a2c                __sfmoreglue
+                0x00005970                _cleanup
+                0x00005960                _cleanup_r
+                0x00005948                __fp_lock_all
+                0x00005918                __sfp_lock_acquire
+                0x00005a5c                __sfp
+                0x00005924                __sinit_lock_release
+                0x00005930                __fp_unlock_all
+                0x0000591c                __sfp_lock_release
+                0x00005920                __sinit_lock_acquire
+ .text          0x00005aec      0x250 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-freer.o)
+                0x00005b90                _free_r
+                0x00005aec                _malloc_trim_r
+ .text          0x00005d3c       0xc4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fwalk.o)
+                0x00005da0                _fwalk
+                0x00005d3c                _fwalk_reent
+ .text          0x00005e00        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
+ .text          0x00005e00       0x94 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memset.o)
+                0x00005e00                memset
+ .text          0x00005e94      0x10c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-reent.o)
+                0x00005ee0                cleanup_glue
+                0x00005f00                _reclaim_reent
+                0x00005e94                _wrapup_reent
+ .text          0x00005fa0       0xa8 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-stdio.o)
+                0x00005fb0                __sseek
+                0x0000601c                __sread
+                0x00005fa0                __sclose
+                0x00005fe0                __swrite
+ .text          0x00006048       0x6c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-strlen.o)
+                0x00006048                strlen
+ .text          0x000060b4       0x2c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-writer.o)
+                0x000060b4                _write_r
+ .text          0x000060e0       0x28 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-closer.o)
+                0x000060e0                _close_r
+ .text          0x00006108       0xbc c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fclose.o)
+                0x00006108                _fclose_r
+                0x000061ac                fclose
+ .text          0x000061c4      0x144 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fflush.o)
+                0x000062d8                fflush
+                0x000061c4                _fflush_r
+ .text          0x00006308       0x2c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-lseekr.o)
+                0x00006308                _lseek_r
+ .text          0x00006334       0x2c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-readr.o)
+                0x00006334                _read_r
  *(.gnu.linkonce.t.*)
  *(.gcc_except_table)
  *(.glue_7)
- .glue_7        0x000063cc        0x0 startup.o
- .glue_7        0x000063cc        0x0 main.o
- .glue_7        0x000063cc        0x0 servo.o
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_addsubdf3.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_muldivdf3.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_cmpdf2.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_fixdfsi.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libnanoc++.a(nanoc++.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(main_serial.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbhw_lpc.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbcontrol.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbstdreq.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbinit.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(serial_fifo.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(armVIC.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libm.a(lib_a-s_floor.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_udivsi3.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_umodsi3.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-malloc.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mallocr.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memcpy.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mlock.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-sbrkr.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-errno.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-findfp.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-freer.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fwalk.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memset.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-reent.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-stdio.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-strlen.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-writer.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-closer.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fclose.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fflush.o)
- .glue_7        0x000063cc        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-lseekr.o)
- .glue_7        0x000063cc      0x120 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-readr.o)
-                0x00006408                __USBHwISR_from_arm
-                0x000064bc                __USBHwConnect_from_arm
-                0x00006450                __fifo_get_from_arm
-                0x0000645c                __USBHwEPWrite_from_arm
-                0x00006474                __fifo_init_from_arm
-                0x000063f0                __PWM_frequency_from_arm
-                0x00006420                __USBHwNakIntEnable_from_arm
-                0x000064c8                ____umodsi3_from_arm
-                0x000064d4                ____udivsi3_from_arm
-                0x00006414                __fifo_avail_from_arm
-                0x00006480                __USBInit_from_arm
-                0x00006468                __memcpy_from_arm
-                0x000064b0                __USBHwRegisterFrameHandler_from_arm
-                0x0000648c                __USBRegisterDescriptors_from_arm
-                0x00006498                __USBRegisterRequestHandler_from_arm
-                0x000063d8                __LEDS_on_from_arm
-                0x000063fc                __PWM_init_from_arm
-                0x000063cc                __LEDS_init_from_arm
-                0x000064e0                __floor_from_arm
-                0x00006444                __fifo_put_from_arm
-                0x00006438                __USBHwEPRead_from_arm
-                0x000063e4                __PWM_pulsewidth_us_from_arm
-                0x0000642c                __fifo_free_from_arm
-                0x000064a4                __USBHwRegisterEPIntHandler_from_arm
+ .glue_7        0x00006360        0x0 startup.o
+ .glue_7        0x00006360        0x0 main.o
+ .glue_7        0x00006360        0x0 servo.o
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_addsubdf3.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_muldivdf3.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_cmpdf2.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_fixdfsi.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libnanoc++.a(nanoc++.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(main_serial.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbhw_lpc.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbcontrol.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbstdreq.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbinit.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(serial_fifo.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(armVIC.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libm.a(lib_a-s_floor.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_udivsi3.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_umodsi3.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-malloc.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mallocr.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memcpy.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mlock.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-sbrkr.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-errno.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-findfp.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-freer.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fwalk.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memset.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-reent.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-stdio.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-strlen.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-writer.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-closer.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fclose.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fflush.o)
+ .glue_7        0x00006360        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-lseekr.o)
+ .glue_7        0x00006360      0x120 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-readr.o)
+                0x0000639c                __USBHwISR_from_arm
+                0x00006450                __USBHwConnect_from_arm
+                0x000063e4                __fifo_get_from_arm
+                0x000063f0                __USBHwEPWrite_from_arm
+                0x00006408                __fifo_init_from_arm
+                0x00006384                __PWM_frequency_from_arm
+                0x000063b4                __USBHwNakIntEnable_from_arm
+                0x0000645c                ____umodsi3_from_arm
+                0x00006468                ____udivsi3_from_arm
+                0x000063a8                __fifo_avail_from_arm
+                0x00006414                __USBInit_from_arm
+                0x000063fc                __memcpy_from_arm
+                0x00006444                __USBHwRegisterFrameHandler_from_arm
+                0x00006420                __USBRegisterDescriptors_from_arm
+                0x0000642c                __USBRegisterRequestHandler_from_arm
+                0x0000636c                __LEDS_on_from_arm
+                0x00006390                __PWM_init_from_arm
+                0x00006360                __LEDS_init_from_arm
+                0x00006474                __floor_from_arm
+                0x000063d8                __fifo_put_from_arm
+                0x000063cc                __USBHwEPRead_from_arm
+                0x00006378                __PWM_pulsewidth_us_from_arm
+                0x000063c0                __fifo_free_from_arm
+                0x00006438                __USBHwRegisterEPIntHandler_from_arm
  *(.glue_7t)
- .glue_7t       0x000064ec        0x0 startup.o
- .glue_7t       0x000064ec        0x0 main.o
- .glue_7t       0x000064ec        0x0 servo.o
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_addsubdf3.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_muldivdf3.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_cmpdf2.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_fixdfsi.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libnanoc++.a(nanoc++.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(main_serial.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbhw_lpc.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbcontrol.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbstdreq.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbinit.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(serial_fifo.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(armVIC.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libm.a(lib_a-s_floor.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_udivsi3.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_umodsi3.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-malloc.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mallocr.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memcpy.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mlock.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-sbrkr.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-errno.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-findfp.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-freer.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fwalk.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memset.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-reent.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-stdio.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-strlen.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-writer.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-closer.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fclose.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fflush.o)
- .glue_7t       0x000064ec        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-lseekr.o)
- .glue_7t       0x000064ec       0x10 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-readr.o)
-                0x000064f4                ____gtdf2_from_thumb
-                0x000064f0                ____adddf3_change_to_arm
-                0x000064f8                ____gtdf2_change_to_arm
-                0x000064ec                ____adddf3_from_thumb
+ .glue_7t       0x00006480        0x0 startup.o
+ .glue_7t       0x00006480        0x0 main.o
+ .glue_7t       0x00006480        0x0 servo.o
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_addsubdf3.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_muldivdf3.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_cmpdf2.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_fixdfsi.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libnanoc++.a(nanoc++.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(main_serial.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbhw_lpc.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbcontrol.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbstdreq.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbinit.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(serial_fifo.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(armVIC.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libm.a(lib_a-s_floor.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_udivsi3.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_umodsi3.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-malloc.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mallocr.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memcpy.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mlock.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-sbrkr.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-errno.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-findfp.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-freer.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fwalk.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memset.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-reent.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-stdio.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-strlen.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-writer.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-closer.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fclose.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fflush.o)
+ .glue_7t       0x00006480        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-lseekr.o)
+ .glue_7t       0x00006480       0x10 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-readr.o)
+                0x00006488                ____gtdf2_from_thumb
+                0x00006484                ____adddf3_change_to_arm
+                0x0000648c                ____gtdf2_change_to_arm
+                0x00006480                ____adddf3_from_thumb
  *(.rodata)
- .rodata        0x000064fc       0x90 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(main_serial.o)
- .rodata        0x0000658c       0x28 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbstdreq.o)
- .rodata        0x000065b4        0x4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
-                0x000065b4                _global_impure_ptr
+ .rodata        0x00006490       0x90 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(main_serial.o)
+ .rodata        0x00006520       0x28 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbstdreq.o)
+ .rodata        0x00006548        0x4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
+                0x00006548                _global_impure_ptr
  *(.rodata*)
  .rodata.str1.4
-                0x000065b8       0x63 main.o
+                0x0000654c       0x63 main.o
                                  0x64 (tamaño antes de la relajación)
  .rodata.str1.1
-                0x0000661b        0x7 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
- *fill*         0x00006622        0x2 00
+                0x000065af        0x7 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
+ *fill*         0x000065b6        0x2 00
  .rodata.str1.4
-                0x00006624        0x4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
+                0x000065b8        0x4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
  .rodata.str1.4
-                0x00006628        0x4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
+                0x000065bc        0x4 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
  *(.gnu.linkonce.r.*)
 
-.eh_frame       0x0000662c       0xf8
- .eh_frame      0x0000662c       0x68 main.o
- .eh_frame      0x00006694       0x90 servo.o
-                                 0xac (tamaño antes de la relajación)
+.vfp11_veneer   0x000065c0        0x0
+ .vfp11_veneer  0x000065c0        0x0 startup.o
+ .vfp11_veneer  0x000065c0        0x0 main.o
+ .vfp11_veneer  0x000065c0        0x0 servo.o
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_addsubdf3.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_muldivdf3.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_cmpdf2.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_fixdfsi.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libnanoc++.a(nanoc++.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(main_serial.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbhw_lpc.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbcontrol.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbstdreq.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbinit.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(serial_fifo.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(armVIC.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libm.a(lib_a-s_floor.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_udivsi3.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_umodsi3.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-malloc.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mallocr.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memcpy.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mlock.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-sbrkr.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-errno.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-findfp.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-freer.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fwalk.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memset.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-reent.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-stdio.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-strlen.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-writer.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-closer.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fclose.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fflush.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-lseekr.o)
+ .vfp11_veneer  0x000065c0        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-readr.o)
+                0x000065c0                . = ALIGN (0x4)
 
-.vfp11_veneer   0x00006724        0x0
- .vfp11_veneer  0x00006724        0x0 startup.o
- .vfp11_veneer  0x00006724        0x0 main.o
- .vfp11_veneer  0x00006724        0x0 servo.o
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_addsubdf3.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_muldivdf3.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_cmpdf2.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_fixdfsi.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libnanoc++.a(nanoc++.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(main_serial.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbhw_lpc.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbcontrol.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbstdreq.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(usbinit.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(serial_fifo.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(armVIC.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(leds.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(pwm.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(sysclocks.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(iolib.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libm.a(lib_a-s_floor.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_udivsi3.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_umodsi3.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-malloc.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mallocr.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memcpy.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mlock.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-sbrkr.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-errno.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-findfp.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-freer.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fwalk.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memset.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-reent.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-stdio.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-strlen.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-writer.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-closer.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fclose.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fflush.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-lseekr.o)
- .vfp11_veneer  0x00006724        0x0 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-readr.o)
-                0x00006724                . = ALIGN (0x4)
-
-.ctors          0x00006724        0x0
-                0x00006724                PROVIDE (__ctors_start__, .)
+.ctors          0x000065c0        0x0
+                0x000065c0                PROVIDE (__ctors_start__, .)
  *(SORT(.ctors.*))
  *(.ctors)
-                0x00006724                PROVIDE (__ctors_end__, .)
+                0x000065c0                PROVIDE (__ctors_end__, .)
 
-.dtors          0x00006724        0x0
-                0x00006724                PROVIDE (__dtors_start__, .)
+.dtors          0x000065c0        0x0
+                0x000065c0                PROVIDE (__dtors_start__, .)
  *(SORT(.dtors.*))
  *(.dtors)
-                0x00006724                PROVIDE (__dtors_end__, .)
-                0x00006724                . = ALIGN (0x4)
-                0x00006724                _etext = .
-                0x00006724                PROVIDE (etext, .)
+                0x000065c0                PROVIDE (__dtors_end__, .)
+                0x000065c0                . = ALIGN (0x4)
+                0x000065c0                _etext = .
+                0x000065c0                PROVIDE (etext, .)
 
-.data           0x40000000      0x868 cargar la dirección 0x00006724
+.data           0x40000000      0x868 cargar la dirección 0x000065c0
                 0x40000000                _data = .
  *(.data)
  .data          0x40000000        0x0 startup.o
@@ -641,7 +642,7 @@ END GROUP
                 0x40000868                _edata = .
                 0x40000868                PROVIDE (edata, .)
 
-.bss            0x40000868      0x2e8 cargar la dirección 0x00006f8c
+.bss            0x40000868      0x2e8 cargar la dirección 0x00006e28
                 0x40000868                __bss_start = .
                 0x40000868                __bss_start__ = .
  *(.bss)
@@ -707,7 +708,7 @@ END GROUP
                 0x40000b50                __bss_end__ = .
                 0x40000b50                PROVIDE (__bss_end, .)
 
-.stack          0x40000c00       0x10 cargar la dirección 0x00007324
+.stack          0x40000c00       0x10 cargar la dirección 0x000071c0
                 0x40000c10                . = (. + STACK_SIZE)
  *fill*         0x40000c00       0x10 00
                 0x40000c10                PROVIDE (_stack, .)
@@ -903,41 +904,41 @@ END GROUP
  .debug_pubnames
                 0x0000068f       0x1e c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-readr.o)
 
-.debug_info     0x00000000     0xd72e
+.debug_info     0x00000000     0xd731
  *(.debug_info .gnu.linkonce.wi.*)
- .debug_info    0x00000000       0x5c startup.o
- .debug_info    0x0000005c      0x262 main.o
- .debug_info    0x000002be      0x265 servo.o
- .debug_info    0x00000523       0x97 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_addsubdf3.o)
- .debug_info    0x000005ba       0x97 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_muldivdf3.o)
- .debug_info    0x00000651       0x97 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_cmpdf2.o)
- .debug_info    0x000006e8       0x97 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_fixdfsi.o)
- .debug_info    0x0000077f      0x1b1 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libm.a(lib_a-s_floor.o)
- .debug_info    0x00000930       0x98 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_udivsi3.o)
- .debug_info    0x000009c8       0x98 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
- .debug_info    0x00000a60       0x98 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_umodsi3.o)
- .debug_info    0x00000af8       0x98 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
- .debug_info    0x00000b90      0x99a c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-malloc.o)
- .debug_info    0x0000152a      0xcfb c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mallocr.o)
- .debug_info    0x00002225      0x142 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memcpy.o)
- .debug_info    0x00002367      0x97f c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mlock.o)
- .debug_info    0x00002ce6      0x98e c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-sbrkr.o)
- .debug_info    0x00003674     0x1991 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
- .debug_info    0x00005005      0x956 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-errno.o)
- .debug_info    0x0000595b      0xbc7 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-findfp.o)
- .debug_info    0x00006522      0xbf1 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-freer.o)
- .debug_info    0x00007113      0xb1d c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fwalk.o)
- .debug_info    0x00007c30      0x967 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
- .debug_info    0x00008597      0x115 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memset.o)
- .debug_info    0x000086ac      0xa4b c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-reent.o)
- .debug_info    0x000090f7      0xada c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-stdio.o)
- .debug_info    0x00009bd1       0xd9 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-strlen.o)
- .debug_info    0x00009caa      0x9bd c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-writer.o)
- .debug_info    0x0000a667      0x982 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-closer.o)
- .debug_info    0x0000afe9      0x9bf c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fclose.o)
- .debug_info    0x0000b9a8      0xa25 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fflush.o)
- .debug_info    0x0000c3cd      0x9ab c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-lseekr.o)
- .debug_info    0x0000cd78      0x9b6 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-readr.o)
+ .debug_info    0x00000000       0x5f startup.o
+ .debug_info    0x0000005f      0x262 main.o
+ .debug_info    0x000002c1      0x265 servo.o
+ .debug_info    0x00000526       0x97 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_addsubdf3.o)
+ .debug_info    0x000005bd       0x97 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_muldivdf3.o)
+ .debug_info    0x00000654       0x97 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_cmpdf2.o)
+ .debug_info    0x000006eb       0x97 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_arm_fixdfsi.o)
+ .debug_info    0x00000782      0x1b1 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libm.a(lib_a-s_floor.o)
+ .debug_info    0x00000933       0x98 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_udivsi3.o)
+ .debug_info    0x000009cb       0x98 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_divsi3.o)
+ .debug_info    0x00000a63       0x98 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_umodsi3.o)
+ .debug_info    0x00000afb       0x98 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/thumb/interwork\libgcc.a(_dvmd_tls.o)
+ .debug_info    0x00000b93      0x99a c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-malloc.o)
+ .debug_info    0x0000152d      0xcfb c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mallocr.o)
+ .debug_info    0x00002228      0x142 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memcpy.o)
+ .debug_info    0x0000236a      0x97f c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mlock.o)
+ .debug_info    0x00002ce9      0x98e c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-sbrkr.o)
+ .debug_info    0x00003677     0x1991 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
+ .debug_info    0x00005008      0x956 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-errno.o)
+ .debug_info    0x0000595e      0xbc7 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-findfp.o)
+ .debug_info    0x00006525      0xbf1 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-freer.o)
+ .debug_info    0x00007116      0xb1d c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fwalk.o)
+ .debug_info    0x00007c33      0x967 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
+ .debug_info    0x0000859a      0x115 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memset.o)
+ .debug_info    0x000086af      0xa4b c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-reent.o)
+ .debug_info    0x000090fa      0xada c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-stdio.o)
+ .debug_info    0x00009bd4       0xd9 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-strlen.o)
+ .debug_info    0x00009cad      0x9bd c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-writer.o)
+ .debug_info    0x0000a66a      0x982 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-closer.o)
+ .debug_info    0x0000afec      0x9bf c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fclose.o)
+ .debug_info    0x0000b9ab      0xa25 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fflush.o)
+ .debug_info    0x0000c3d0      0x9ab c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-lseekr.o)
+ .debug_info    0x0000cd7b      0x9b6 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-readr.o)
 
 .debug_abbrev   0x00000000     0x2769
  *(.debug_abbrev)
@@ -1038,55 +1039,55 @@ END GROUP
  .debug_frame   0x0000098c       0x2c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-lseekr.o)
  .debug_frame   0x000009b8       0x2c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-readr.o)
 
-.debug_str      0x00000000     0x13b2
+.debug_str      0x00000000     0x13b5
  *(.debug_str)
- .debug_str     0x00000000      0x192 main.o
-                                0x1de (tamaño antes de la relajación)
- .debug_str     0x00000192       0x12 servo.o
-                                0x172 (tamaño antes de la relajación)
- .debug_str     0x000001a4       0xe2 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libm.a(lib_a-s_floor.o)
+ .debug_str     0x00000000      0x195 main.o
+                                0x1e1 (tamaño antes de la relajación)
+ .debug_str     0x00000195       0x12 servo.o
+                                0x175 (tamaño antes de la relajación)
+ .debug_str     0x000001a7       0xe2 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libm.a(lib_a-s_floor.o)
                                 0x178 (tamaño antes de la relajación)
- .debug_str     0x00000286      0x3ee c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-malloc.o)
+ .debug_str     0x00000289      0x3ee c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-malloc.o)
                                 0x4ef (tamaño antes de la relajación)
- .debug_str     0x00000674      0x20c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mallocr.o)
+ .debug_str     0x00000677      0x20c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mallocr.o)
                                 0x6c4 (tamaño antes de la relajación)
- .debug_str     0x00000880       0xae c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memcpy.o)
+ .debug_str     0x00000883       0xae c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memcpy.o)
                                 0x14a (tamaño antes de la relajación)
- .debug_str     0x0000092e       0x71 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mlock.o)
+ .debug_str     0x00000931       0x71 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-mlock.o)
                                 0x4f6 (tamaño antes de la relajación)
- .debug_str     0x0000099f       0x94 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-sbrkr.o)
+ .debug_str     0x000009a2       0x94 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-sbrkr.o)
                                 0x4de (tamaño antes de la relajación)
- .debug_str     0x00000a33      0x369 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
+ .debug_str     0x00000a36      0x369 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
                                 0x813 (tamaño antes de la relajación)
- .debug_str     0x00000d9c       0x85 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-errno.o)
+ .debug_str     0x00000d9f       0x85 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-errno.o)
                                 0x4d5 (tamaño antes de la relajación)
- .debug_str     0x00000e21      0x159 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-findfp.o)
+ .debug_str     0x00000e24      0x159 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-findfp.o)
                                 0x5c7 (tamaño antes de la relajación)
- .debug_str     0x00000f7a       0x3c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-freer.o)
+ .debug_str     0x00000f7d       0x3c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-freer.o)
                                 0x616 (tamaño antes de la relajación)
- .debug_str     0x00000fb6       0x62 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fwalk.o)
+ .debug_str     0x00000fb9       0x62 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fwalk.o)
                                 0x508 (tamaño antes de la relajación)
- .debug_str     0x00001018       0x4a c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
+ .debug_str     0x0000101b       0x4a c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-impure.o)
                                 0x4ed (tamaño antes de la relajación)
- .debug_str     0x00001062       0x5a c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memset.o)
+ .debug_str     0x00001065       0x5a c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-memset.o)
                                 0x137 (tamaño antes de la relajación)
- .debug_str     0x000010bc       0x77 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-reent.o)
+ .debug_str     0x000010bf       0x77 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-reent.o)
                                 0x512 (tamaño antes de la relajación)
- .debug_str     0x00001133       0x66 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-stdio.o)
+ .debug_str     0x00001136       0x66 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-stdio.o)
                                 0x504 (tamaño antes de la relajación)
- .debug_str     0x00001199       0x4c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-strlen.o)
+ .debug_str     0x0000119c       0x4c c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-strlen.o)
                                 0x136 (tamaño antes de la relajación)
- .debug_str     0x000011e5       0x50 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-writer.o)
+ .debug_str     0x000011e8       0x50 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-writer.o)
                                 0x4e1 (tamaño antes de la relajación)
- .debug_str     0x00001235       0x47 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-closer.o)
+ .debug_str     0x00001238       0x47 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-closer.o)
                                 0x4d1 (tamaño antes de la relajación)
- .debug_str     0x0000127c       0x54 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fclose.o)
+ .debug_str     0x0000127f       0x54 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fclose.o)
                                 0x4e9 (tamaño antes de la relajación)
- .debug_str     0x000012d0       0x56 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fflush.o)
+ .debug_str     0x000012d3       0x56 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-fflush.o)
                                 0x505 (tamaño antes de la relajación)
- .debug_str     0x00001326       0x47 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-lseekr.o)
+ .debug_str     0x00001329       0x47 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-lseekr.o)
                                 0x4df (tamaño antes de la relajación)
- .debug_str     0x0000136d       0x45 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-readr.o)
+ .debug_str     0x00001370       0x45 c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-readr.o)
                                 0x4df (tamaño antes de la relajación)
 
 .debug_loc      0x00000000     0x2de4
@@ -1127,6 +1128,9 @@ END GROUP
 
 .debug_varnames
  *(.debug_varnames)
+
+/DISCARD/
+ *(.eh_frame)
 OUTPUT(main.elf elf32-littlearm)
 
 .ARM.attributes
@@ -1542,7 +1546,6 @@ memset                                            c:/espardino/bin/../lib/gcc/ar
                                                   c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-syscalls.o)
 operator delete(void*)                            c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libnanoc++.a(nanoc++.o)
 operator new(unsigned long)                       c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libnanoc++.a(nanoc++.o)
-print                                             c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
 restoreFIQ                                        c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(armVIC.o)
 restoreIRQ                                        c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libvcom.a(armVIC.o)
 strlen                                            c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib/thumb/interwork\libg.a(lib_a-strlen.o)
@@ -1552,6 +1555,8 @@ xprintf                                           c:/espardino/bin/../lib/gcc/ar
                                                   main.o
 xprintf_output                                    c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
                                                   main.o
+xprintf_print                                     c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
+xputc                                             c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
 xputs                                             c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)
                                                   main.o
 xsprintf                                          c:/espardino/bin/../lib/gcc/arm-elf/4.4.0/../../../../arm-elf/lib\libmicro214x.a(miniprintf.o)

@@ -43,6 +43,11 @@ void delay_init(void);
 void delay_us (unsigned long usdelay);
 void delay_ms ( unsigned long mdelay);
 
+void t1_init(void);
+unsigned int t1_get_us(void);
+unsigned int t1_get_ms(void);
+
+
 #ifdef __cplusplus
 }
 #endif
@@ -63,6 +68,14 @@ Reliable delay is managed thanks to Timer1 control, which makes it more/less
 independent from IRQ execution. It should only be shifted if by the time
 of finishing an IRQ/FIQ is on execution.
 
+Timer1 can be readen using t1_get_ms() and t1_get_us() in millisecond/microsecond
+granularity, these functions manage the T1 overflow (every 143,165567 seconds by
+default) whenever they are called in a periodic maneer with period less than those
+143 seconds).
+
+An init function for t1_get_xx is included, it's t1_init(), it should be called at
+program start to use the t1_get_ms or t1_get_us functions.
+
 */
 
 
@@ -72,7 +85,7 @@ it doesn't modify T1 count, just reads*/
 
 
 /*==USAGE Using the delay library in your applications
-    
+
 1st) Edit your makefile to include the **"micro214x"** library at linking time.
 You can modify the espardino base projects adding "-lmicro214x" to the MY_LIBS var.
 
@@ -80,7 +93,7 @@ You can modify the espardino base projects adding "-lmicro214x" to the MY_LIBS v
   # System libraries to be linked with
   MY_LIBS = -lmicro214x -lm
 </code>
-	
+
 2nd) Include the "micro214x.h" headers in your application.
 
 <code c>
@@ -90,7 +103,7 @@ You can modify the espardino base projects adding "-lmicro214x" to the MY_LIBS v
 3rd) Call the delay_init() function during your program startup
 
 4th) Call the delay_us(x) or delay_ms(x) functions to stop your program
-execution for a given time. 
+execution for a given time.
 <code c>
 
     delay_init();

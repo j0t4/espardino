@@ -44,7 +44,7 @@ typedef  struct {
 	int (* rx_data)(unsigned char *data, int maxlen);
 
 
-} st_net_driver_ops;
+} netif;
 
 
 #endif /* NETIF_H_ */
