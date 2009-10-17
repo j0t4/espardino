@@ -151,7 +151,7 @@ void enc28j60_SetMacAddr(unsigned char *mac)
 
 int enc28j60_IsLinked()
 {
-	return (encReadPHYReg (PHSTAT1) && PHSTAT1_LLSTAT);
+	return (encReadPHYReg (PHSTAT1) & PHSTAT1_LLSTAT);
 }
 
 void enc28j60_Relink()
@@ -241,15 +241,6 @@ U8 enc28j60_spiPut (U8 valueIn)
 int enc28j60Init (void)
 {
   volatile portTickType xTicks;
-
-  //
-  //  If the current MAC address is 00:00:00:00:00:00, default to UIP_ETHADDR[0..5] values
-  //
-  if (!uip_ethaddr.addr[0] && !uip_ethaddr.addr[1] && !uip_ethaddr.addr[2] && !uip_ethaddr.addr[3] && !uip_ethaddr.addr[4] && !uip_ethaddr.addr[5])
-  {
-    struct uip_eth_addr mac = {{UIP_ETHADDR0, UIP_ETHADDR1, UIP_ETHADDR2, UIP_ETHADDR3, UIP_ETHADDR4, UIP_ETHADDR5}};
-    uip_setethaddr (mac);
-  }
 
   //
   //  It'd probably be better if the EINT initialization code took a pointer to
@@ -354,12 +345,12 @@ int enc28j60Init (void)
   encWriteReg (MABBIPG, 0x12);            // Set back to back inter-packet gap
 
   encBankSelect (BANK3);
-  encWriteReg (MAADR1, uip_ethaddr.addr [0]);
-  encWriteReg (MAADR2, uip_ethaddr.addr [1]);
-  encWriteReg (MAADR3, uip_ethaddr.addr [2]);
-  encWriteReg (MAADR4, uip_ethaddr.addr [3]);
-  encWriteReg (MAADR5, uip_ethaddr.addr [4]);
-  encWriteReg (MAADR6, uip_ethaddr.addr [5]);
+  encWriteReg (MAADR1, enc28j60_mac [0]);
+  encWriteReg (MAADR2, enc28j60_mac [1]);
+  encWriteReg (MAADR3, enc28j60_mac [2]);
+  encWriteReg (MAADR4, enc28j60_mac [3]);
+  encWriteReg (MAADR5, enc28j60_mac [4]);
+  encWriteReg (MAADR6, enc28j60_mac [5]);
 
 #ifdef HALF_DUPLEX
   encWritePHYReg (PHCON1, 0);
@@ -403,7 +394,7 @@ int	 enc28j60Send (u8_t *uip_buf, int uip_len)
   if (uip_len > 54)
   {
     uip_len -= 54;
-    encMACwriteBulk (uip_appdata, uip_len);
+    encMACwriteBulk (&uip_buf[54], uip_len);
   }
 
   //

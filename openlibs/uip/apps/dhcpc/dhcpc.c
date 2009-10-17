@@ -1,10 +1,3 @@
-//
-//  $Id: dhcpc.c 278 2008-11-02 19:49:40Z jcw $
-//  $Revision: 278 $
-//  $Author: jcw $
-//  $Date: 2008-11-02 14:49:40 -0500 (Sun, 02 Nov 2008) $
-//  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/uip/apps/dhcpc/dhcpc.c $
-//
 
 /*
  * Copyright (c) 2005, Swedish Institute of Computer Science
@@ -245,9 +238,9 @@ static u8_t parse_options (u8_t *optptr, int len)
   u8_t *end = optptr + len;
   u8_t type = 0;
 
-  while (optptr < end) 
+  while (optptr < end)
   {
-    switch (*optptr) 
+    switch (*optptr)
     {
       case DHCP_OPTION_SUBNET_MASK :
         memcpy (dhcpcState->netmask, optptr + 2, 4);
@@ -318,14 +311,14 @@ static PT_THREAD (handle_dhcp (void))
   dhcpcState->state = STATE_SENDING;
   dhcpcState->ticks = CLOCK_SECOND;
 
-  do 
+  do
   {
     send_discover ();
     timer_set (&dhcpcState->timer, dhcpcState->ticks);
 
     PT_WAIT_UNTIL (&dhcpcState->pt, uip_newdata () || timer_expired (&dhcpcState->timer));
 
-    if (uip_newdata () && (parse_msg () == DHCPOFFER)) 
+    if (uip_newdata () && (parse_msg () == DHCPOFFER))
     {
       uip_flags &= ~UIP_NEWDATA;
       dhcpcState->state = STATE_OFFER_RECEIVED;
@@ -336,17 +329,17 @@ static PT_THREAD (handle_dhcp (void))
 
     if (dhcpcState->ticks < CLOCK_SECOND * 60)
       dhcpcState->ticks *= 2;
-    else 
+    else
     {
       dhcpcState->ipaddr [0] = dhcpcState->ipaddr [1] = 0;
       goto dhcpcf;
     }
-  } 
+  }
   while (dhcpcState->state != STATE_OFFER_RECEIVED);
 
   dhcpcState->ticks = CLOCK_SECOND;
 
-  do 
+  do
   {
     send_request ();
     timer_set (&dhcpcState->timer, dhcpcState->ticks);
@@ -366,7 +359,7 @@ static PT_THREAD (handle_dhcp (void))
       dhcpcState->ticks += CLOCK_SECOND;
     else
       PT_RESTART (&dhcpcState->pt);
-  } 
+  }
   while (dhcpcState->state != STATE_CONFIG_RECEIVED);
 
 dhcpcf:
@@ -423,7 +416,7 @@ void dhcpc_request (void)
 {
   u16_t ipaddr [2];
 
-  if (dhcpcState->state == STATE_INITIAL) 
+  if (dhcpcState->state == STATE_INITIAL)
   {
     uip_ipaddr (ipaddr, 0,0,0,0);
     uip_sethostaddr (ipaddr);
