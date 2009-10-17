@@ -31,37 +31,28 @@
  *
  */
 
-
-
 //
-//  Standard includes 
-// 
+//  Standard includes
+//
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifdef USE_FREERTOS
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
+#endif
 
 #include <micro214x.h>
 #include <rtc.h>
 
 #undef HTONS
-#include "hardware/enc28j60.h"
+
+#include <netif.h>
 #include "uip/uip.h"
 #include "uip/uip_arp.h"
-#include "apps/webserver/httpd.h"
-#include "apps/telnetd/telnetd.h"
 #include "apps/dhcpc/dhcpc.h"
-#include "apps/sntp/sntp.h"
 #include "uiptask.h"
-#include <vcom.h>
-
-#define USE_ZG2100 1
-
-#ifdef USE_ZG2100
-#include "ZG2100MAC.h"
-#endif
 
 //
 //  The start of the uIP buffer, which will contain the frame headers
@@ -71,211 +62,93 @@
 //
 //  uIP update frequencies
 //
+
+#ifdef USE_FREERTOS
 #define RT_CLOCK_SECOND   (configTICK_RATE_HZ)
+xTaskHandle xUIPTaskHandle;
+static xQueueHandle xFastPollQueue = NULL;
+#else
+#define RT_CLOCK_SECOND   (1000)
+#define xTaskGetTickCount  t1_get_ms
+#define vTaskDelay(x)	   delay_ms(x)
+#endif
+
 #define uipARP_FREQUENCY  (1000/8)
 #define uipMAX_BLOCK_TIME (4)
 
-xTaskHandle xUIPTaskHandle;
 
-//
-//
-//
 u8_t uip_buf [UIP_BUFSIZE + 8] __attribute__ ((aligned (4)));
 
 static int useDHCP = TRUE;
-static xQueueHandle xFastPollQueue = NULL; 
+static netif *netIF;
+static int uip_task_last_linked = 0;
 
-//
-//
-//
-static portTASK_FUNCTION (vUIPTask, pvParameters)
+unsigned int xCurrentTime;
+unsigned int xStartTime;
+unsigned int xARPTimer;
+
+int uip_task_init(int use_dhcp, netif *pnetIF)
 {
-  portBASE_TYPE xARPTimer;
-  volatile portBASE_TYPE *errFlag = (portBASE_TYPE *) pvParameters;
-  static volatile portTickType xStartTime, xCurrentTime;
-  int last_connected = 0;
-  int sw;
-  signed portBASE_TYPE hadData;
-  unsigned char wepkey[13];
-  int alreadySetup=0;
+	netIF = pnetIF;
+	useDHCP = use_dhcp;
 
-   
-  xprintf("GO!\r\n");
-
-  
-  if (!xFastPollQueue)
-    xFastPollQueue = xQueueCreate (1, (unsigned portBASE_TYPE) sizeof (struct uip_conn *));
-
-  //
-  //  Initialize the uIP TCP/IP stack
-  //
-  uip_init ();
-  uip_arp_init ();
-
-  
-  //
-  //  Initialize the Ethernet controller hardware
-  //
-
-#ifdef USE_ENC28J60    
-  if (!enc28j60Init ())
-  {
-    if (errFlag)
-      *errFlag = 1;
-	
-    while (1)
-      vTaskDelay (1000 / portTICK_RATE_MS);
-  }
-  xprintf("Initialization OK!! :)\n");
-
-  if (errFlag)
-    *errFlag = 0;
-
-  //
-  //  Either we've got an address, or we need to request one
-  //
-  if (useDHCP)
-  {
-    dhcpc_init (uip_ethaddr.addr, sizeof (uip_ethaddr.addr));
-    dhcpc_request ();
-  }
-  else
-  {
-  
-	no_dhcp_config();
-  }
-
+#ifdef USE_FREERTOS
+	  if (!xFastPollQueue)
+	    xFastPollQueue = xQueueCreate (1, (unsigned portBASE_TYPE) sizeof (struct uip_conn *));
 #endif
 
-// ARP 
+    uip_init ();
+    uip_arp_init ();
 
-#ifdef USE_ZG2100
+    xStartTime =   xTaskGetTickCount();
+    xARPTimer = 0;
 
-	delay_ms(100);
-	//VCOM_getchar();
-  //      ZG2100_SetOutput(&VCOM_putchar_nonblock);
-	ZG2100_Init();
-	ZG2100_LinkMgrInit();
-	
-	
-	//ZG2100_LinkMgrSetNextMode(kZGLMNetworkModeAdhoc);
-	//ZG2100_SetSSID("EspardinoWifi", strlen("EspardinoWifi"));
-	if (useDHCP)
+}
+
+int uip_task_process()
+{
+	int is_linked;
+
+	is_linked = netIF->is_linked();
+
+	if (is_linked!=uip_task_last_linked)
 	{
-		ZG2100_LinkMgrSetNextMode(kZGLMNetworkModeInfrastructure);
-		ZG2100_SetAllRfChannels();
-		ZG2100_SetSSID("ajocasa",strlen("ajocasa"));
-		ZG2100_SetWEPKeyLong("pelayopelayop",0);
-		ZG2100_SetEncryptionType(kKeyTypeWep);
-		ZG2100_SetAuthType(kZGAuthAlgOpen);
-	}
-	else
-	{
-		ZG2100_LinkMgrSetNextMode(kZGLMNetworkModeAdhoc);
-		ZG2100_SetAllRfChannels();
-		ZG2100_SetSSID("EspardinoWifi",strlen("EspardinoWifi"));
-		ZG2100_SetEncryptionType(kKeyTypeNone);
-		ZG2100_SetAuthType(kZGAuthAlgOpen);
-		//ZG2100_SetTxRate(kZGRFRateOneMbps);
-	}
-	
-	
-	//ZG2100_SetWEPKey("\x91\x36\x41\x46\x00", 0, kZGWEPKeyLenShort);
+		uip_task_last_linked=is_linked;
 
-#endif
-
-  //
-  //  Initialise the local timers
-  //
-  xStartTime = xTaskGetTickCount ();
-  xARPTimer = 0;
-
-  //
-  //  The big loop
-  //
-
-  sw=0;
-
-  while (1)
-  {
-    /* enc28j60WaitForData() returns pdTRUE if we were woken by an 
-       interrupt, otherwise pdFALSE if the timer expired.  If pdTRUE,
-       then the ENC28J60 has data ready for us. */
-#ifdef USE_ENC28J60
-    if (enc28j60WaitForData (uipMAX_BLOCK_TIME) == pdTRUE)
-    {
-		if ((uip_len = enc28j60Receive ()) > 0)
+		if (is_linked)
 		{
-#endif
-
-#ifdef USE_ZG2100
-	
-	
-	if ((ZG2100_IsLinked()!=last_connected))
-	{
-		last_connected=ZG2100_IsLinked();
-		
-		if (last_connected)
-		{
-		  memcpy(uip_ethaddr.addr,ZG2100_GetMacAddr(),6);
+		  memcpy(uip_ethaddr.addr,netIF->get_mac_address(),6);
 		  if (useDHCP)
 		  {
-			
+
 			dhcpc_init (uip_ethaddr.addr, sizeof (uip_ethaddr.addr));
 			dhcpc_request ();
 		  }
-		  else
-		  {
-		  
-			if (!alreadySetup)
-			{
-				no_dhcp_config();
-				alreadySetup=1;
-			}
-			
-		  }
-				
+
 		}
 		else
 		{
-			// we got disconnected, ask the linkmanager to connect again
-			ZG2100_LinkMgrInit();
-			ZG2100_LinkMgrSetNextMode(kZGLMNetworkModeInfrastructure);
-			
+			// we got disconnected, ask the interface to link again
+			netIF->relink();
 		}
-			
+
 	}
-	
-	
-	
-	
-	hadData = ZG2100_WaitData (uipMAX_BLOCK_TIME);
-    
-		
-	ZG2100_Process();
-	ZG2100_LinkMgr();
-	
-	
-	
-	
-	//if (hadData==pdTRUE) VCOM_putchar('*'); else VCOM_putchar('.');
-	
-		
-	if ((uip_len = ZG2100_GetUip((unsigned char *)uip_buf,UIP_BUFSIZE)) > 0)	
-	{
-		//if (hadData==pdTRUE) VCOM_putchar_nonblock('.');
-	
-		if (uip_len>0)
-        {
-#endif
-      /* Let the network device driver read an entire IP packet
-         into the uip_buf. If it returns > 0, there is a packet in the
-         uip_buf buffer. */
-      
-        /* A packet is present in the uIP buffer. We call the
-           appropriate ARP functions depending on what kind of packet we
-           have received. If the packet is an IP packet, we should call
-           uip_input() as well. */
+
+
+	/* this will yield processor if we're using freertos enabled driver */
+
+	netIF->wait_data(uipMAX_BLOCK_TIME);
+
+	netIF->process();  /* do internal processes of the driver */
+
+	uip_len = netIF->rx_data(uip_buf,UIP_BUFSIZE);
+
+	/*****************************************************************************************/
+
+	if (uip_len>0)
+    {
+        /* if the incomming packet is IP handle ARP, then IP */
+
         if (pucUIP_Buffer->type == htons (UIP_ETHTYPE_IP))
         {
           uip_arp_ipin ();
@@ -287,62 +160,33 @@ static portTASK_FUNCTION (vUIPTask, pvParameters)
           if (uip_len > 0)
           {
             uip_arp_out ();
-			
-#ifdef USE_ENC28J60			
-            enc28j60Send ();
-#endif
-			
-#ifdef USE_ZG2100
-			ZG2100_PutUip((unsigned char *)uip_buf,uip_len);
-#endif
+            netIF->tx_data((unsigned char *)uip_buf,uip_len);
           }
-        }
+        } /* if the incoming packet is ARP type then let UIP handle it for ARP */
         else if (pucUIP_Buffer->type == htons (UIP_ETHTYPE_ARP))
         {
           uip_arp_arpin ();
 
-          /* If the above function invocation resulted in data that
-             should be sent out on the network, the global variable
-             uip_len is set to a value > 0. */  
           if (uip_len > 0)
-		  {
-            #ifdef USE_ENC28J60			
-            enc28j60Send ();
-			#endif
-			
-			#ifdef USE_ZG2100
-			ZG2100_PutUip((unsigned char *)uip_buf,uip_len);
-			#endif
-		  }
+			netIF->tx_data((unsigned char *)uip_buf,uip_len);
+
         }
-      }
     }
     else
     {
+#ifdef USE_FREERTOS
       struct uip_conn *conn;
-
-
-      //
-      //  If there's data in the short circuit queue, it means that
-      //  uipFastPoll() was called with a connection number, and
-      //  we need to poll that connection.
-      //
       if (xFastPollQueue && (xQueueReceive (xFastPollQueue, &conn, 0) == pdTRUE))
       {
         uip_poll_conn (conn);
 
         if (uip_len > 0)
         {
-          uip_arp_out ();
-			#ifdef USE_ENC28J60			
-            enc28j60Send ();
-			#endif
-			
-			#ifdef USE_ZG2100
-			ZG2100_PutUip((unsigned char *)uip_buf,uip_len);
-			#endif
+            uip_arp_out ();
+			netIF->tx_data((unsigned char *)uip_buf,uip_len);
         }
       }
+#endif
 
       /* The poll function returned 0, so no packet was
          received. Instead we check if it is time that we do the
@@ -351,7 +195,8 @@ static portTASK_FUNCTION (vUIPTask, pvParameters)
 
       if ((xCurrentTime - xStartTime) >= RT_CLOCK_SECOND)
       {
-        portBASE_TYPE i;
+
+    	int i;
 
         /* Reset the timer. */
         xStartTime = xCurrentTime;
@@ -363,20 +208,15 @@ static portTASK_FUNCTION (vUIPTask, pvParameters)
 
           /* If the above function invocation resulted in data that
              should be sent out on the network, the global variable
-             uip_len is set to a value > 0. */          
+             uip_len is set to a value > 0. */
           if (uip_len > 0)
           {
-            uip_arp_out ();
-            #ifdef USE_ENC28J60			
-            enc28j60Send ();
-			#endif
-			
-			#ifdef USE_ZG2100
-			ZG2100_PutUip((unsigned char *)uip_buf,uip_len);
-			#endif
+              uip_arp_out ();
+              netIF->tx_data((unsigned char *)uip_buf,uip_len);
           }
         }
 
+		/* check for UDP connections , may be they have data to be sent too */
 #if UIP_UDP
         for (i = 0; i < UIP_UDP_CONNS; i++)
         {
@@ -387,179 +227,69 @@ static portTASK_FUNCTION (vUIPTask, pvParameters)
              uip_len is set to a value > 0. */
           if (uip_len > 0)
           {
-            uip_arp_out ();
-            #ifdef USE_ENC28J60			
-            enc28j60Send ();
-			#endif
-			
-			#ifdef USE_ZG2100
-			ZG2100_PutUip((unsigned char *)uip_buf,uip_len);
-			#endif
+              uip_arp_out ();
+              netIF->tx_data((unsigned char *)uip_buf,uip_len);
           }
         }
 #endif /* UIP_UDP */
 
         /* Periodically call the ARP timer function. */
         if (++xARPTimer == uipARP_FREQUENCY)
-        { 
+        {
           uip_arp_timer ();
           xARPTimer = 0;
         }
-      }
-    }
-  }
+      } /*  if ((xCurrentTime - xStartTime) >= RT_CLOCK_SECOND) */
+    } /* if data received {..} else { */
 }
 
 //
 //
 //
-void uipFastPoll (struct uip_conn *conn)
+void uip_task_FastPoll (struct uip_conn *conn)
 {
+#ifdef USE_FREERTOS
   if (xFastPollQueue)
     xQueueSend (xFastPollQueue, &conn, portMAX_DELAY);
+#endif
 }
 
-//
-//
-//
-portBASE_TYPE uipIsRunning (void)
-{
-  return xUIPTaskHandle ? 1 : 0;
-}
 
-portBASE_TYPE uiptask_errFlag = -1;
-uipState_e uipStart (int doDHCP)
-{
-  volatile portTickType xTicks;
-
-   xTaskHandle xTASKUip;
-  if (uipIsRunning ())
-    return UIPSTATE_ALREADYRUNNING;
-  
-  useDHCP = doDHCP;
-
-  
-
-  xTASKUip = xTaskCreate (vUIPTask, (const signed portCHAR * const) "uIP2", 1400, &uiptask_errFlag, (tskIDLE_PRIORITY + 1), &xUIPTaskHandle);
-
-
-  if (!xTASKUip) xprintf("ERROR NO uIP task!\r\n");
-
-/*
-  xTicks = xTaskGetTickCount ();
-
-  while ((volatile portBASE_TYPE) errFlag == -1)
-  {
-    vTaskDelay (100 / portTICK_RATE_MS);
-
-    if ((xTaskGetTickCount () - xTicks) > (5000 / portTICK_RATE_MS))
-    {
-      uipStop ();
-      return UIPSTATE_TASKDIDNTSTART;
-    }
-  }
-
-  if (errFlag == 1)
-  {
-    uipStop ();
-    return UIPSTATE_ENCJ28C60ERR;
-  }
-*/
-  return UIPSTATE_OK;
-  
-}
-
-uipState_e uipStop (void)
-{
-  if (!uipIsRunning ())
-    return UIPSTATE_NOTRUNNING;
-
-  vTaskDelete (xUIPTaskHandle);
-  xUIPTaskHandle = NULL;
- 
-			#ifdef USE_ENC28J60			
-             enc28j60Deinit ();
-			#endif
-			
-			#ifdef USE_ZG2100
-			
-			#endif  
-  
-  
-  return UIPSTATE_OK;
-}
-
-extern struct uip_conn *stream_connection;
+void dispatch_tcp_appcall_uip(void);
+void dispatch_udp_appcall_uip(void);
+void dhcpc_configured_uip (const dhcpcState_t *s);
 
 void dispatch_tcp_appcall (void)
 {
-  if (uip_conn->lport == HTONS (80))
-    httpd_appcall ();
-
-//  if (uip_conn->lport == HTONS (23))
-//    telnetd_appcall ();
-
-	if (uip_conn==stream_connection)
-		streamer_appcall();
+	dispatch_tcp_appcall_uip();
 }
 
 void dispatch_udp_appcall (void)
 {
-//  if (uip_udp_conn->rport == HTONS (123))
-//    sntp_appcall ();
-//  else
 
   if (uip_udp_conn->rport == HTONS (DHCPC_SERVER_PORT))
     dhcpc_appcall ();
 
-
    resolv_appcall();
 
+   dispatch_udp_appcall_uip();
+
 }
 
-
-
-#ifdef CFG_AUTO_SNTP
-//
-//
-//
-static void uipAutoSNTPTimeSynced (time_t *epochSeconds)
-{
-  if (*epochSeconds)
-  {
-    n32_t to;
-      
-    uip_gettimeoffset (&to);
-    *epochSeconds += to;
-    rtcSetEpochSeconds (*epochSeconds);
-  }
-}
-
-static void uipAutoSNTP (void)
-{
-  uip_ipaddr_t addr;
-
-  uip_getsntpaddr (&addr);
-
-  if (!uip_iszeroaddr (&addr))
-    sntpSync (&addr, uipAutoSNTPTimeSynced);
-}
-#endif
-
-
+/*
 void no_dhcp_config()
 {
 	uip_ipaddr_t addr;
 
  uip_ipaddr(&addr, 169,254,1,2);
  uip_sethostaddr(&addr);
- 
+
  uip_ipaddr(&addr, 255,255,0,0);
  uip_setnetmask(&addr);
- 
+
  uip_ipaddr(&addr, 169,254,1,1);
  uip_setdraddr(&addr);
- 
+
   uip_ipaddr(&addr, 194,179,1,100);
  uip_setdraddr(&addr);
 
@@ -567,32 +297,31 @@ void no_dhcp_config()
  resolv_init();
  streamer_init();
 }
-
+*/
 void dhcpc_configured (const dhcpcState_t *s)
 {
   if (!s->ipaddr [0] && !s->ipaddr [1])
   {
-    xprintf ("Can't get address via DHCP and no static address configured, stopping uIP task\n");
-    uipStop ();
+ //   xprintf ("Can't get address via DHCP and no static address configured, stopping uIP task\n");
+
   }
-  else 
+  else
     {
+	  /*
     xprintf ("\nIP address via DHCP is %d.%d.%d.%d\n", uip_ipaddr1 (s->ipaddr), uip_ipaddr2 (s->ipaddr), uip_ipaddr3 (s->ipaddr), uip_ipaddr4 (s->ipaddr));
 	xprintf ("Netmask via DHCP is %d.%d.%d.%d\n", uip_ipaddr1 (s->netmask), uip_ipaddr2 (s->netmask), uip_ipaddr3 (s->netmask), uip_ipaddr4 (s->netmask));
 	xprintf ("Router  via DHCP is %d.%d.%d.%d\n", uip_ipaddr1 (s->default_router), uip_ipaddr2 (s->default_router), uip_ipaddr3 (s->default_router), uip_ipaddr4 (s->default_router));
 	xprintf ("DNS     via DHCP is %d.%d.%d.%d\n", uip_ipaddr1 (s->dnsaddr), uip_ipaddr2 (s->dnsaddr), uip_ipaddr3 (s->dnsaddr), uip_ipaddr4 (s->dnsaddr));
-	
+*/
     uip_sethostaddr (s->ipaddr);
     uip_setnetmask (s->netmask);
     uip_setdraddr (s->default_router);
     uip_setsntpaddr (s->sntpaddr);
     uip_settimeoffset (&s->timeoffset);
-	
-	
-	httpd_init ();
-	resolv_init();
+
+
 	resolv_conf(s->dnsaddr);
-	streamer_init();
+	dhcp_configured_uip(s);
 
   }
 }

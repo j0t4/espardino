@@ -2,10 +2,10 @@
    2              		.file	"uiptask.c"
   10              	.Ltext0:
   11              		.align	2
-  12              		.global	uipIsRunning
+  12              		.global	uip_task_FastPoll
   13              		.code	16
   14              		.thumb_func
-  16              	uipIsRunning:
+  16              	uip_task_FastPoll:
   17              	.LFB2:
   18              		.file 1 "uiptask.c"
    1:uiptask.c     **** 
@@ -41,1586 +41,810 @@
   31:uiptask.c     ****  *
   32:uiptask.c     ****  */
   33:uiptask.c     **** 
-  34:uiptask.c     **** 
-  35:uiptask.c     **** 
+  34:uiptask.c     **** //
+  35:uiptask.c     **** //  Standard includes
   36:uiptask.c     **** //
-  37:uiptask.c     **** //  Standard includes 
-  38:uiptask.c     **** // 
-  39:uiptask.c     **** #include <stdlib.h>
-  40:uiptask.c     **** #include <stdio.h>
-  41:uiptask.c     **** 
-  42:uiptask.c     **** #include <freertos/FreeRTOS.h>
-  43:uiptask.c     **** #include <freertos/semphr.h>
-  44:uiptask.c     **** #include <freertos/task.h>
+  37:uiptask.c     **** #include <stdlib.h>
+  38:uiptask.c     **** #include <stdio.h>
+  39:uiptask.c     **** 
+  40:uiptask.c     **** #ifdef USE_FREERTOS
+  41:uiptask.c     **** #include <freertos/FreeRTOS.h>
+  42:uiptask.c     **** #include <freertos/semphr.h>
+  43:uiptask.c     **** #include <freertos/task.h>
+  44:uiptask.c     **** #endif
   45:uiptask.c     **** 
   46:uiptask.c     **** #include <micro214x.h>
   47:uiptask.c     **** #include <rtc.h>
   48:uiptask.c     **** 
   49:uiptask.c     **** #undef HTONS
-  50:uiptask.c     **** #include "hardware/enc28j60.h"
-  51:uiptask.c     **** #include "uip/uip.h"
-  52:uiptask.c     **** #include "uip/uip_arp.h"
-  53:uiptask.c     **** #include "apps/webserver/httpd.h"
-  54:uiptask.c     **** #include "apps/telnetd/telnetd.h"
-  55:uiptask.c     **** #include "apps/dhcpc/dhcpc.h"
-  56:uiptask.c     **** #include "apps/sntp/sntp.h"
-  57:uiptask.c     **** #include "uiptask.h"
-  58:uiptask.c     **** #include <vcom.h>
-  59:uiptask.c     **** 
-  60:uiptask.c     **** #define USE_ZG2100 1
+  50:uiptask.c     **** 
+  51:uiptask.c     **** #include <netif.h>
+  52:uiptask.c     **** #include "uip/uip.h"
+  53:uiptask.c     **** #include "uip/uip_arp.h"
+  54:uiptask.c     **** #include "apps/dhcpc/dhcpc.h"
+  55:uiptask.c     **** #include "uiptask.h"
+  56:uiptask.c     **** 
+  57:uiptask.c     **** //
+  58:uiptask.c     **** //  The start of the uIP buffer, which will contain the frame headers
+  59:uiptask.c     **** //
+  60:uiptask.c     **** #define pucUIP_Buffer ((struct uip_eth_hdr *) &uip_buf [0])
   61:uiptask.c     **** 
-  62:uiptask.c     **** #ifdef USE_ZG2100
-  63:uiptask.c     **** #include "ZG2100MAC.h"
-  64:uiptask.c     **** #endif
+  62:uiptask.c     **** //
+  63:uiptask.c     **** //  uIP update frequencies
+  64:uiptask.c     **** //
   65:uiptask.c     **** 
-  66:uiptask.c     **** //
-  67:uiptask.c     **** //  The start of the uIP buffer, which will contain the frame headers
-  68:uiptask.c     **** //
-  69:uiptask.c     **** #define pucUIP_Buffer ((struct uip_eth_hdr *) &uip_buf [0])
-  70:uiptask.c     **** 
-  71:uiptask.c     **** //
-  72:uiptask.c     **** //  uIP update frequencies
-  73:uiptask.c     **** //
-  74:uiptask.c     **** #define RT_CLOCK_SECOND   (configTICK_RATE_HZ)
-  75:uiptask.c     **** #define uipARP_FREQUENCY  (1000/8)
-  76:uiptask.c     **** #define uipMAX_BLOCK_TIME (4)
-  77:uiptask.c     **** 
-  78:uiptask.c     **** xTaskHandle xUIPTaskHandle;
+  66:uiptask.c     **** #ifdef USE_FREERTOS
+  67:uiptask.c     **** #define RT_CLOCK_SECOND   (configTICK_RATE_HZ)
+  68:uiptask.c     **** xTaskHandle xUIPTaskHandle;
+  69:uiptask.c     **** static xQueueHandle xFastPollQueue = NULL;
+  70:uiptask.c     **** #else
+  71:uiptask.c     **** #define RT_CLOCK_SECOND   (1000)
+  72:uiptask.c     **** #define xTaskGetTickCount  t1_get_ms
+  73:uiptask.c     **** #define vTaskDelay(x)	   delay_ms(x)
+  74:uiptask.c     **** #endif
+  75:uiptask.c     **** 
+  76:uiptask.c     **** #define uipARP_FREQUENCY  (1000/8)
+  77:uiptask.c     **** #define uipMAX_BLOCK_TIME (4)
+  78:uiptask.c     **** 
   79:uiptask.c     **** 
-  80:uiptask.c     **** //
-  81:uiptask.c     **** //
-  82:uiptask.c     **** //
-  83:uiptask.c     **** u8_t uip_buf [UIP_BUFSIZE + 8] __attribute__ ((aligned (4)));
-  84:uiptask.c     **** 
-  85:uiptask.c     **** static int useDHCP = TRUE;
-  86:uiptask.c     **** static xQueueHandle xFastPollQueue = NULL; 
-  87:uiptask.c     **** 
-  88:uiptask.c     **** //
-  89:uiptask.c     **** //
-  90:uiptask.c     **** //
-  91:uiptask.c     **** static portTASK_FUNCTION (vUIPTask, pvParameters)
-  92:uiptask.c     **** {
-  93:uiptask.c     ****   portBASE_TYPE xARPTimer;
-  94:uiptask.c     ****   volatile portBASE_TYPE *errFlag = (portBASE_TYPE *) pvParameters;
-  95:uiptask.c     ****   static volatile portTickType xStartTime, xCurrentTime;
-  96:uiptask.c     ****   int last_connected = 0;
-  97:uiptask.c     ****   int sw;
-  98:uiptask.c     ****   signed portBASE_TYPE hadData;
-  99:uiptask.c     ****   unsigned char wepkey[13];
- 100:uiptask.c     ****   int alreadySetup=0;
- 101:uiptask.c     **** 
- 102:uiptask.c     ****    
- 103:uiptask.c     ****   xprintf("GO!\r\n");
- 104:uiptask.c     **** 
- 105:uiptask.c     ****   
- 106:uiptask.c     ****   if (!xFastPollQueue)
- 107:uiptask.c     ****     xFastPollQueue = xQueueCreate (1, (unsigned portBASE_TYPE) sizeof (struct uip_conn *));
- 108:uiptask.c     **** 
- 109:uiptask.c     ****   //
- 110:uiptask.c     ****   //  Initialize the uIP TCP/IP stack
- 111:uiptask.c     ****   //
- 112:uiptask.c     ****   uip_init ();
- 113:uiptask.c     ****   uip_arp_init ();
- 114:uiptask.c     **** 
- 115:uiptask.c     ****   
- 116:uiptask.c     ****   //
- 117:uiptask.c     ****   //  Initialize the Ethernet controller hardware
- 118:uiptask.c     ****   //
- 119:uiptask.c     **** 
- 120:uiptask.c     **** #ifdef USE_ENC28J60    
- 121:uiptask.c     ****   if (!enc28j60Init ())
- 122:uiptask.c     ****   {
- 123:uiptask.c     ****     if (errFlag)
- 124:uiptask.c     ****       *errFlag = 1;
- 125:uiptask.c     **** 	
- 126:uiptask.c     ****     while (1)
- 127:uiptask.c     ****       vTaskDelay (1000 / portTICK_RATE_MS);
- 128:uiptask.c     ****   }
- 129:uiptask.c     ****   xprintf("Initialization OK!! :)\n");
- 130:uiptask.c     **** 
- 131:uiptask.c     ****   if (errFlag)
- 132:uiptask.c     ****     *errFlag = 0;
- 133:uiptask.c     **** 
- 134:uiptask.c     ****   //
- 135:uiptask.c     ****   //  Either we've got an address, or we need to request one
- 136:uiptask.c     ****   //
- 137:uiptask.c     ****   if (useDHCP)
- 138:uiptask.c     ****   {
- 139:uiptask.c     ****     dhcpc_init (uip_ethaddr.addr, sizeof (uip_ethaddr.addr));
- 140:uiptask.c     ****     dhcpc_request ();
- 141:uiptask.c     ****   }
- 142:uiptask.c     ****   else
- 143:uiptask.c     ****   {
- 144:uiptask.c     ****   
- 145:uiptask.c     **** 	no_dhcp_config();
- 146:uiptask.c     ****   }
+  80:uiptask.c     **** u8_t uip_buf [UIP_BUFSIZE + 8] __attribute__ ((aligned (4)));
+  81:uiptask.c     **** 
+  82:uiptask.c     **** static int useDHCP = TRUE;
+  83:uiptask.c     **** static netif *netIF;
+  84:uiptask.c     **** static int uip_task_last_linked = 0;
+  85:uiptask.c     **** 
+  86:uiptask.c     **** unsigned int xCurrentTime;
+  87:uiptask.c     **** unsigned int xStartTime;
+  88:uiptask.c     **** unsigned int xARPTimer;
+  89:uiptask.c     **** 
+  90:uiptask.c     **** int uip_task_init(int use_dhcp, netif *pnetIF)
+  91:uiptask.c     **** {
+  92:uiptask.c     **** 	netIF = pnetIF;
+  93:uiptask.c     **** 	useDHCP = use_dhcp;
+  94:uiptask.c     **** 
+  95:uiptask.c     **** #ifdef USE_FREERTOS
+  96:uiptask.c     **** 	  if (!xFastPollQueue)
+  97:uiptask.c     **** 	    xFastPollQueue = xQueueCreate (1, (unsigned portBASE_TYPE) sizeof (struct uip_conn *));
+  98:uiptask.c     **** #endif
+  99:uiptask.c     **** 
+ 100:uiptask.c     ****     uip_init ();
+ 101:uiptask.c     ****     uip_arp_init ();
+ 102:uiptask.c     **** 
+ 103:uiptask.c     ****     xStartTime =   xTaskGetTickCount();
+ 104:uiptask.c     ****     xARPTimer = 0;
+ 105:uiptask.c     **** 
+ 106:uiptask.c     **** }
+ 107:uiptask.c     **** 
+ 108:uiptask.c     **** int uip_task_process()
+ 109:uiptask.c     **** {
+ 110:uiptask.c     **** 	int is_linked;
+ 111:uiptask.c     **** 
+ 112:uiptask.c     **** 	is_linked = netIF->is_linked();
+ 113:uiptask.c     **** 
+ 114:uiptask.c     **** 	if (is_linked!=uip_task_last_linked)
+ 115:uiptask.c     **** 	{
+ 116:uiptask.c     **** 		uip_task_last_linked=is_linked;
+ 117:uiptask.c     **** 
+ 118:uiptask.c     **** 		if (is_linked)
+ 119:uiptask.c     **** 		{
+ 120:uiptask.c     **** 		  memcpy(uip_ethaddr.addr,netIF->get_mac_address(),6);
+ 121:uiptask.c     **** 		  if (useDHCP)
+ 122:uiptask.c     **** 		  {
+ 123:uiptask.c     **** 
+ 124:uiptask.c     **** 			dhcpc_init (uip_ethaddr.addr, sizeof (uip_ethaddr.addr));
+ 125:uiptask.c     **** 			dhcpc_request ();
+ 126:uiptask.c     **** 		  }
+ 127:uiptask.c     **** 
+ 128:uiptask.c     **** 		}
+ 129:uiptask.c     **** 		else
+ 130:uiptask.c     **** 		{
+ 131:uiptask.c     **** 			// we got disconnected, ask the interface to link again
+ 132:uiptask.c     **** 			netIF->relink();
+ 133:uiptask.c     **** 		}
+ 134:uiptask.c     **** 
+ 135:uiptask.c     **** 	}
+ 136:uiptask.c     **** 
+ 137:uiptask.c     **** 
+ 138:uiptask.c     **** 	/* this will yield processor if we're using freertos enabled driver */
+ 139:uiptask.c     **** 
+ 140:uiptask.c     **** 	netIF->wait_data(uipMAX_BLOCK_TIME);
+ 141:uiptask.c     **** 
+ 142:uiptask.c     **** 	netIF->process();  /* do internal processes of the driver */
+ 143:uiptask.c     **** 
+ 144:uiptask.c     **** 	uip_len = netIF->rx_data(uip_buf,UIP_BUFSIZE);
+ 145:uiptask.c     **** 
+ 146:uiptask.c     **** 	/*****************************************************************************************/
  147:uiptask.c     **** 
- 148:uiptask.c     **** #endif
- 149:uiptask.c     **** 
- 150:uiptask.c     **** // ARP 
+ 148:uiptask.c     **** 	if (uip_len>0)
+ 149:uiptask.c     ****     {
+ 150:uiptask.c     ****         /* if the incomming packet is IP handle ARP, then IP */
  151:uiptask.c     **** 
- 152:uiptask.c     **** #ifdef USE_ZG2100
- 153:uiptask.c     **** 
- 154:uiptask.c     **** 	delay_ms(100);
- 155:uiptask.c     **** 	//VCOM_getchar();
- 156:uiptask.c     ****   //      ZG2100_SetOutput(&VCOM_putchar_nonblock);
- 157:uiptask.c     **** 	ZG2100_Init();
- 158:uiptask.c     **** 	ZG2100_LinkMgrInit();
- 159:uiptask.c     **** 	
- 160:uiptask.c     **** 	
- 161:uiptask.c     **** 	//ZG2100_LinkMgrSetNextMode(kZGLMNetworkModeAdhoc);
- 162:uiptask.c     **** 	//ZG2100_SetSSID("EspardinoWifi", strlen("EspardinoWifi"));
- 163:uiptask.c     **** 	if (useDHCP)
- 164:uiptask.c     **** 	{
- 165:uiptask.c     **** 		ZG2100_LinkMgrSetNextMode(kZGLMNetworkModeInfrastructure);
- 166:uiptask.c     **** 		ZG2100_SetAllRfChannels();
- 167:uiptask.c     **** 		ZG2100_SetSSID("ajocasa",strlen("ajocasa"));
- 168:uiptask.c     **** 		ZG2100_SetWEPKeyLong("pelayopelayop",0);
- 169:uiptask.c     **** 		ZG2100_SetEncryptionType(kKeyTypeWep);
- 170:uiptask.c     **** 		ZG2100_SetAuthType(kZGAuthAlgOpen);
- 171:uiptask.c     **** 	}
- 172:uiptask.c     **** 	else
- 173:uiptask.c     **** 	{
- 174:uiptask.c     **** 		ZG2100_LinkMgrSetNextMode(kZGLMNetworkModeAdhoc);
- 175:uiptask.c     **** 		ZG2100_SetAllRfChannels();
- 176:uiptask.c     **** 		ZG2100_SetSSID("EspardinoWifi",strlen("EspardinoWifi"));
- 177:uiptask.c     **** 		ZG2100_SetEncryptionType(kKeyTypeNone);
- 178:uiptask.c     **** 		ZG2100_SetAuthType(kZGAuthAlgOpen);
- 179:uiptask.c     **** 		//ZG2100_SetTxRate(kZGRFRateOneMbps);
- 180:uiptask.c     **** 	}
- 181:uiptask.c     **** 	
- 182:uiptask.c     **** 	
- 183:uiptask.c     **** 	//ZG2100_SetWEPKey("\x91\x36\x41\x46\x00", 0, kZGWEPKeyLenShort);
- 184:uiptask.c     **** 
- 185:uiptask.c     **** #endif
- 186:uiptask.c     **** 
- 187:uiptask.c     ****   //
- 188:uiptask.c     ****   //  Initialise the local timers
- 189:uiptask.c     ****   //
- 190:uiptask.c     ****   xStartTime = xTaskGetTickCount ();
- 191:uiptask.c     ****   xARPTimer = 0;
- 192:uiptask.c     **** 
- 193:uiptask.c     ****   //
- 194:uiptask.c     ****   //  The big loop
- 195:uiptask.c     ****   //
- 196:uiptask.c     **** 
- 197:uiptask.c     ****   sw=0;
+ 152:uiptask.c     ****         if (pucUIP_Buffer->type == htons (UIP_ETHTYPE_IP))
+ 153:uiptask.c     ****         {
+ 154:uiptask.c     ****           uip_arp_ipin ();
+ 155:uiptask.c     ****           uip_input ();
+ 156:uiptask.c     **** 
+ 157:uiptask.c     ****           /* If the above function invocation resulted in data that
+ 158:uiptask.c     ****              should be sent out on the network, the global variable
+ 159:uiptask.c     ****              uip_len is set to a value > 0. */
+ 160:uiptask.c     ****           if (uip_len > 0)
+ 161:uiptask.c     ****           {
+ 162:uiptask.c     ****             uip_arp_out ();
+ 163:uiptask.c     ****             netIF->tx_data((unsigned char *)uip_buf,uip_len);
+ 164:uiptask.c     ****           }
+ 165:uiptask.c     ****         } /* if the incoming packet is ARP type then let UIP handle it for ARP */
+ 166:uiptask.c     ****         else if (pucUIP_Buffer->type == htons (UIP_ETHTYPE_ARP))
+ 167:uiptask.c     ****         {
+ 168:uiptask.c     ****           uip_arp_arpin ();
+ 169:uiptask.c     **** 
+ 170:uiptask.c     ****           if (uip_len > 0)
+ 171:uiptask.c     **** 			netIF->tx_data((unsigned char *)uip_buf,uip_len);
+ 172:uiptask.c     **** 
+ 173:uiptask.c     ****         }
+ 174:uiptask.c     ****     }
+ 175:uiptask.c     ****     else
+ 176:uiptask.c     ****     {
+ 177:uiptask.c     **** #ifdef USE_FREERTOS
+ 178:uiptask.c     ****       struct uip_conn *conn;
+ 179:uiptask.c     ****       if (xFastPollQueue && (xQueueReceive (xFastPollQueue, &conn, 0) == pdTRUE))
+ 180:uiptask.c     ****       {
+ 181:uiptask.c     ****         uip_poll_conn (conn);
+ 182:uiptask.c     **** 
+ 183:uiptask.c     ****         if (uip_len > 0)
+ 184:uiptask.c     ****         {
+ 185:uiptask.c     ****             uip_arp_out ();
+ 186:uiptask.c     **** 			netIF->tx_data((unsigned char *)uip_buf,uip_len);
+ 187:uiptask.c     ****         }
+ 188:uiptask.c     ****       }
+ 189:uiptask.c     **** #endif
+ 190:uiptask.c     **** 
+ 191:uiptask.c     ****       /* The poll function returned 0, so no packet was
+ 192:uiptask.c     ****          received. Instead we check if it is time that we do the
+ 193:uiptask.c     ****          periodic processing. */
+ 194:uiptask.c     ****       xCurrentTime = xTaskGetTickCount ();
+ 195:uiptask.c     **** 
+ 196:uiptask.c     ****       if ((xCurrentTime - xStartTime) >= RT_CLOCK_SECOND)
+ 197:uiptask.c     ****       {
  198:uiptask.c     **** 
- 199:uiptask.c     ****   while (1)
- 200:uiptask.c     ****   {
- 201:uiptask.c     ****     /* enc28j60WaitForData() returns pdTRUE if we were woken by an 
- 202:uiptask.c     ****        interrupt, otherwise pdFALSE if the timer expired.  If pdTRUE,
- 203:uiptask.c     ****        then the ENC28J60 has data ready for us. */
- 204:uiptask.c     **** #ifdef USE_ENC28J60
- 205:uiptask.c     ****     if (enc28j60WaitForData (uipMAX_BLOCK_TIME) == pdTRUE)
- 206:uiptask.c     ****     {
- 207:uiptask.c     **** 		if ((uip_len = enc28j60Receive ()) > 0)
- 208:uiptask.c     **** 		{
- 209:uiptask.c     **** #endif
- 210:uiptask.c     **** 
- 211:uiptask.c     **** #ifdef USE_ZG2100
- 212:uiptask.c     **** 	
- 213:uiptask.c     **** 	
- 214:uiptask.c     **** 	if ((ZG2100_IsLinked()!=last_connected))
- 215:uiptask.c     **** 	{
- 216:uiptask.c     **** 		last_connected=ZG2100_IsLinked();
- 217:uiptask.c     **** 		
- 218:uiptask.c     **** 		if (last_connected)
- 219:uiptask.c     **** 		{
- 220:uiptask.c     **** 		  memcpy(uip_ethaddr.addr,ZG2100_GetMacAddr(),6);
- 221:uiptask.c     **** 		  if (useDHCP)
- 222:uiptask.c     **** 		  {
- 223:uiptask.c     **** 			
- 224:uiptask.c     **** 			dhcpc_init (uip_ethaddr.addr, sizeof (uip_ethaddr.addr));
- 225:uiptask.c     **** 			dhcpc_request ();
- 226:uiptask.c     **** 		  }
- 227:uiptask.c     **** 		  else
- 228:uiptask.c     **** 		  {
- 229:uiptask.c     **** 		  
- 230:uiptask.c     **** 			if (!alreadySetup)
- 231:uiptask.c     **** 			{
- 232:uiptask.c     **** 				no_dhcp_config();
- 233:uiptask.c     **** 				alreadySetup=1;
- 234:uiptask.c     **** 			}
- 235:uiptask.c     **** 			
- 236:uiptask.c     **** 		  }
- 237:uiptask.c     **** 				
- 238:uiptask.c     **** 		}
- 239:uiptask.c     **** 		else
- 240:uiptask.c     **** 		{
- 241:uiptask.c     **** 			// we got disconnected, ask the linkmanager to connect again
- 242:uiptask.c     **** 			ZG2100_LinkMgrInit();
- 243:uiptask.c     **** 			ZG2100_LinkMgrSetNextMode(kZGLMNetworkModeInfrastructure);
- 244:uiptask.c     **** 			
- 245:uiptask.c     **** 		}
- 246:uiptask.c     **** 			
- 247:uiptask.c     **** 	}
- 248:uiptask.c     **** 	
- 249:uiptask.c     **** 	
- 250:uiptask.c     **** 	
- 251:uiptask.c     **** 	
- 252:uiptask.c     **** 	hadData = ZG2100_WaitData (uipMAX_BLOCK_TIME);
- 253:uiptask.c     ****     
- 254:uiptask.c     **** 		
- 255:uiptask.c     **** 	ZG2100_Process();
- 256:uiptask.c     **** 	ZG2100_LinkMgr();
- 257:uiptask.c     **** 	
- 258:uiptask.c     **** 	
- 259:uiptask.c     **** 	
- 260:uiptask.c     **** 	
- 261:uiptask.c     **** 	//if (hadData==pdTRUE) VCOM_putchar('*'); else VCOM_putchar('.');
- 262:uiptask.c     **** 	
- 263:uiptask.c     **** 		
- 264:uiptask.c     **** 	if ((uip_len = ZG2100_GetUip((unsigned char *)uip_buf,UIP_BUFSIZE)) > 0)	
- 265:uiptask.c     **** 	{
- 266:uiptask.c     **** 		//if (hadData==pdTRUE) VCOM_putchar_nonblock('.');
- 267:uiptask.c     **** 	
- 268:uiptask.c     **** 		if (uip_len>0)
- 269:uiptask.c     ****         {
- 270:uiptask.c     **** #endif
- 271:uiptask.c     ****       /* Let the network device driver read an entire IP packet
- 272:uiptask.c     ****          into the uip_buf. If it returns > 0, there is a packet in the
- 273:uiptask.c     ****          uip_buf buffer. */
- 274:uiptask.c     ****       
- 275:uiptask.c     ****         /* A packet is present in the uIP buffer. We call the
- 276:uiptask.c     ****            appropriate ARP functions depending on what kind of packet we
- 277:uiptask.c     ****            have received. If the packet is an IP packet, we should call
- 278:uiptask.c     ****            uip_input() as well. */
- 279:uiptask.c     ****         if (pucUIP_Buffer->type == htons (UIP_ETHTYPE_IP))
- 280:uiptask.c     ****         {
- 281:uiptask.c     ****           uip_arp_ipin ();
- 282:uiptask.c     ****           uip_input ();
+ 199:uiptask.c     ****     	int i;
+ 200:uiptask.c     **** 
+ 201:uiptask.c     ****         /* Reset the timer. */
+ 202:uiptask.c     ****         xStartTime = xCurrentTime;
+ 203:uiptask.c     **** 
+ 204:uiptask.c     ****         /* Periodic check of all connections. */
+ 205:uiptask.c     ****         for (i = 0; i < UIP_CONNS; i++)
+ 206:uiptask.c     ****         {
+ 207:uiptask.c     ****           uip_periodic (i);
+ 208:uiptask.c     **** 
+ 209:uiptask.c     ****           /* If the above function invocation resulted in data that
+ 210:uiptask.c     ****              should be sent out on the network, the global variable
+ 211:uiptask.c     ****              uip_len is set to a value > 0. */
+ 212:uiptask.c     ****           if (uip_len > 0)
+ 213:uiptask.c     ****           {
+ 214:uiptask.c     ****               uip_arp_out ();
+ 215:uiptask.c     ****               netIF->tx_data((unsigned char *)uip_buf,uip_len);
+ 216:uiptask.c     ****           }
+ 217:uiptask.c     ****         }
+ 218:uiptask.c     **** 
+ 219:uiptask.c     **** 		/* check for UDP connections , may be they have data to be sent too */
+ 220:uiptask.c     **** #if UIP_UDP
+ 221:uiptask.c     ****         for (i = 0; i < UIP_UDP_CONNS; i++)
+ 222:uiptask.c     ****         {
+ 223:uiptask.c     ****           uip_udp_periodic (i);
+ 224:uiptask.c     **** 
+ 225:uiptask.c     ****           /* If the above function invocation resulted in data that
+ 226:uiptask.c     ****              should be sent out on the network, the global variable
+ 227:uiptask.c     ****              uip_len is set to a value > 0. */
+ 228:uiptask.c     ****           if (uip_len > 0)
+ 229:uiptask.c     ****           {
+ 230:uiptask.c     ****               uip_arp_out ();
+ 231:uiptask.c     ****               netIF->tx_data((unsigned char *)uip_buf,uip_len);
+ 232:uiptask.c     ****           }
+ 233:uiptask.c     ****         }
+ 234:uiptask.c     **** #endif /* UIP_UDP */
+ 235:uiptask.c     **** 
+ 236:uiptask.c     ****         /* Periodically call the ARP timer function. */
+ 237:uiptask.c     ****         if (++xARPTimer == uipARP_FREQUENCY)
+ 238:uiptask.c     ****         {
+ 239:uiptask.c     ****           uip_arp_timer ();
+ 240:uiptask.c     ****           xARPTimer = 0;
+ 241:uiptask.c     ****         }
+ 242:uiptask.c     ****       } /*  if ((xCurrentTime - xStartTime) >= RT_CLOCK_SECOND) */
+ 243:uiptask.c     ****     } /* if data received {..} else { */
+ 244:uiptask.c     **** }
+ 245:uiptask.c     **** 
+ 246:uiptask.c     **** //
+ 247:uiptask.c     **** //
+ 248:uiptask.c     **** //
+ 249:uiptask.c     **** void uip_task_FastPoll (struct uip_conn *conn)
+ 250:uiptask.c     **** {
+  19              		.loc 1 250 0
+  20              		.cfi_startproc
+  21              	.LVL0:
+ 251:uiptask.c     **** #ifdef USE_FREERTOS
+ 252:uiptask.c     ****   if (xFastPollQueue)
+ 253:uiptask.c     ****     xQueueSend (xFastPollQueue, &conn, portMAX_DELAY);
+ 254:uiptask.c     **** #endif
+ 255:uiptask.c     **** }
+  22              		.loc 1 255 0
+  23              		@ sp needed for prologue
+  24 0000 7047     		bx	lr
+  25              		.cfi_endproc
+  26              	.LFE2:
+  28 0002 C046     		.align	2
+  29              		.global	dhcpc_configured
+  30              		.code	16
+  31              		.thumb_func
+  33              	dhcpc_configured:
+  34              	.LFB5:
+ 256:uiptask.c     **** 
+ 257:uiptask.c     **** 
+ 258:uiptask.c     **** void dispatch_tcp_appcall_uip(void);
+ 259:uiptask.c     **** void dispatch_udp_appcall_uip(void);
+ 260:uiptask.c     **** void dhcpc_configured_uip (const dhcpcState_t *s);
+ 261:uiptask.c     **** 
+ 262:uiptask.c     **** void dispatch_tcp_appcall (void)
+ 263:uiptask.c     **** {
+ 264:uiptask.c     **** 	dispatch_tcp_appcall_uip();
+ 265:uiptask.c     **** }
+ 266:uiptask.c     **** 
+ 267:uiptask.c     **** void dispatch_udp_appcall (void)
+ 268:uiptask.c     **** {
+ 269:uiptask.c     **** 
+ 270:uiptask.c     ****   if (uip_udp_conn->rport == HTONS (DHCPC_SERVER_PORT))
+ 271:uiptask.c     ****     dhcpc_appcall ();
+ 272:uiptask.c     **** 
+ 273:uiptask.c     ****    resolv_appcall();
+ 274:uiptask.c     **** 
+ 275:uiptask.c     ****    dispatch_udp_appcall_uip();
+ 276:uiptask.c     **** 
+ 277:uiptask.c     **** }
+ 278:uiptask.c     **** 
+ 279:uiptask.c     **** /*
+ 280:uiptask.c     **** void no_dhcp_config()
+ 281:uiptask.c     **** {
+ 282:uiptask.c     **** 	uip_ipaddr_t addr;
  283:uiptask.c     **** 
- 284:uiptask.c     ****           /* If the above function invocation resulted in data that
- 285:uiptask.c     ****              should be sent out on the network, the global variable
- 286:uiptask.c     ****              uip_len is set to a value > 0. */
- 287:uiptask.c     ****           if (uip_len > 0)
- 288:uiptask.c     ****           {
- 289:uiptask.c     ****             uip_arp_out ();
- 290:uiptask.c     **** 			
- 291:uiptask.c     **** #ifdef USE_ENC28J60			
- 292:uiptask.c     ****             enc28j60Send ();
- 293:uiptask.c     **** #endif
- 294:uiptask.c     **** 			
- 295:uiptask.c     **** #ifdef USE_ZG2100
- 296:uiptask.c     **** 			ZG2100_PutUip((unsigned char *)uip_buf,uip_len);
- 297:uiptask.c     **** #endif
- 298:uiptask.c     ****           }
- 299:uiptask.c     ****         }
- 300:uiptask.c     ****         else if (pucUIP_Buffer->type == htons (UIP_ETHTYPE_ARP))
- 301:uiptask.c     ****         {
- 302:uiptask.c     ****           uip_arp_arpin ();
- 303:uiptask.c     **** 
- 304:uiptask.c     ****           /* If the above function invocation resulted in data that
- 305:uiptask.c     ****              should be sent out on the network, the global variable
- 306:uiptask.c     ****              uip_len is set to a value > 0. */  
- 307:uiptask.c     ****           if (uip_len > 0)
- 308:uiptask.c     **** 		  {
- 309:uiptask.c     ****             #ifdef USE_ENC28J60			
- 310:uiptask.c     ****             enc28j60Send ();
- 311:uiptask.c     **** 			#endif
- 312:uiptask.c     **** 			
- 313:uiptask.c     **** 			#ifdef USE_ZG2100
- 314:uiptask.c     **** 			ZG2100_PutUip((unsigned char *)uip_buf,uip_len);
- 315:uiptask.c     **** 			#endif
- 316:uiptask.c     **** 		  }
- 317:uiptask.c     ****         }
- 318:uiptask.c     ****       }
- 319:uiptask.c     ****     }
- 320:uiptask.c     ****     else
- 321:uiptask.c     ****     {
- 322:uiptask.c     ****       struct uip_conn *conn;
- 323:uiptask.c     **** 
- 324:uiptask.c     **** 
- 325:uiptask.c     ****       //
- 326:uiptask.c     ****       //  If there's data in the short circuit queue, it means that
- 327:uiptask.c     ****       //  uipFastPoll() was called with a connection number, and
- 328:uiptask.c     ****       //  we need to poll that connection.
- 329:uiptask.c     ****       //
- 330:uiptask.c     ****       if (xFastPollQueue && (xQueueReceive (xFastPollQueue, &conn, 0) == pdTRUE))
- 331:uiptask.c     ****       {
- 332:uiptask.c     ****         uip_poll_conn (conn);
- 333:uiptask.c     **** 
- 334:uiptask.c     ****         if (uip_len > 0)
- 335:uiptask.c     ****         {
- 336:uiptask.c     ****           uip_arp_out ();
- 337:uiptask.c     **** 			#ifdef USE_ENC28J60			
- 338:uiptask.c     ****             enc28j60Send ();
- 339:uiptask.c     **** 			#endif
- 340:uiptask.c     **** 			
- 341:uiptask.c     **** 			#ifdef USE_ZG2100
- 342:uiptask.c     **** 			ZG2100_PutUip((unsigned char *)uip_buf,uip_len);
- 343:uiptask.c     **** 			#endif
- 344:uiptask.c     ****         }
- 345:uiptask.c     ****       }
- 346:uiptask.c     **** 
- 347:uiptask.c     ****       /* The poll function returned 0, so no packet was
- 348:uiptask.c     ****          received. Instead we check if it is time that we do the
- 349:uiptask.c     ****          periodic processing. */
- 350:uiptask.c     ****       xCurrentTime = xTaskGetTickCount ();
- 351:uiptask.c     **** 
- 352:uiptask.c     ****       if ((xCurrentTime - xStartTime) >= RT_CLOCK_SECOND)
- 353:uiptask.c     ****       {
- 354:uiptask.c     ****         portBASE_TYPE i;
- 355:uiptask.c     **** 
- 356:uiptask.c     ****         /* Reset the timer. */
- 357:uiptask.c     ****         xStartTime = xCurrentTime;
- 358:uiptask.c     **** 
- 359:uiptask.c     ****         /* Periodic check of all connections. */
- 360:uiptask.c     ****         for (i = 0; i < UIP_CONNS; i++)
- 361:uiptask.c     ****         {
- 362:uiptask.c     ****           uip_periodic (i);
- 363:uiptask.c     **** 
- 364:uiptask.c     ****           /* If the above function invocation resulted in data that
- 365:uiptask.c     ****              should be sent out on the network, the global variable
- 366:uiptask.c     ****              uip_len is set to a value > 0. */          
- 367:uiptask.c     ****           if (uip_len > 0)
- 368:uiptask.c     ****           {
- 369:uiptask.c     ****             uip_arp_out ();
- 370:uiptask.c     ****             #ifdef USE_ENC28J60			
- 371:uiptask.c     ****             enc28j60Send ();
- 372:uiptask.c     **** 			#endif
- 373:uiptask.c     **** 			
- 374:uiptask.c     **** 			#ifdef USE_ZG2100
- 375:uiptask.c     **** 			ZG2100_PutUip((unsigned char *)uip_buf,uip_len);
- 376:uiptask.c     **** 			#endif
- 377:uiptask.c     ****           }
- 378:uiptask.c     ****         }
- 379:uiptask.c     **** 
- 380:uiptask.c     **** #if UIP_UDP
- 381:uiptask.c     ****         for (i = 0; i < UIP_UDP_CONNS; i++)
- 382:uiptask.c     ****         {
- 383:uiptask.c     ****           uip_udp_periodic (i);
- 384:uiptask.c     **** 
- 385:uiptask.c     ****           /* If the above function invocation resulted in data that
- 386:uiptask.c     ****              should be sent out on the network, the global variable
- 387:uiptask.c     ****              uip_len is set to a value > 0. */
- 388:uiptask.c     ****           if (uip_len > 0)
- 389:uiptask.c     ****           {
- 390:uiptask.c     ****             uip_arp_out ();
- 391:uiptask.c     ****             #ifdef USE_ENC28J60			
- 392:uiptask.c     ****             enc28j60Send ();
- 393:uiptask.c     **** 			#endif
- 394:uiptask.c     **** 			
- 395:uiptask.c     **** 			#ifdef USE_ZG2100
- 396:uiptask.c     **** 			ZG2100_PutUip((unsigned char *)uip_buf,uip_len);
- 397:uiptask.c     **** 			#endif
- 398:uiptask.c     ****           }
- 399:uiptask.c     ****         }
- 400:uiptask.c     **** #endif /* UIP_UDP */
- 401:uiptask.c     **** 
- 402:uiptask.c     ****         /* Periodically call the ARP timer function. */
- 403:uiptask.c     ****         if (++xARPTimer == uipARP_FREQUENCY)
- 404:uiptask.c     ****         { 
- 405:uiptask.c     ****           uip_arp_timer ();
- 406:uiptask.c     ****           xARPTimer = 0;
- 407:uiptask.c     ****         }
- 408:uiptask.c     ****       }
- 409:uiptask.c     ****     }
- 410:uiptask.c     ****   }
- 411:uiptask.c     **** }
- 412:uiptask.c     **** 
- 413:uiptask.c     **** //
- 414:uiptask.c     **** //
- 415:uiptask.c     **** //
- 416:uiptask.c     **** void uipFastPoll (struct uip_conn *conn)
- 417:uiptask.c     **** {
- 418:uiptask.c     ****   if (xFastPollQueue)
- 419:uiptask.c     ****     xQueueSend (xFastPollQueue, &conn, portMAX_DELAY);
- 420:uiptask.c     **** }
- 421:uiptask.c     **** 
- 422:uiptask.c     **** //
- 423:uiptask.c     **** //
- 424:uiptask.c     **** //
- 425:uiptask.c     **** portBASE_TYPE uipIsRunning (void)
- 426:uiptask.c     **** {
-  19              	i_startproc
-  20              		.loc 1 426 0
-  21              		ldr	r3, .L3
-  22 0000 024B     		ldr	r0, [r3]
-  23 0002 1868     		.loc 1 428 0
- 427:uiptask.c     ****   return xUIPTaskHandle ? 1 : 0;
- 428:uiptask.c     **** }
-  24              	 needed for prologue
-  25              		.loc 1 426 0
-  26              		sub	r3, r0, #1
-  27 0004 431E     		sbc	r0, r0, r3
-  28 0006 9841     		.loc 1 428 0
-  29              		bx	lr
-  30 0008 7047     	.L4:
-  31              		.align	2
-  32 000a C046     	.L3:
-  33              		.word	xUIPTaskHandle
-  34 000c 00000000 		.cfi_endproc
-  35              	.LFE2:
-  37              		.align	2
-  38              		.global	no_dhcp_config
-  39              		.code	16
-  40              		.thumb_func
-  42              	no_dhcp_config:
-  43              	.LFB7:
-  44              		.loc 1 551 0
- 429:uiptask.c     **** 
- 430:uiptask.c     **** portBASE_TYPE uiptask_errFlag = -1;
- 431:uiptask.c     **** uipState_e uipStart (int doDHCP)
- 432:uiptask.c     **** {
- 433:uiptask.c     ****   volatile portTickType xTicks;
- 434:uiptask.c     **** 
- 435:uiptask.c     ****    xTaskHandle xTASKUip;
- 436:uiptask.c     ****   if (uipIsRunning ())
- 437:uiptask.c     ****     return UIPSTATE_ALREADYRUNNING;
- 438:uiptask.c     ****   
- 439:uiptask.c     ****   useDHCP = doDHCP;
- 440:uiptask.c     **** 
- 441:uiptask.c     ****   
- 442:uiptask.c     **** 
- 443:uiptask.c     ****   xTASKUip = xTaskCreate (vUIPTask, (const signed portCHAR * const) "uIP2", 1400, &uiptask_errFlag,
- 444:uiptask.c     **** 
- 445:uiptask.c     **** 
- 446:uiptask.c     ****   if (!xTASKUip) xprintf("ERROR NO uIP task!\r\n");
- 447:uiptask.c     **** 
- 448:uiptask.c     **** /*
- 449:uiptask.c     ****   xTicks = xTaskGetTickCount ();
- 450:uiptask.c     **** 
- 451:uiptask.c     ****   while ((volatile portBASE_TYPE) errFlag == -1)
- 452:uiptask.c     ****   {
- 453:uiptask.c     ****     vTaskDelay (100 / portTICK_RATE_MS);
- 454:uiptask.c     **** 
- 455:uiptask.c     ****     if ((xTaskGetTickCount () - xTicks) > (5000 / portTICK_RATE_MS))
- 456:uiptask.c     ****     {
- 457:uiptask.c     ****       uipStop ();
- 458:uiptask.c     ****       return UIPSTATE_TASKDIDNTSTART;
- 459:uiptask.c     ****     }
- 460:uiptask.c     ****   }
- 461:uiptask.c     **** 
- 462:uiptask.c     ****   if (errFlag == 1)
- 463:uiptask.c     ****   {
- 464:uiptask.c     ****     uipStop ();
- 465:uiptask.c     ****     return UIPSTATE_ENCJ28C60ERR;
- 466:uiptask.c     ****   }
- 467:uiptask.c     **** */
- 468:uiptask.c     ****   return UIPSTATE_OK;
- 469:uiptask.c     ****   
- 470:uiptask.c     **** }
- 471:uiptask.c     **** 
- 472:uiptask.c     **** uipState_e uipStop (void)
- 473:uiptask.c     **** {
- 474:uiptask.c     ****   if (!uipIsRunning ())
- 475:uiptask.c     ****     return UIPSTATE_NOTRUNNING;
- 476:uiptask.c     **** 
- 477:uiptask.c     ****   vTaskDelete (xUIPTaskHandle);
- 478:uiptask.c     ****   xUIPTaskHandle = NULL;
- 479:uiptask.c     ****  
- 480:uiptask.c     **** 			#ifdef USE_ENC28J60			
- 481:uiptask.c     ****              enc28j60Deinit ();
- 482:uiptask.c     **** 			#endif
- 483:uiptask.c     **** 			
- 484:uiptask.c     **** 			#ifdef USE_ZG2100
- 485:uiptask.c     **** 			
- 486:uiptask.c     **** 			#endif  
- 487:uiptask.c     ****   
- 488:uiptask.c     ****   
- 489:uiptask.c     ****   return UIPSTATE_OK;
- 490:uiptask.c     **** }
- 491:uiptask.c     **** 
- 492:uiptask.c     **** extern struct uip_conn *stream_connection;
- 493:uiptask.c     **** 
- 494:uiptask.c     **** void dispatch_tcp_appcall (void)
- 495:uiptask.c     **** {
- 496:uiptask.c     ****   if (uip_conn->lport == HTONS (80))
- 497:uiptask.c     ****     httpd_appcall ();
- 498:uiptask.c     **** 
- 499:uiptask.c     **** //  if (uip_conn->lport == HTONS (23))
- 500:uiptask.c     **** //    telnetd_appcall ();
- 501:uiptask.c     **** 
- 502:uiptask.c     **** 	if (uip_conn==stream_connection)
- 503:uiptask.c     **** 		streamer_appcall();
- 504:uiptask.c     **** }
- 505:uiptask.c     **** 
- 506:uiptask.c     **** void dispatch_udp_appcall (void)
- 507:uiptask.c     **** {
- 508:uiptask.c     **** //  if (uip_udp_conn->rport == HTONS (123))
- 509:uiptask.c     **** //    sntp_appcall ();
- 510:uiptask.c     **** //  else
- 511:uiptask.c     **** 
- 512:uiptask.c     ****   if (uip_udp_conn->rport == HTONS (DHCPC_SERVER_PORT))
- 513:uiptask.c     ****     dhcpc_appcall ();
- 514:uiptask.c     **** 
- 515:uiptask.c     **** 
- 516:uiptask.c     ****    resolv_appcall();
- 517:uiptask.c     **** 
- 518:uiptask.c     **** }
- 519:uiptask.c     **** 
- 520:uiptask.c     **** 
- 521:uiptask.c     **** 
- 522:uiptask.c     **** #ifdef CFG_AUTO_SNTP
- 523:uiptask.c     **** //
- 524:uiptask.c     **** //
- 525:uiptask.c     **** //
- 526:uiptask.c     **** static void uipAutoSNTPTimeSynced (time_t *epochSeconds)
- 527:uiptask.c     **** {
- 528:uiptask.c     ****   if (*epochSeconds)
- 529:uiptask.c     ****   {
- 530:uiptask.c     ****     n32_t to;
- 531:uiptask.c     ****       
- 532:uiptask.c     ****     uip_gettimeoffset (&to);
- 533:uiptask.c     ****     *epochSeconds += to;
- 534:uiptask.c     ****     rtcSetEpochSeconds (*epochSeconds);
- 535:uiptask.c     ****   }
- 536:uiptask.c     **** }
- 537:uiptask.c     **** 
- 538:uiptask.c     **** static void uipAutoSNTP (void)
- 539:uiptask.c     **** {
- 540:uiptask.c     ****   uip_ipaddr_t addr;
- 541:uiptask.c     **** 
- 542:uiptask.c     ****   uip_getsntpaddr (&addr);
- 543:uiptask.c     **** 
- 544:uiptask.c     ****   if (!uip_iszeroaddr (&addr))
- 545:uiptask.c     ****     sntpSync (&addr, uipAutoSNTPTimeSynced);
- 546:uiptask.c     **** }
- 547:uiptask.c     **** #endif
- 548:uiptask.c     **** 
- 549:uiptask.c     **** 
- 550:uiptask.c     **** void no_dhcp_config()
- 551:uiptask.c     **** {
-  45              		{lr}
-  46              		.cfi_def_cfa_offset 4
-  47 0010 00B5     		.cfi_offset 14, -4
-  48              		.loc 1 555 0
-  49              		ldr	r3, .L7
- 552:uiptask.c     **** 	uip_ipaddr_t addr;
- 553:uiptask.c     **** 
- 554:uiptask.c     ****  uip_ipaddr(&addr, 169,254,1,2);
- 555:uiptask.c     ****  uip_sethostaddr(&addr);
-  50              	r2, .L7+4
-  51 0012 0C4B     		strh	r2, [r3]
-  52 0014 0C4A     		ldr	r2, .L7+8
-  53 0016 1A80     		strh	r2, [r3, #2]
-  54 0018 0C4A     		.loc 1 558 0
-  55 001a 5A80     		ldr	r2, .L7+12
- 556:uiptask.c     ****  
- 557:uiptask.c     ****  uip_ipaddr(&addr, 255,255,0,0);
- 558:uiptask.c     ****  uip_setnetmask(&addr);
-  56              	3, #1
-  57 001c 0C4A     		neg	r3, r3
-  58 001e 0123     		strh	r3, [r2]
-  59 0020 5B42     		mov	r3, #0
-  60 0022 1380     		strh	r3, [r2, #2]
-  61 0024 0023     		.loc 1 564 0
-  62 0026 5380     		ldr	r3, .L7+16
- 559:uiptask.c     ****  
- 560:uiptask.c     ****  uip_ipaddr(&addr, 169,254,1,1);
- 561:uiptask.c     ****  uip_setdraddr(&addr);
- 562:uiptask.c     ****  
- 563:uiptask.c     ****   uip_ipaddr(&addr, 194,179,1,100);
- 564:uiptask.c     ****  uip_setdraddr(&addr);
-  63              	, .L7+20
-  64 0028 0A4B     		strh	r2, [r3]
-  65 002a 0B4A     		ldr	r2, .L7+24
-  66 002c 1A80     		strh	r2, [r3, #2]
-  67 002e 0B4A     		.loc 1 566 0
-  68 0030 5A80     		bl	httpd_init
- 565:uiptask.c     **** 
- 566:uiptask.c     ****  httpd_init();
-  69              	1 569 0
-  70 0032 FFF7FEFF 		@ sp needed for prologue
- 567:uiptask.c     ****  resolv_init();
- 568:uiptask.c     ****  streamer_init();
- 569:uiptask.c     **** }
-  71              	loc 1 567 0
-  72              		bl	resolv_init
-  73              		.loc 1 568 0
-  74 0036 FFF7FEFF 		bl	streamer_init
-  75              		.loc 1 569 0
-  76 003a FFF7FEFF 		pop	{r0}
-  77              		bx	r0
-  78 003e 01BC     	.L8:
-  79 0040 0047     		.align	2
-  80              	.L7:
-  81 0042 C046     		.word	uip_hostaddr
-  82              		.word	-343
-  83 0044 00000000 		.word	513
-  84 0048 A9FEFFFF 		.word	uip_netmask
-  85 004c 01020000 		.word	uip_draddr
-  86 0050 00000000 		.word	-19518
-  87 0054 00000000 		.word	25601
-  88 0058 C2B3FFFF 		.cfi_endproc
-  89 005c 01640000 	.LFE7:
-  91              		.align	2
-  92              		.global	dispatch_udp_appcall
-  93              		.code	16
-  94              		.thumb_func
-  96              	dispatch_udp_appcall:
-  97              	.LFB6:
-  98              		.loc 1 507 0
-  99              		.cfi_startproc
- 100              		push	{lr}
- 101              		.cfi_def_cfa_offset 4
- 102 0060 00B5     		.cfi_offset 14, -4
- 103              		.loc 1 512 0
- 104              		ldr	r3, .L13
- 105              		ldr	r2, [r3]
- 106 0062 064B     		mov	r3, #134
- 107 0064 1A68     		ldrh	r2, [r2, #6]
- 108 0066 8623     		lsl	r3, r3, #7
- 109 0068 D288     		cmp	r2, r3
- 110 006a DB01     		bne	.L10
- 111 006c 9A42     		.loc 1 513 0
- 112 006e 01D1     		bl	dhcpc_appcall
- 113              	.L10:
- 114 0070 FFF7FEFF 		.loc 1 516 0
- 115              		bl	resolv_appcall
- 116              		.loc 1 518 0
- 117 0074 FFF7FEFF 		@ sp needed for prologue
- 118              		pop	{r0}
- 119              		bx	r0
- 120 0078 01BC     	.L14:
- 121 007a 0047     		.align	2
- 122              	.L13:
- 123              		.word	uip_udp_conn
- 124              		.cfi_endproc
- 125 007c 00000000 	.LFE6:
- 127              		.align	2
- 128              		.global	dispatch_tcp_appcall
- 129              		.code	16
- 130              		.thumb_func
- 132              	dispatch_tcp_appcall:
- 133              	.LFB5:
- 134              		.loc 1 495 0
- 135              		.cfi_startproc
- 136              		push	{lr}
- 137              		.cfi_def_cfa_offset 4
- 138 0080 00B5     		.cfi_offset 14, -4
- 139              		.loc 1 496 0
- 140              		ldr	r3, .L19
- 141              		ldr	r2, [r3]
- 142 0082 094B     		mov	r3, #160
- 143 0084 1A68     		ldrh	r2, [r2, #4]
- 144 0086 A023     		lsl	r3, r3, #7
- 145 0088 9288     		cmp	r2, r3
- 146 008a DB01     		bne	.L16
- 147 008c 9A42     		.loc 1 497 0
- 148 008e 01D1     		bl	httpd_appcall
- 149              	.L16:
- 150 0090 FFF7FEFF 		.loc 1 502 0
- 151              		ldr	r3, .L19
- 152              		ldr	r2, [r3]
- 153 0094 044B     		ldr	r3, .L19+4
- 154 0096 1A68     		ldr	r3, [r3]
- 155 0098 044B     		cmp	r2, r3
- 156 009a 1B68     		bne	.L18
- 157 009c 9A42     		.loc 1 503 0
- 158 009e 01D1     		bl	streamer_appcall
- 159              	.L18:
- 160 00a0 FFF7FEFF 		.loc 1 504 0
- 161              		@ sp needed for prologue
- 162              		pop	{r0}
- 163              		bx	r0
- 164 00a4 01BC     	.L20:
- 165 00a6 0047     		.align	2
- 166              	.L19:
- 167              		.word	uip_conn
- 168              		.word	stream_connection
- 169 00a8 00000000 		.cfi_endproc
- 170 00ac 00000000 	.LFE5:
- 172              		.align	2
- 173              		.global	uipStop
- 174              		.code	16
- 175              		.thumb_func
- 177              	uipStop:
- 178              	.LFB4:
- 179              		.loc 1 473 0
- 180              		.cfi_startproc
- 181              		push	{r4, lr}
- 182              		.cfi_def_cfa_offset 8
- 183 00b0 10B5     		.cfi_offset 4, -8
- 184              		.cfi_offset 14, -4
- 185              	.LBB6:
- 186              	.LBB7:
- 187              		.loc 1 427 0
- 188              		ldr	r4, .L25
- 189              		ldr	r0, [r4]
- 190 00b2 074C     	.LBE7:
- 191 00b4 2068     	.LBE6:
- 192              		.loc 1 474 0
- 193              		cmp	r0, #0
- 194              		bne	.L22
- 195 00b6 0028     		mov	r0, #2
- 196 00b8 01D1     		b	.L23
- 197 00ba 0220     	.L22:
- 198 00bc 04E0     		.loc 1 477 0
- 199              		bl	vTaskDelete
- 200              		.loc 1 478 0
- 201 00be FFF7FEFF 		mov	r3, #0
- 202              		str	r3, [r4]
- 203 00c2 0023     		mov	r0, #0
- 204 00c4 2360     	.L23:
- 205 00c6 0020     		.loc 1 490 0
- 206              		@ sp needed for prologue
- 207              		pop	{r4}
- 208              		pop	{r1}
- 209 00c8 10BC     		bx	r1
- 210 00ca 02BC     	.L26:
- 211 00cc 0847     		.align	2
- 212              	.L25:
- 213 00ce C046     		.word	xUIPTaskHandle
- 214              		.cfi_endproc
- 215 00d0 00000000 	.LFE4:
- 217              		.align	2
- 218              		.global	dhcpc_configured
- 219              		.code	16
- 220              		.thumb_func
- 222              	dhcpc_configured:
- 223              	.LFB8:
- 224              		.loc 1 572 0
- 225              		.cfi_startproc
- 570:uiptask.c     **** 
- 571:uiptask.c     **** void dhcpc_configured (const dhcpcState_t *s)
- 572:uiptask.c     **** {
- 226              	:
- 227              		.loc 1 573 0
- 228 00d4 F0B5     		ldr	r3, [r0, #40]
- 229              		.loc 1 572 0
- 230              		sub	sp, sp, #8
- 231              		.cfi_def_cfa_offset 28
- 232              		.loc 1 572 0
- 233              		mov	r4, r0
- 234              		.loc 1 573 0
- 235              		cmp	r3, #0
- 573:uiptask.c     ****   if (!s->ipaddr [0] && !s->ipaddr [1])
- 236              	.LVL1:
- 237 00d6 836A     		.loc 1 575 0
- 238              		ldr	r0, .L31
- 239 00d8 82B0     		bl	xprintf
- 240              		.loc 1 576 0
- 241              		bl	uipStop
- 242 00da 041C     		b	.L30
- 243              	.LVL2:
- 244 00dc 002B     	.L28:
- 245 00de 05D1     		.loc 1 580 0
- 246              		ldrh	r0, [r0, #40]
- 574:uiptask.c     ****   {
- 575:uiptask.c     ****     xprintf ("Can't get address via DHCP and no static address configured, stopping uIP task\n");
- 247              	mov	r5, r0
- 248 00e0 4B48     		ldrh	r0, [r4, #40]
- 249 00e2 FFF7FEFF 		bl	htons
- 576:uiptask.c     ****     uipStop ();
- 250              	v	r6, r0
- 251 00e6 FFF7FEFF 		ldrh	r0, [r4, #42]
- 252 00ea 8CE0     		bl	htons
- 253              		mov	r7, r0
- 254              		ldrh	r0, [r4, #42]
- 577:uiptask.c     ****   }
- 578:uiptask.c     ****   else 
- 579:uiptask.c     ****     {
- 580:uiptask.c     ****     xprintf ("\nIP address via DHCP is %d.%d.%d.%d\n", uip_ipaddr1 (s->ipaddr), uip_ipaddr2 (s->ipa
- 255              	tons
- 256 00ec 008D     		lsl	r5, r5, #8
- 257 00ee FFF7FEFF 		lsr	r1, r5, #16
- 258 00f2 051C     		mov	r5, #255
- 259 00f4 208D     		and	r0, r0, r5
- 260 00f6 FFF7FEFF 		mov	r2, r6
- 261 00fa 061C     		lsl	r7, r7, #8
- 262 00fc 608D     		and	r2, r2, r5
- 263 00fe FFF7FEFF 		lsr	r3, r7, #16
- 264 0102 071C     		str	r0, [sp]
- 265 0104 608D     		ldr	r0, .L31+4
- 266 0106 FFF7FEFF 		bl	xprintf
- 267 010a 2D02     		.loc 1 581 0
- 268 010c 290C     		ldrh	r0, [r4, #44]
- 269 010e FF25     		bl	htons
- 270 0110 2840     		mov	r6, r0
- 271 0112 321C     		ldrh	r0, [r4, #44]
- 272 0114 3F02     		bl	htons
- 273 0116 2A40     		mov	r7, r0
- 274 0118 3B0C     		ldrh	r0, [r4, #46]
- 275 011a 0090     		bl	htons
- 276 011c 3D48     		str	r0, [sp, #4]
- 277 011e FFF7FEFF 		ldrh	r0, [r4, #46]
- 581:uiptask.c     **** 	xprintf ("Netmask via DHCP is %d.%d.%d.%d\n", uip_ipaddr1 (s->netmask), uip_ipaddr2 (s->netmask), 
- 278              	#8
- 279 0122 A08D     		lsr	r1, r6, #16
- 280 0124 FFF7FEFF 		ldr	r6, [sp, #4]
- 281 0128 061C     		and	r0, r0, r5
- 282 012a A08D     		mov	r2, r7
- 283 012c FFF7FEFF 		lsl	r3, r6, #8
- 284 0130 071C     		and	r2, r2, r5
- 285 0132 E08D     		lsr	r3, r3, #16
- 286 0134 FFF7FEFF 		str	r0, [sp]
- 287 0138 0190     		ldr	r0, .L31+8
- 288 013a E08D     		bl	xprintf
- 289 013c FFF7FEFF 		.loc 1 582 0
- 290 0140 3602     		ldrh	r0, [r4, #52]
- 291 0142 310C     		bl	htons
- 292 0144 019E     		mov	r6, r0
- 293 0146 2840     		ldrh	r0, [r4, #52]
- 294 0148 3A1C     		bl	htons
- 295 014a 3302     		mov	r7, r0
- 296 014c 2A40     		ldrh	r0, [r4, #54]
- 297 014e 1B0C     		bl	htons
- 298 0150 0090     		str	r0, [sp, #4]
- 299 0152 3148     		ldrh	r0, [r4, #54]
- 300 0154 FFF7FEFF 		bl	htons
- 582:uiptask.c     **** 	xprintf ("Router  via DHCP is %d.%d.%d.%d\n", uip_ipaddr1 (s->default_router), uip_ipaddr2 (s->def
- 301              	, r6, #16
- 302 0158 A08E     		ldr	r6, [sp, #4]
- 303 015a FFF7FEFF 		and	r0, r0, r5
- 304 015e 061C     		mov	r2, r7
- 305 0160 A08E     		lsl	r3, r6, #8
- 306 0162 FFF7FEFF 		and	r2, r2, r5
- 307 0166 071C     		lsr	r3, r3, #16
- 308 0168 E08E     		str	r0, [sp]
- 309 016a FFF7FEFF 		ldr	r0, .L31+12
- 310 016e 0190     		bl	xprintf
- 311 0170 E08E     		.loc 1 583 0
- 312 0172 FFF7FEFF 		ldrh	r0, [r4, #48]
- 313 0176 3602     		bl	htons
- 314 0178 310C     		mov	r6, r0
- 315 017a 019E     		ldrh	r0, [r4, #48]
- 316 017c 2840     		bl	htons
- 317 017e 3A1C     		mov	r7, r0
- 318 0180 3302     		ldrh	r0, [r4, #50]
- 319 0182 2A40     		bl	htons
- 320 0184 1B0C     		str	r0, [sp, #4]
- 321 0186 0090     		ldrh	r0, [r4, #50]
- 322 0188 2448     		bl	htons
- 323 018a FFF7FEFF 		lsl	r6, r6, #8
- 583:uiptask.c     **** 	xprintf ("DNS     via DHCP is %d.%d.%d.%d\n", uip_ipaddr1 (s->dnsaddr), uip_ipaddr2 (s->dnsaddr), 
- 324              	6, [sp, #4]
- 325 018e 208E     		mov	r2, r7
- 326 0190 FFF7FEFF 		lsl	r3, r6, #8
- 327 0194 061C     		and	r2, r2, r5
- 328 0196 208E     		lsr	r3, r3, #16
- 329 0198 FFF7FEFF 		and	r5, r5, r0
- 330 019c 071C     		ldr	r0, .L31+16
- 331 019e 608E     		str	r5, [sp]
- 332 01a0 FFF7FEFF 		bl	xprintf
- 333 01a4 0190     		.loc 1 585 0
- 334 01a6 608E     		ldrh	r2, [r4, #40]
- 335 01a8 FFF7FEFF 		ldr	r3, .L31+20
- 336 01ac 3602     		strh	r2, [r3]
- 337 01ae 310C     		ldrh	r2, [r4, #42]
- 338 01b0 019E     		strh	r2, [r3, #2]
- 339 01b2 3A1C     		.loc 1 586 0
- 340 01b4 3302     		ldr	r3, .L31+24
- 341 01b6 2A40     		ldrh	r2, [r4, #44]
- 342 01b8 1B0C     		strh	r2, [r3]
- 343 01ba 0540     		ldrh	r2, [r4, #46]
- 344 01bc 1848     		strh	r2, [r3, #2]
- 345 01be 0095     		.loc 1 587 0
- 346 01c0 FFF7FEFF 		ldr	r3, .L31+28
- 584:uiptask.c     **** 	
- 585:uiptask.c     ****     uip_sethostaddr (s->ipaddr);
- 347              	rh	r2, [r3]
- 348 01c4 228D     		ldrh	r2, [r4, #54]
- 349 01c6 174B     		strh	r2, [r3, #2]
- 350 01c8 1A80     		.loc 1 588 0
- 351 01ca 628D     		ldr	r3, .L31+32
- 352 01cc 5A80     		ldrh	r2, [r4, #56]
- 586:uiptask.c     ****     uip_setnetmask (s->netmask);
- 353              	r2, [r3]
- 354 01ce 164B     		ldrh	r2, [r4, #58]
- 355 01d0 A28D     		strh	r2, [r3, #2]
- 356 01d2 1A80     		.loc 1 589 0
- 357 01d4 E28D     		ldr	r2, [r4, #60]
- 358 01d6 5A80     		ldr	r3, .L31+36
- 587:uiptask.c     ****     uip_setdraddr (s->default_router);
- 359              	2, [r3]
- 360 01d8 144B     		.loc 1 592 0
- 361 01da A28E     		bl	httpd_init
- 362 01dc 1A80     		.loc 1 593 0
- 363 01de E28E     		bl	resolv_init
- 364 01e0 5A80     		.loc 1 594 0
- 588:uiptask.c     ****     uip_setsntpaddr (s->sntpaddr);
- 365              	0, r4
- 366 01e2 134B     		add	r0, r0, #48
- 367 01e4 228F     		bl	resolv_conf
- 368 01e6 1A80     		.loc 1 595 0
- 369 01e8 628F     		bl	streamer_init
- 370 01ea 5A80     	.L30:
- 589:uiptask.c     ****     uip_settimeoffset (&s->timeoffset);
- 371              	1 598 0
- 372 01ec E26B     		add	sp, sp, #8
- 373 01ee 114B     		@ sp needed for prologue
- 374 01f0 1A60     	.LVL3:
- 590:uiptask.c     **** 	
- 591:uiptask.c     **** 	
- 592:uiptask.c     **** 	httpd_init ();
- 375              		{r4, r5, r6, r7}
- 376 01f2 FFF7FEFF 		pop	{r0}
- 593:uiptask.c     **** 	resolv_init();
- 377              	x	r0
- 378 01f6 FFF7FEFF 	.L32:
- 594:uiptask.c     **** 	resolv_conf(s->dnsaddr);
- 379              	align	2
- 380 01fa 201C     	.L31:
- 381 01fc 3030     		.word	.LC8
- 382 01fe FFF7FEFF 		.word	.LC10
- 595:uiptask.c     **** 	streamer_init();
- 383              	rd	.LC12
- 384 0202 FFF7FEFF 		.word	.LC14
- 385              		.word	.LC16
- 596:uiptask.c     **** 
- 597:uiptask.c     ****   }
- 598:uiptask.c     **** }
- 386              	ord	uip_hostaddr
- 387 0206 02B0     		.word	uip_netmask
- 388              		.word	uip_draddr
- 389              		.word	uip_sntpaddr
- 390 0208 F0BC     		.word	uip_timeoffset
- 391 020a 01BC     		.cfi_endproc
- 392 020c 0047     	.LFE8:
- 394 020e C046     		.align	2
- 395              		.global	uipStart
- 396 0210 00000000 		.code	16
- 397 0214 50000000 		.thumb_func
- 399 021c 96000000 	uipStart:
- 400 0220 B7000000 	.LFB3:
- 401 0224 00000000 		.loc 1 432 0
- 402 0228 00000000 		.cfi_startproc
- 403 022c 00000000 		push	{lr}
- 404 0230 00000000 		.cfi_def_cfa_offset 4
- 405 0234 00000000 		.cfi_offset 14, -4
- 406              	.LVL4:
- 407              		.loc 1 436 0
- 408              		ldr	r2, .L39
- 409              		ldr	r3, [r2]
- 410              		.loc 1 432 0
- 411              		sub	sp, sp, #8
- 412              		.cfi_def_cfa_offset 12
- 413              		.loc 1 436 0
- 414              		cmp	r3, #0
- 415              		beq	.L34
- 416              		mov	r0, #1
- 417              	.LVL5:
- 418 0238 00B5     		b	.L35
- 419              	.LVL6:
- 420              	.L34:
- 421              		.loc 1 439 0
- 422              		ldr	r3, .L39+4
- 423 023a 0D4A     		.loc 1 443 0
- 424 023c 1368     		mov	r1, #1
- 425              		.loc 1 439 0
- 426 023e 82B0     		stmia	r3!, {r0}
- 427              		.loc 1 443 0
- 428              		str	r2, [sp, #4]
- 429 0240 002B     		mov	r2, #175
- 430 0242 01D0     		str	r1, [sp]
- 431 0244 0120     		ldr	r0, .L39+8
- 432              	.LVL7:
- 433 0246 10E0     		ldr	r1, .L39+12
- 434              		lsl	r2, r2, #3
- 435              		bl	xTaskCreate
- 436              		.loc 1 446 0
- 437 0248 0A4B     		cmp	r0, #0
- 438              		bne	.L38
- 439 024a 0121     		ldr	r0, .L39+16
- 440              		bl	xprintf
- 441 024c 01C3     	.L38:
- 442              		mov	r0, #0
- 443 024e 0192     	.L35:
- 444 0250 AF22     		.loc 1 470 0
- 445 0252 0091     		add	sp, sp, #8
- 446 0254 0848     		@ sp needed for prologue
- 447              		pop	{r1}
- 448 0256 0949     		bx	r1
- 449 0258 D200     	.L40:
- 450 025a FFF7FEFF 		.align	2
- 451              	.L39:
- 452 025e 0028     		.word	xUIPTaskHandle
- 453 0260 02D1     		.word	.LANCHOR0
- 454 0262 0748     		.word	vUIPTask
- 455 0264 FFF7FEFF 		.word	.LC26
- 456              		.word	.LC28
- 457 0268 0020     		.cfi_endproc
- 458              	.LFE3:
- 460 026a 02B0     		.align	2
- 461              		.code	16
- 462 026c 02BC     		.thumb_func
- 464              	vUIPTask:
- 465              	.LFB0:
- 466              		.loc 1 92 0
- 467 0270 00000000 		.cfi_startproc
- 468 0274 00000000 		push	{r4, r5, r6, r7, lr}
- 469 0278 00000000 		.cfi_def_cfa_offset 20
- 470 027c D8000000 		.cfi_offset 4, -20
- 471 0280 DD000000 		.cfi_offset 5, -16
- 472              		.cfi_offset 6, -12
- 473              		.cfi_offset 7, -8
- 474              		.cfi_offset 14, -4
- 475              	.LVL8:
- 476              		sub	sp, sp, #12
- 477              		.cfi_def_cfa_offset 32
- 478              		.loc 1 103 0
- 479              		ldr	r0, .L63
- 480              	.LVL9:
- 481              		bl	xprintf
- 482              		.loc 1 106 0
- 483 0284 F0B5     		ldr	r4, .L63+4
- 484              		ldr	r3, [r4]
- 485              		cmp	r3, #0
- 486              		bne	.L42
- 487              		.loc 1 107 0
- 488              		mov	r0, #1
- 489              		mov	r1, #4
- 490              		bl	xQueueCreate
- 491 0286 83B0     		str	r0, [r4]
- 492              	.L42:
- 493              		.loc 1 112 0
- 494 0288 8148     		bl	uip_init
- 495              		.loc 1 113 0
- 496 028a FFF7FEFF 		bl	uip_arp_init
- 497              		.loc 1 154 0
- 498 028e 814C     		mov	r0, #100
- 499 0290 2368     		bl	delay_ms
- 500 0292 002B     		.loc 1 157 0
- 501 0294 04D1     		bl	ZG2100_Init
- 502              		.loc 1 158 0
- 503 0296 0120     		bl	ZG2100_LinkMgrInit
- 504 0298 0421     		.loc 1 163 0
- 505 029a FFF7FEFF 		ldr	r3, .L63+8
- 506 029e 2060     		ldr	r3, [r3]
- 507              		cmp	r3, #0
- 508              		beq	.L43
- 509 02a0 FFF7FEFF 		.loc 1 165 0
- 510              		mov	r0, #0
- 511 02a4 FFF7FEFF 		bl	ZG2100_LinkMgrSetNextMode
- 512              		.loc 1 166 0
- 513 02a8 6420     		bl	ZG2100_SetAllRfChannels
- 514 02aa FFF7FEFF 		.loc 1 167 0
- 515              		ldr	r0, .L63+12
- 516 02ae FFF7FEFF 		mov	r1, #7
- 517              		bl	ZG2100_SetSSID
- 518 02b2 FFF7FEFF 		.loc 1 168 0
- 519              		ldr	r0, .L63+16
- 520 02b6 784B     		mov	r1, #0
- 521 02b8 1B68     		bl	ZG2100_SetWEPKeyLong
- 522 02ba 002B     		.loc 1 169 0
- 523 02bc 0ED0     		mov	r0, #1
- 524              		b	.L61
- 525 02be 0020     	.L43:
- 526 02c0 FFF7FEFF 		.loc 1 174 0
- 527              		mov	r0, #1
- 528 02c4 FFF7FEFF 		bl	ZG2100_LinkMgrSetNextMode
- 529              		.loc 1 175 0
- 530 02c8 7448     		bl	ZG2100_SetAllRfChannels
- 531 02ca 0721     		.loc 1 176 0
- 532 02cc FFF7FEFF 		ldr	r0, .L63+20
- 533              		mov	r1, #13
- 534 02d0 7348     		bl	ZG2100_SetSSID
- 535 02d2 0021     		.loc 1 177 0
- 536 02d4 FFF7FEFF 		mov	r0, #0
- 537              	.L61:
- 538 02d8 0120     		bl	ZG2100_SetEncryptionType
- 539 02da 09E0     		.loc 1 178 0
- 540              		mov	r0, #0
- 541              		bl	ZG2100_SetAuthType
- 542 02dc 0120     		.loc 1 190 0
- 543 02de FFF7FEFF 		bl	xTaskGetTickCount
- 544              		ldr	r3, .L63+4
- 545 02e2 FFF7FEFF 		mov	r2, #0
- 546              		mov	r4, #0
- 547 02e6 6F48     	.LVL10:
- 548 02e8 0D21     		str	r0, [r3, #4]
- 549 02ea FFF7FEFF 		str	r2, [sp, #4]
- 550              		str	r4, [sp]
- 551 02ee 0020     		b	.L45
- 552              	.LVL11:
- 553 02f0 FFF7FEFF 	.L52:
- 554              		mov	r4, r7
- 555 02f4 0020     	.LVL12:
- 556 02f6 FFF7FEFF 	.L45:
- 557              		.loc 1 214 0
- 558 02fa FFF7FEFF 		bl	ZG2100_IsLinked
- 559 02fe 654B     		mov	r7, r0
- 560 0300 0022     	.LVL13:
- 561 0302 0024     		cmp	r0, r4
- 562              		beq	.L46
- 563 0304 5860     	.LVL14:
- 564 0306 0192     		.loc 1 216 0
- 565 0308 0094     		bl	ZG2100_IsLinked
- 566 030a 00E0     		mov	r7, r0
- 567              	.LVL15:
- 568              		.loc 1 218 0
- 569 030c 3C1C     		cmp	r0, #0
- 570              		beq	.L47
- 571              	.LVL16:
- 572              		.loc 1 220 0
- 573 030e FFF7FEFF 		bl	ZG2100_GetMacAddr
- 574 0312 071C     	.LVL17:
- 575              		ldr	r4, .L63+24
- 576 0314 A042     		mov	r1, r0
- 577 0316 27D0     		mov	r2, #6
- 578              		mov	r0, r4
- 579              		bl	memcpy
- 580 0318 FFF7FEFF 		.loc 1 221 0
- 581 031c 071C     		ldr	r3, .L63+8
- 582              		ldr	r3, [r3]
- 583              		cmp	r3, #0
- 584 031e 0028     		beq	.L48
- 585 0320 1DD0     		.loc 1 224 0
- 586              		mov	r0, r4
- 587              		mov	r1, #6
- 588 0322 FFF7FEFF 		bl	dhcpc_init
- 589              		.loc 1 225 0
- 590 0326 604C     		bl	dhcpc_request
- 591 0328 011C     		b	.L46
- 592 032a 0622     	.L48:
- 593 032c 201C     		.loc 1 230 0
- 594 032e FFF7FEFF 		ldr	r3, [sp, #4]
- 595              		cmp	r3, #0
- 596 0332 594B     		beq	.L49
- 597 0334 1B68     		mov	r2, #1
- 598 0336 002B     		str	r2, [sp, #4]
- 599 0338 06D0     		b	.L46
- 600              	.L49:
- 601 033a 201C     		.loc 1 232 0
- 602 033c 0621     		bl	no_dhcp_config
- 603 033e FFF7FEFF 		mov	r3, #1
- 604              		str	r3, [sp, #4]
- 605 0342 FFF7FEFF 		b	.L46
- 606 0346 0FE0     	.LVL18:
- 607              	.L47:
- 608              		.loc 1 242 0
- 609 0348 019B     		bl	ZG2100_LinkMgrInit
- 610 034a 002B     	.LVL19:
- 611 034c 02D0     		.loc 1 243 0
- 612 034e 0122     		mov	r0, #0
- 613 0350 0192     		bl	ZG2100_LinkMgrSetNextMode
- 614 0352 09E0     	.LVL20:
- 615              	.L46:
- 616              		.loc 1 252 0
- 617 0354 FFF7FEFF 		mov	r0, #4
- 618 0358 0123     		bl	ZG2100_WaitData
- 619 035a 0193     		.loc 1 255 0
- 620 035c 04E0     		bl	ZG2100_Process
- 621              		.loc 1 256 0
- 622              		bl	ZG2100_LinkMgr
- 623              		.loc 1 264 0
- 624 035e FFF7FEFF 		ldr	r4, .L63+28
- 625              		ldr	r1, .L63+32
- 626              		mov	r0, r4
- 627 0362 0020     		bl	ZG2100_GetUip
- 628 0364 FFF7FEFF 		ldr	r5, .L63+36
- 629              		lsl	r0, r0, #16
- 630              		lsr	r0, r0, #16
- 631              	.LVL21:
- 632 0368 0420     		strh	r0, [r5]
- 633 036a FFF7FEFF 		cmp	r0, #0
- 634              		beq	.L50
- 635 036e FFF7FEFF 		.loc 1 279 0
- 636              		ldrb	r6, [r4, #13]
- 637 0372 FFF7FEFF 		ldrb	r3, [r4, #12]
- 638              		mov	r0, #128
- 639 0376 4D4C     	.LVL22:
- 640 0378 4D49     		lsl	r6, r6, #8
- 641 037a 201C     		lsl	r0, r0, #4
- 642 037c FFF7FEFF 		orr	r6, r6, r3
- 643 0380 4C4D     		bl	htons
- 644 0382 0004     		cmp	r6, r0
- 645 0384 000C     		bne	.L51
- 646              		.loc 1 281 0
- 647 0386 2880     		bl	uip_arp_ipin
- 648 0388 0028     		.loc 1 282 0
- 649 038a 27D0     		mov	r0, #1
- 650              		bl	uip_process
- 651 038c 667B     		.loc 1 287 0
- 652 038e 237B     		ldrh	r3, [r5]
- 653 0390 8020     		cmp	r3, #0
- 654              		beq	.L52
- 655 0392 3602     		.loc 1 289 0
- 656 0394 0001     		bl	uip_arp_out
- 657 0396 1E43     		.loc 1 296 0
- 658 0398 FFF7FEFF 		ldrh	r1, [r5]
- 659 039c 8642     		b	.L62
- 660 039e 0BD1     	.L51:
- 661              		.loc 1 300 0
- 662 03a0 FFF7FEFF 		ldrb	r6, [r4, #13]
- 663              		ldrb	r3, [r4, #12]
- 664 03a4 0120     		lsl	r6, r6, #8
- 665 03a6 FFF7FEFF 		ldr	r0, .L63+40
- 666              		orr	r6, r6, r3
- 667 03aa 2B88     		bl	htons
- 668 03ac 002B     		cmp	r6, r0
- 669 03ae ADD0     		bne	.L52
- 670              		.loc 1 302 0
- 671 03b0 FFF7FEFF 		bl	uip_arp_arpin
- 672              		.loc 1 307 0
- 673 03b4 2988     		ldrh	r1, [r5]
- 674 03b6 0DE0     		cmp	r1, #0
- 675              		beq	.L52
- 676              	.L62:
- 677 03b8 667B     		.loc 1 314 0
- 678 03ba 237B     		mov	r0, r4
- 679 03bc 3602     		bl	ZG2100_PutUip
- 680 03be 3E48     		b	.L52
- 681 03c0 1E43     	.LVL23:
- 682 03c2 FFF7FEFF 	.L50:
- 683 03c6 8642     	.LBB8:
- 684 03c8 A0D1     		.loc 1 330 0
- 685              		ldr	r3, .L63+4
- 686 03ca FFF7FEFF 		ldr	r0, [r3]
- 687              	.LVL24:
- 688 03ce 2988     		cmp	r0, #0
- 689 03d0 0029     		beq	.L53
- 690 03d2 9BD0     		add	r1, sp, #8
- 691              		mov	r2, #0
- 692              		mov	r3, #0
- 693 03d4 201C     		bl	xQueueGenericReceive
- 694 03d6 FFF7FEFF 		cmp	r0, #1
- 695 03da 97E7     		bne	.L53
- 696              		.loc 1 332 0
- 697              		ldr	r3, .L63+44
- 698              		ldr	r2, [sp, #8]
- 699              		mov	r0, #3
- 700 03dc 2D4B     		str	r2, [r3]
- 701 03de 1868     		bl	uip_process
- 702              		.loc 1 334 0
- 703 03e0 0028     		ldrh	r3, [r5]
- 704 03e2 15D0     		cmp	r3, #0
- 705 03e4 02A9     		beq	.L53
- 706 03e6 0022     		.loc 1 336 0
- 707 03e8 0023     		bl	uip_arp_out
- 708 03ea FFF7FEFF 		.loc 1 342 0
- 709 03ee 0128     		ldrh	r1, [r5]
- 710 03f0 0ED1     		mov	r0, r4
- 711              		bl	ZG2100_PutUip
- 712 03f2 324B     	.L53:
- 713 03f4 029A     		.loc 1 350 0
- 714 03f6 0320     		bl	xTaskGetTickCount
- 715 03f8 1A60     		ldr	r3, .L63+4
- 716 03fa FFF7FEFF 		str	r0, [r3, #8]
- 717              		.loc 1 352 0
- 718 03fe 2B88     		ldr	r1, [r3, #8]
- 719 0400 002B     		ldr	r2, [r3, #4]
- 720 0402 05D0     		sub	r1, r1, r2
- 721              		ldr	r2, .L63+48
- 722 0404 FFF7FEFF 		cmp	r1, r2
- 723              		bhi	.LCB609
- 724 0408 2988     		b	.L52	@long jump
- 725 040a 201C     	.LCB609:
- 726 040c FFF7FEFF 	.LBB9:
- 727              		.loc 1 357 0
- 728              		ldr	r2, [r3, #8]
- 729 0410 FFF7FEFF 		ldr	r4, .L63+52
- 730 0414 1F4B     		str	r2, [r3, #4]
- 731 0416 9860     		.loc 1 362 0
- 732              		ldr	r5, .L63+44
- 733 0418 9968     		.loc 1 367 0
- 734 041a 5A68     		ldr	r6, .L63+36
- 735 041c 891A     	.L55:
- 736 041e 284A     		.loc 1 362 0
- 737 0420 9142     		str	r4, [r5]
- 738 0422 00D8     		mov	r0, #2
- 739 0424 72E7     		bl	uip_process
- 740              		.loc 1 367 0
- 741              		ldrh	r3, [r6]
- 742              		cmp	r3, #0
- 743 0426 9A68     		beq	.L54
- 744 0428 264C     		.loc 1 369 0
- 745 042a 5A60     		bl	uip_arp_out
- 746              		.loc 1 375 0
- 747 042c 234D     		ldrh	r1, [r6]
- 748              		ldr	r0, .L63+28
- 749 042e 214E     		bl	ZG2100_PutUip
- 750              	.L54:
- 751              		.loc 1 360 0
- 752 0430 2C60     		ldr	r2, .L63+56
- 753 0432 0220     		.loc 1 375 0
- 754 0434 FFF7FEFF 		add	r4, r4, #216
- 755              		.loc 1 360 0
- 756 0438 3388     		cmp	r4, r2
- 757 043a 002B     		bne	.L55
- 758 043c 05D0     		ldr	r4, .L63+60
- 759              		.loc 1 383 0
- 760 043e FFF7FEFF 		ldr	r5, .L63+64
- 761              		.loc 1 388 0
- 762 0442 3188     		ldr	r6, .L63+36
- 763 0444 1948     	.L57:
- 764 0446 FFF7FEFF 		.loc 1 383 0
- 765              		str	r4, [r5]
- 766              		mov	r0, #5
- 767 044a 1F4A     		bl	uip_process
- 768              		.loc 1 388 0
- 769 044c D834     		ldrh	r3, [r6]
- 770              		cmp	r3, #0
- 771 044e 9442     		beq	.L56
- 772 0450 EED1     		.loc 1 390 0
- 773 0452 1E4C     		bl	uip_arp_out
- 774              		.loc 1 396 0
- 775 0454 1E4D     		ldrh	r1, [r6]
- 776              		ldr	r0, .L63+28
- 777 0456 174E     		bl	ZG2100_PutUip
- 778              	.L56:
- 779              		.loc 1 381 0
- 780 0458 2C60     		ldr	r3, .L63+68
- 781 045a 0520     		.loc 1 396 0
- 782 045c FFF7FEFF 		add	r4, r4, #76
- 783              		.loc 1 381 0
- 784 0460 3388     		cmp	r4, r3
- 785 0462 002B     		bne	.L57
- 786 0464 05D0     		.loc 1 403 0
- 787              		ldr	r2, [sp]
- 788 0466 FFF7FEFF 		add	r2, r2, #1
- 789              		str	r2, [sp]
- 790 046a 3188     		cmp	r2, #125
- 791 046c 0F48     		beq	.LCB662
- 792 046e FFF7FEFF 		b	.L52	@long jump
- 793              	.LCB662:
- 794              		.loc 1 405 0
- 795 0472 184B     		bl	uip_arp_timer
- 796              		mov	r3, #0
- 797 0474 4C34     		str	r3, [sp]
- 798              		b	.L52
- 799 0476 9C42     	.L64:
- 800 0478 EED1     		.align	2
- 801              	.L63:
- 802 047a 009A     		.word	.LC30
- 803 047c 0132     		.word	.LANCHOR1
- 804 047e 0092     		.word	.LANCHOR0
- 805 0480 7D2A     		.word	.LC34
- 806 0482 00D0     		.word	.LC36
- 807 0484 42E7     		.word	.LC38
- 808              		.word	uip_ethaddr
- 809              		.word	uip_buf
- 810 0486 FFF7FEFF 		.word	14000
- 811 048a 0023     		.word	uip_len
- 812 048c 0093     		.word	2054
- 813 048e 3DE7     		.word	uip_conn
- 814              		.word	999
- 815              		.word	uip_conns
- 816              		.word	uip_conns+432
- 817 0490 F2000000 		.word	uip_udp_conns
- 818 0494 00000000 		.word	uip_udp_conn
- 819 0498 00000000 		.word	uip_udp_conns+304
- 820 049c F8000000 	.LBE9:
- 821 04a0 00010000 	.LBE8:
- 822 04a4 0E010000 		.cfi_endproc
- 823 04a8 00000000 	.LFE0:
- 825 04b0 B0360000 		.align	2
- 826 04b4 00000000 		.global	uipFastPoll
- 827 04b8 06080000 		.code	16
- 828 04bc 00000000 		.thumb_func
- 830 04c4 00000000 	uipFastPoll:
- 831 04c8 B0010000 	.LFB1:
- 832 04cc 00000000 		.loc 1 417 0
- 833 04d0 00000000 		.cfi_startproc
- 834 04d4 30010000 		push	{lr}
- 835              		.cfi_def_cfa_offset 4
- 836              		.cfi_offset 14, -4
- 837              	.LVL25:
- 838              		.loc 1 418 0
- 839              		ldr	r3, .L68
- 840              		.loc 1 417 0
- 841              		sub	sp, sp, #4
- 842              		.cfi_def_cfa_offset 8
- 843              		.loc 1 417 0
- 844              		str	r0, [sp]
- 845              		.loc 1 418 0
- 846              		ldr	r0, [r3]
- 847              	.LVL26:
- 848              		cmp	r0, #0
- 849 04d8 00B5     		beq	.L67
- 850              		.loc 1 419 0
- 851              		mov	r2, #1
- 852              		mov	r1, sp
- 853              		neg	r2, r2
- 854 04da 074B     		mov	r3, #0
- 855              		bl	xQueueGenericSend
- 856 04dc 81B0     	.L67:
- 857              		.loc 1 420 0
- 858              		add	sp, sp, #4
- 859 04de 0090     		@ sp needed for prologue
- 860              		pop	{r0}
- 861 04e0 1868     		bx	r0
- 862              	.L69:
- 863 04e2 0028     		.align	2
- 864 04e4 05D0     	.L68:
- 865              		.word	.LANCHOR1
- 866 04e6 0122     		.cfi_endproc
- 867 04e8 6946     	.LFE1:
- 869 04ec 0023     		.global	uiptask_errFlag
- 870 04ee FFF7FEFF 		.comm	uip_buf,14008,4
- 871              		.comm	xUIPTaskHandle,4,4
- 872              		.section	.rodata.str1.1,"aMS",%progbits,1
- 873 04f2 01B0     	.LC8:
- 874              		.ascii	"Can't get address via DHCP and no static address co"
- 875 04f4 01BC     		.ascii	"nfigured, stopping uIP task\012\000"
- 876 04f6 0047     	.LC10:
- 877              		.ascii	"\012IP address via DHCP is %d.%d.%d.%d\012\000"
- 878              	.LC12:
- 879              		.ascii	"Netmask via DHCP is %d.%d.%d.%d\012\000"
- 880 04f8 00000000 	.LC14:
- 881              		.ascii	"Router  via DHCP is %d.%d.%d.%d\012\000"
- 882              	.LC16:
- 883              		.ascii	"DNS     via DHCP is %d.%d.%d.%d\012\000"
- 884              	.LC26:
- 885              		.ascii	"uIP2\000"
- 886              	.LC28:
- 887              		.ascii	"ERROR NO uIP task!\015\012\000"
- 888              	.LC30:
- 889 0000 43616E27 		.ascii	"GO!\015\012\000"
- 889      74206765 
- 889      74206164 
- 889      64726573 
- 889      73207669 
- 890 0033 6E666967 	.LC34:
- 890      75726564 
- 890      2C207374 
- 890      6F707069 
- 890      6E672075 
- 891              		.ascii	"ajocasa\000"
- 892 0050 0A495020 	.LC36:
- 892      61646472 
- 892      65737320 
- 892      76696120 
- 892      44484350 
- 893              		.ascii	"pelayopelayop\000"
- 894 0075 4E65746D 	.LC38:
- 894      61736B20 
- 894      76696120 
- 894      44484350 
- 894      20697320 
- 895              		.ascii	"EspardinoWifi\000"
- 896 0096 526F7574 		.data
- 896      65722020 
- 896      76696120 
- 896      44484350 
- 896      20697320 
- 897              		.align	2
- 898 00b7 444E5320 		.set	.LANCHOR0,. + 0
- 898      20202020 
- 898      76696120 
- 898      44484350 
- 898      20697320 
- 901              	useDHCP:
- 902 00dd 4552524F 		.word	1
- 902      52204E4F 
- 902      20754950 
- 902      20746173 
- 902      6B210D0A 
- 905              	uiptask_errFlag:
- 906 00f8 616A6F63 		.word	-1
- 906      61736100 
- 907              		.bss
- 908 0100 70656C61 		.align	2
- 908      796F7065 
- 908      6C61796F 
- 908      7000
- 909              		.set	.LANCHOR1,. + 0
- 912              	xFastPollQueue:
- 913              		.space	4
- 916              	xStartTime.3545:
- 917 0000 01000000 		.space	4
- 920              	xCurrentTime.3546:
- 921 0004 FFFFFFFF 		.space	4
- 922              		.text
- 923              	.Letext0:
- 924              		.section	.debug_loc,"",%progbits
- 925              	.Ldebug_loc0:
- 926              	.LLST1:
- 927              		.4byte	.LFB7-.Ltext0
- 928 0000 00000000 		.4byte	.LFE7-.Ltext0
- 929              		.2byte	0x2
- 930              		.byte	0x7d
- 931              		.sleb128 4
- 932 0004 00000000 		.4byte	0x0
- 933              		.4byte	0x0
- 934              	.LLST2:
- 935              		.4byte	.LFB6-.Ltext0
- 936 0008 00000000 		.4byte	.LFE6-.Ltext0
- 937              		.2byte	0x2
- 938              		.byte	0x7d
+ 284:uiptask.c     ****  uip_ipaddr(&addr, 169,254,1,2);
+ 285:uiptask.c     ****  uip_sethostaddr(&addr);
+ 286:uiptask.c     **** 
+ 287:uiptask.c     ****  uip_ipaddr(&addr, 255,255,0,0);
+ 288:uiptask.c     ****  uip_setnetmask(&addr);
+ 289:uiptask.c     **** 
+ 290:uiptask.c     ****  uip_ipaddr(&addr, 169,254,1,1);
+ 291:uiptask.c     ****  uip_setdraddr(&addr);
+ 292:uiptask.c     **** 
+ 293:uiptask.c     ****   uip_ipaddr(&addr, 194,179,1,100);
+ 294:uiptask.c     ****  uip_setdraddr(&addr);
+ 295:uiptask.c     **** 
+ 296:uiptask.c     ****  httpd_init();
+ 297:uiptask.c     ****  resolv_init();
+ 298:uiptask.c     ****  streamer_init();
+ 299:uiptask.c     **** }
+ 300:uiptask.c     **** */
+ 301:uiptask.c     **** void dhcpc_configured (const dhcpcState_t *s)
+ 302:uiptask.c     **** {
+  35              		.loc 1 302 0
+  36              		.cfi_startproc
+  37 0004 10B5     		push	{r4, lr}
+  38              		.cfi_def_cfa_offset 8
+  39              		.cfi_offset 4, -8
+  40              		.cfi_offset 14, -4
+  41              	.LVL1:
+ 303:uiptask.c     ****   if (!s->ipaddr [0] && !s->ipaddr [1])
+  42              		.loc 1 303 0
+  43 0006 836A     		ldr	r3, [r0, #40]
+  44              		.loc 1 302 0
+  45 0008 041C     		mov	r4, r0
+  46              		.loc 1 303 0
+  47 000a 002B     		cmp	r3, #0
+  48 000c 1CD0     		beq	.L5
+  49              	.LVL2:
+ 304:uiptask.c     ****   {
+ 305:uiptask.c     ****  //   xprintf ("Can't get address via DHCP and no static address configured, stopping uIP task\n");
+ 306:uiptask.c     **** 
+ 307:uiptask.c     ****   }
+ 308:uiptask.c     ****   else
+ 309:uiptask.c     ****     {
+ 310:uiptask.c     **** 	  /*
+ 311:uiptask.c     ****     xprintf ("\nIP address via DHCP is %d.%d.%d.%d\n", uip_ipaddr1 (s->ipaddr), uip_ipaddr2 (s->ipa
+ 312:uiptask.c     **** 	xprintf ("Netmask via DHCP is %d.%d.%d.%d\n", uip_ipaddr1 (s->netmask), uip_ipaddr2 (s->netmask), 
+ 313:uiptask.c     **** 	xprintf ("Router  via DHCP is %d.%d.%d.%d\n", uip_ipaddr1 (s->default_router), uip_ipaddr2 (s->def
+ 314:uiptask.c     **** 	xprintf ("DNS     via DHCP is %d.%d.%d.%d\n", uip_ipaddr1 (s->dnsaddr), uip_ipaddr2 (s->dnsaddr), 
+ 315:uiptask.c     **** */
+ 316:uiptask.c     ****     uip_sethostaddr (s->ipaddr);
+  50              		.loc 1 316 0
+  51 000e 028D     		ldrh	r2, [r0, #40]
+  52 0010 0F4B     		ldr	r3, .L7
+  53 0012 1A80     		strh	r2, [r3]
+  54 0014 428D     		ldrh	r2, [r0, #42]
+  55 0016 5A80     		strh	r2, [r3, #2]
+ 317:uiptask.c     ****     uip_setnetmask (s->netmask);
+  56              		.loc 1 317 0
+  57 0018 0E4B     		ldr	r3, .L7+4
+  58 001a 828D     		ldrh	r2, [r0, #44]
+  59 001c 1A80     		strh	r2, [r3]
+  60 001e C28D     		ldrh	r2, [r0, #46]
+  61 0020 5A80     		strh	r2, [r3, #2]
+ 318:uiptask.c     ****     uip_setdraddr (s->default_router);
+  62              		.loc 1 318 0
+  63 0022 0D4B     		ldr	r3, .L7+8
+  64 0024 828E     		ldrh	r2, [r0, #52]
+  65 0026 1A80     		strh	r2, [r3]
+  66 0028 C28E     		ldrh	r2, [r0, #54]
+  67 002a 5A80     		strh	r2, [r3, #2]
+ 319:uiptask.c     ****     uip_setsntpaddr (s->sntpaddr);
+  68              		.loc 1 319 0
+  69 002c 0B4B     		ldr	r3, .L7+12
+  70 002e 028F     		ldrh	r2, [r0, #56]
+  71 0030 1A80     		strh	r2, [r3]
+  72 0032 428F     		ldrh	r2, [r0, #58]
+  73 0034 5A80     		strh	r2, [r3, #2]
+ 320:uiptask.c     ****     uip_settimeoffset (&s->timeoffset);
+  74              		.loc 1 320 0
+  75 0036 C26B     		ldr	r2, [r0, #60]
+  76 0038 094B     		ldr	r3, .L7+16
+ 321:uiptask.c     **** 
+ 322:uiptask.c     **** 
+ 323:uiptask.c     **** 	resolv_conf(s->dnsaddr);
+  77              		.loc 1 323 0
+  78 003a 3030     		add	r0, r0, #48
+  79              		.loc 1 320 0
+  80 003c 1A60     		str	r2, [r3]
+  81              		.loc 1 323 0
+  82 003e FFF7FEFF 		bl	resolv_conf
+ 324:uiptask.c     **** 	dhcp_configured_uip(s);
+  83              		.loc 1 324 0
+  84 0042 201C     		mov	r0, r4
+  85 0044 FFF7FEFF 		bl	dhcp_configured_uip
+  86              	.LVL3:
+  87              	.L5:
+ 325:uiptask.c     **** 
+ 326:uiptask.c     ****   }
+ 327:uiptask.c     **** }
+  88              		.loc 1 327 0
+  89              		@ sp needed for prologue
+  90              	.LVL4:
+  91 0048 10BC     		pop	{r4}
+  92 004a 01BC     		pop	{r0}
+  93 004c 0047     		bx	r0
+  94              	.L8:
+  95 004e C046     		.align	2
+  96              	.L7:
+  97 0050 00000000 		.word	uip_hostaddr
+  98 0054 00000000 		.word	uip_netmask
+  99 0058 00000000 		.word	uip_draddr
+ 100 005c 00000000 		.word	uip_sntpaddr
+ 101 0060 00000000 		.word	uip_timeoffset
+ 102              		.cfi_endproc
+ 103              	.LFE5:
+ 105              		.align	2
+ 106              		.global	dispatch_udp_appcall
+ 107              		.code	16
+ 108              		.thumb_func
+ 110              	dispatch_udp_appcall:
+ 111              	.LFB4:
+ 112              		.loc 1 268 0
+ 113              		.cfi_startproc
+ 114 0064 00B5     		push	{lr}
+ 115              		.cfi_def_cfa_offset 4
+ 116              		.cfi_offset 14, -4
+ 117              		.loc 1 270 0
+ 118 0066 074B     		ldr	r3, .L12
+ 119 0068 1A68     		ldr	r2, [r3]
+ 120 006a 8623     		mov	r3, #134
+ 121 006c D288     		ldrh	r2, [r2, #6]
+ 122 006e DB01     		lsl	r3, r3, #7
+ 123 0070 9A42     		cmp	r2, r3
+ 124 0072 01D1     		bne	.L10
+ 125              		.loc 1 271 0
+ 126 0074 FFF7FEFF 		bl	dhcpc_appcall
+ 127              	.L10:
+ 128              		.loc 1 273 0
+ 129 0078 FFF7FEFF 		bl	resolv_appcall
+ 130              		.loc 1 277 0
+ 131              		@ sp needed for prologue
+ 132              		.loc 1 275 0
+ 133 007c FFF7FEFF 		bl	dispatch_udp_appcall_uip
+ 134              		.loc 1 277 0
+ 135 0080 01BC     		pop	{r0}
+ 136 0082 0047     		bx	r0
+ 137              	.L13:
+ 138              		.align	2
+ 139              	.L12:
+ 140 0084 00000000 		.word	uip_udp_conn
+ 141              		.cfi_endproc
+ 142              	.LFE4:
+ 144              		.align	2
+ 145              		.global	dispatch_tcp_appcall
+ 146              		.code	16
+ 147              		.thumb_func
+ 149              	dispatch_tcp_appcall:
+ 150              	.LFB3:
+ 151              		.loc 1 263 0
+ 152              		.cfi_startproc
+ 153 0088 00B5     		push	{lr}
+ 154              		.cfi_def_cfa_offset 4
+ 155              		.cfi_offset 14, -4
+ 156              		.loc 1 264 0
+ 157 008a FFF7FEFF 		bl	dispatch_tcp_appcall_uip
+ 158              		.loc 1 265 0
+ 159              		@ sp needed for prologue
+ 160 008e 01BC     		pop	{r0}
+ 161 0090 0047     		bx	r0
+ 162              		.cfi_endproc
+ 163              	.LFE3:
+ 165 0092 C046     		.align	2
+ 166              		.global	uip_task_process
+ 167              		.code	16
+ 168              		.thumb_func
+ 170              	uip_task_process:
+ 171              	.LFB1:
+ 172              		.loc 1 109 0
+ 173              		.cfi_startproc
+ 174 0094 F0B5     		push	{r4, r5, r6, r7, lr}
+ 175              		.cfi_def_cfa_offset 20
+ 176              		.cfi_offset 4, -20
+ 177              		.cfi_offset 5, -16
+ 178              		.cfi_offset 6, -12
+ 179              		.cfi_offset 7, -8
+ 180              		.cfi_offset 14, -4
+ 181              		.loc 1 112 0
+ 182 0096 554C     		ldr	r4, .L31
+ 183 0098 2368     		ldr	r3, [r4]
+ 184 009a 9B68     		ldr	r3, [r3, #8]
+ 185 009c 00F0E2F8 		bl	.L33
+ 186              		.loc 1 114 0
+ 187 00a0 6368     		ldr	r3, [r4, #4]
+ 188 00a2 9842     		cmp	r0, r3
+ 189 00a4 1BD0     		beq	.L17
+ 190              	.LVL5:
+ 191              		.loc 1 116 0
+ 192 00a6 6060     		str	r0, [r4, #4]
+ 193              		.loc 1 118 0
+ 194 00a8 0028     		cmp	r0, #0
+ 195 00aa 14D0     		beq	.L18
+ 196              		.loc 1 120 0
+ 197 00ac 2368     		ldr	r3, [r4]
+ 198 00ae 1B68     		ldr	r3, [r3]
+ 199 00b0 00F0D8F8 		bl	.L33
+ 200              	.LVL6:
+ 201 00b4 4E4C     		ldr	r4, .L31+4
+ 202 00b6 011C     		mov	r1, r0
+ 203 00b8 0622     		mov	r2, #6
+ 204 00ba 201C     		mov	r0, r4
+ 205 00bc FFF7FEFF 		bl	memcpy
+ 206              		.loc 1 121 0
+ 207 00c0 4C4B     		ldr	r3, .L31+8
+ 208 00c2 1B68     		ldr	r3, [r3]
+ 209 00c4 002B     		cmp	r3, #0
+ 210 00c6 0AD0     		beq	.L17
+ 211              		.loc 1 124 0
+ 212 00c8 201C     		mov	r0, r4
+ 213 00ca 0621     		mov	r1, #6
+ 214 00cc FFF7FEFF 		bl	dhcpc_init
+ 215              		.loc 1 125 0
+ 216 00d0 FFF7FEFF 		bl	dhcpc_request
+ 217 00d4 03E0     		b	.L17
+ 218              	.LVL7:
+ 219              	.L18:
+ 220              		.loc 1 132 0
+ 221 00d6 2368     		ldr	r3, [r4]
+ 222 00d8 DB68     		ldr	r3, [r3, #12]
+ 223 00da 00F0C3F8 		bl	.L33
+ 224              	.LVL8:
+ 225              	.L17:
+ 226              		.loc 1 140 0
+ 227 00de 434C     		ldr	r4, .L31
+ 228 00e0 2368     		ldr	r3, [r4]
+ 229 00e2 0420     		mov	r0, #4
+ 230              	.LVL9:
+ 231 00e4 5B69     		ldr	r3, [r3, #20]
+ 232 00e6 00F0BDF8 		bl	.L33
+ 233              		.loc 1 142 0
+ 234 00ea 2368     		ldr	r3, [r4]
+ 235 00ec 9B69     		ldr	r3, [r3, #24]
+ 236 00ee 00F0B9F8 		bl	.L33
+ 237              		.loc 1 144 0
+ 238 00f2 2368     		ldr	r3, [r4]
+ 239 00f4 404D     		ldr	r5, .L31+12
+ 240 00f6 1B6A     		ldr	r3, [r3, #32]
+ 241 00f8 281C     		mov	r0, r5
+ 242 00fa 4049     		ldr	r1, .L31+16
+ 243 00fc 00F0B2F8 		bl	.L33
+ 244 0100 3F4E     		ldr	r6, .L31+20
+ 245 0102 0004     		lsl	r0, r0, #16
+ 246 0104 000C     		lsr	r0, r0, #16
+ 247              	.LVL10:
+ 248 0106 3080     		strh	r0, [r6]
+ 249              		.loc 1 148 0
+ 250 0108 0028     		cmp	r0, #0
+ 251 010a 2AD0     		beq	.L19
+ 252              		.loc 1 152 0
+ 253 010c 6F7B     		ldrb	r7, [r5, #13]
+ 254 010e 2B7B     		ldrb	r3, [r5, #12]
+ 255 0110 8020     		mov	r0, #128
+ 256              	.LVL11:
+ 257 0112 3F02     		lsl	r7, r7, #8
+ 258 0114 0001     		lsl	r0, r0, #4
+ 259 0116 1F43     		orr	r7, r7, r3
+ 260 0118 FFF7FEFF 		bl	htons
+ 261 011c 8742     		cmp	r7, r0
+ 262 011e 0CD1     		bne	.L20
+ 263              		.loc 1 154 0
+ 264 0120 FFF7FEFF 		bl	uip_arp_ipin
+ 265              		.loc 1 155 0
+ 266 0124 0120     		mov	r0, #1
+ 267 0126 FFF7FEFF 		bl	uip_process
+ 268              		.loc 1 160 0
+ 269 012a 3388     		ldrh	r3, [r6]
+ 270 012c 002B     		cmp	r3, #0
+ 271 012e 59D0     		beq	.L27
+ 272              		.loc 1 162 0
+ 273 0130 FFF7FEFF 		bl	uip_arp_out
+ 274              		.loc 1 163 0
+ 275 0134 2368     		ldr	r3, [r4]
+ 276 0136 3188     		ldrh	r1, [r6]
+ 277 0138 0EE0     		b	.L30
+ 278              	.L20:
+ 279              		.loc 1 166 0
+ 280 013a 6F7B     		ldrb	r7, [r5, #13]
+ 281 013c 2B7B     		ldrb	r3, [r5, #12]
+ 282 013e 3F02     		lsl	r7, r7, #8
+ 283 0140 3048     		ldr	r0, .L31+24
+ 284 0142 1F43     		orr	r7, r7, r3
+ 285 0144 FFF7FEFF 		bl	htons
+ 286 0148 8742     		cmp	r7, r0
+ 287 014a 4BD1     		bne	.L27
+ 288              		.loc 1 168 0
+ 289 014c FFF7FEFF 		bl	uip_arp_arpin
+ 290              		.loc 1 170 0
+ 291 0150 3188     		ldrh	r1, [r6]
+ 292 0152 0029     		cmp	r1, #0
+ 293 0154 46D0     		beq	.L27
+ 294              		.loc 1 171 0
+ 295 0156 2368     		ldr	r3, [r4]
+ 296              	.L30:
+ 297 0158 DB69     		ldr	r3, [r3, #28]
+ 298 015a 281C     		mov	r0, r5
+ 299 015c 00F082F8 		bl	.L33
+ 300 0160 40E0     		b	.L27
+ 301              	.LVL12:
+ 302              	.L19:
+ 303              		.loc 1 194 0
+ 304 0162 FFF7FEFF 		bl	t1_get_ms
+ 305              	.LVL13:
+ 306 0166 284B     		ldr	r3, .L31+28
+ 307 0168 1860     		str	r0, [r3]
+ 308              		.loc 1 196 0
+ 309 016a 284B     		ldr	r3, .L31+32
+ 310 016c 1968     		ldr	r1, [r3]
+ 311 016e 284A     		ldr	r2, .L31+36
+ 312 0170 411A     		sub	r1, r0, r1
+ 313 0172 9142     		cmp	r1, r2
+ 314 0174 36D9     		bls	.L27
+ 315              	.LBB2:
+ 316              		.loc 1 202 0
+ 317 0176 1860     		str	r0, [r3]
+ 318 0178 264F     		ldr	r7, .L31+40
+ 319              	.L23:
+ 320              		.loc 1 207 0
+ 321 017a 274B     		ldr	r3, .L31+44
+ 322 017c 0220     		mov	r0, #2
+ 323 017e 1F60     		str	r7, [r3]
+ 324 0180 FFF7FEFF 		bl	uip_process
+ 325              		.loc 1 212 0
+ 326 0184 3388     		ldrh	r3, [r6]
+ 327 0186 002B     		cmp	r3, #0
+ 328 0188 07D0     		beq	.L22
+ 329              		.loc 1 214 0
+ 330 018a FFF7FEFF 		bl	uip_arp_out
+ 331              		.loc 1 215 0
+ 332 018e 2368     		ldr	r3, [r4]
+ 333 0190 3188     		ldrh	r1, [r6]
+ 334 0192 DB69     		ldr	r3, [r3, #28]
+ 335 0194 281C     		mov	r0, r5
+ 336 0196 00F065F8 		bl	.L33
+ 337              	.L22:
+ 338              		.loc 1 205 0
+ 339 019a 204B     		ldr	r3, .L31+48
+ 340              		.loc 1 215 0
+ 341 019c D837     		add	r7, r7, #216
+ 342              		.loc 1 205 0
+ 343 019e 9F42     		cmp	r7, r3
+ 344 01a0 EBD1     		bne	.L23
+ 345 01a2 1F4C     		ldr	r4, .L31+52
+ 346              		.loc 1 223 0
+ 347 01a4 1F4E     		ldr	r6, .L31+56
+ 348              		.loc 1 228 0
+ 349 01a6 164F     		ldr	r7, .L31+20
+ 350              		.loc 1 231 0
+ 351 01a8 104D     		ldr	r5, .L31
+ 352              	.L25:
+ 353              		.loc 1 223 0
+ 354 01aa 3460     		str	r4, [r6]
+ 355 01ac 0520     		mov	r0, #5
+ 356 01ae FFF7FEFF 		bl	uip_process
+ 357              		.loc 1 228 0
+ 358 01b2 3B88     		ldrh	r3, [r7]
+ 359 01b4 002B     		cmp	r3, #0
+ 360 01b6 07D0     		beq	.L24
+ 361              		.loc 1 230 0
+ 362 01b8 FFF7FEFF 		bl	uip_arp_out
+ 363              		.loc 1 231 0
+ 364 01bc 2B68     		ldr	r3, [r5]
+ 365 01be 3988     		ldrh	r1, [r7]
+ 366 01c0 DB69     		ldr	r3, [r3, #28]
+ 367 01c2 0D48     		ldr	r0, .L31+12
+ 368 01c4 00F04EF8 		bl	.L33
+ 369              	.L24:
+ 370              		.loc 1 221 0
+ 371 01c8 174B     		ldr	r3, .L31+60
+ 372              		.loc 1 231 0
+ 373 01ca 4C34     		add	r4, r4, #76
+ 374              		.loc 1 221 0
+ 375 01cc 9C42     		cmp	r4, r3
+ 376 01ce ECD1     		bne	.L25
+ 377              		.loc 1 237 0
+ 378 01d0 164C     		ldr	r4, .L31+64
+ 379 01d2 2368     		ldr	r3, [r4]
+ 380 01d4 0133     		add	r3, r3, #1
+ 381 01d6 2360     		str	r3, [r4]
+ 382 01d8 7D2B     		cmp	r3, #125
+ 383 01da 03D1     		bne	.L27
+ 384              		.loc 1 239 0
+ 385 01dc FFF7FEFF 		bl	uip_arp_timer
+ 386              		.loc 1 240 0
+ 387 01e0 0023     		mov	r3, #0
+ 388 01e2 2360     		str	r3, [r4]
+ 389              	.L27:
+ 390              	.LBE2:
+ 391              		.loc 1 244 0
+ 392              		@ sp needed for prologue
+ 393 01e4 F0BC     		pop	{r4, r5, r6, r7}
+ 394 01e6 02BC     		pop	{r1}
+ 395 01e8 0847     		bx	r1
+ 396              	.L32:
+ 397 01ea C046     		.align	2
+ 398              	.L31:
+ 399 01ec 00000000 		.word	.LANCHOR0
+ 400 01f0 00000000 		.word	uip_ethaddr
+ 401 01f4 00000000 		.word	.LANCHOR1
+ 402 01f8 00000000 		.word	uip_buf
+ 403 01fc B0360000 		.word	14000
+ 404 0200 00000000 		.word	uip_len
+ 405 0204 06080000 		.word	2054
+ 406 0208 00000000 		.word	xCurrentTime
+ 407 020c 00000000 		.word	xStartTime
+ 408 0210 E7030000 		.word	999
+ 409 0214 00000000 		.word	uip_conns
+ 410 0218 00000000 		.word	uip_conn
+ 411 021c B0010000 		.word	uip_conns+432
+ 412 0220 00000000 		.word	uip_udp_conns
+ 413 0224 00000000 		.word	uip_udp_conn
+ 414 0228 30010000 		.word	uip_udp_conns+304
+ 415 022c 00000000 		.word	xARPTimer
+ 416              		.cfi_endproc
+ 417              	.LFE1:
+ 419              		.align	2
+ 420              		.global	uip_task_init
+ 421              		.code	16
+ 422              		.thumb_func
+ 424              	uip_task_init:
+ 425              	.LFB0:
+ 426              		.loc 1 91 0
+ 427              		.cfi_startproc
+ 428 0230 00B5     		push	{lr}
+ 429              		.cfi_def_cfa_offset 4
+ 430              		.cfi_offset 14, -4
+ 431              	.LVL14:
+ 432              		.loc 1 92 0
+ 433 0232 084B     		ldr	r3, .L36
+ 434 0234 1960     		str	r1, [r3]
+ 435              		.loc 1 93 0
+ 436 0236 084B     		ldr	r3, .L36+4
+ 437 0238 1860     		str	r0, [r3]
+ 438              		.loc 1 100 0
+ 439 023a FFF7FEFF 		bl	uip_init
+ 440              	.LVL15:
+ 441              		.loc 1 101 0
+ 442 023e FFF7FEFF 		bl	uip_arp_init
+ 443              		.loc 1 103 0
+ 444 0242 FFF7FEFF 		bl	t1_get_ms
+ 445 0246 054B     		ldr	r3, .L36+8
+ 446 0248 1860     		str	r0, [r3]
+ 447              		.loc 1 104 0
+ 448 024a 054B     		ldr	r3, .L36+12
+ 449 024c 0022     		mov	r2, #0
+ 450 024e 1A60     		str	r2, [r3]
+ 451              		.loc 1 106 0
+ 452              		@ sp needed for prologue
+ 453 0250 02BC     		pop	{r1}
+ 454 0252 0847     		bx	r1
+ 455              	.L37:
+ 456              		.align	2
+ 457              	.L36:
+ 458 0254 00000000 		.word	.LANCHOR0
+ 459 0258 00000000 		.word	.LANCHOR1
+ 460 025c 00000000 		.word	xStartTime
+ 461 0260 00000000 		.word	xARPTimer
+ 462              		.cfi_endproc
+ 463              	.LFE0:
+ 465              		.comm	uip_buf,14008,4
+ 466              		.comm	xCurrentTime,4,4
+ 467              		.comm	xStartTime,4,4
+ 468              		.comm	xARPTimer,4,4
+ 469              		.data
+ 470              		.align	2
+ 471              		.set	.LANCHOR1,. + 0
+ 474              	useDHCP:
+ 475 0000 01000000 		.word	1
+ 476              		.bss
+ 477              		.align	2
+ 478              		.set	.LANCHOR0,. + 0
+ 481              	netIF:
+ 482 0000 00000000 		.space	4
+ 485              	uip_task_last_linked:
+ 486 0004 00000000 		.space	4
+ 487              		.text
+ 488              	.Letext0:
+ 2926              		.code 16
+ 2927              		.align	1
+ 2928              	.L33:
+ 2929 0264 1847C046 		bx	r3
 DEFINED SYMBOLS
                             *ABS*:00000000 uiptask.c
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:1      .text:00000000 $t
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:16     .text:00000000 uipIsRunning
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:34     .text:0000000c $d
-                            *COM*:00000004 xUIPTaskHandle
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:43     .text:00000010 no_dhcp_config
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:40     .text:00000010 $t
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:83     .text:00000044 $d
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:98     .text:00000060 dispatch_udp_appcall
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:95     .text:00000060 $t
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:125    .text:0000007c $d
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:134    .text:00000080 dispatch_tcp_appcall
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:131    .text:00000080 $t
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:169    .text:000000a8 $d
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:179    .text:000000b0 uipStop
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:176    .text:000000b0 $t
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:215    .text:000000d0 $d
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:224    .text:000000d4 dhcpc_configured
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:221    .text:000000d4 $t
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:396    .text:00000210 $d
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:414    .text:00000238 uipStart
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:411    .text:00000238 $t
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:467    .text:00000270 $d
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:479    .text:00000284 vUIPTask
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:476    .text:00000284 $t
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:817    .text:00000490 $d
+     /tmp/cc8C0JB6.s:1      .text:00000000 $t
+     /tmp/cc8C0JB6.s:16     .text:00000000 uip_task_FastPoll
+     /tmp/cc8C0JB6.s:33     .text:00000004 dhcpc_configured
+     /tmp/cc8C0JB6.s:97     .text:00000050 $d
+     /tmp/cc8C0JB6.s:110    .text:00000064 dispatch_udp_appcall
+     /tmp/cc8C0JB6.s:107    .text:00000064 $t
+     /tmp/cc8C0JB6.s:140    .text:00000084 $d
+     /tmp/cc8C0JB6.s:149    .text:00000088 dispatch_tcp_appcall
+     /tmp/cc8C0JB6.s:146    .text:00000088 $t
+     /tmp/cc8C0JB6.s:170    .text:00000094 uip_task_process
+     /tmp/cc8C0JB6.s:399    .text:000001ec $d
                             *COM*:000036b8 uip_buf
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:845    .text:000004d8 uipFastPoll
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:842    .text:000004d8 $t
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:880    .text:000004f8 $d
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:920    .data:00000004 uiptask_errFlag
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:916    .data:00000000 useDHCP
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:917    .data:00000000 $d
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:927    .bss:00000000 xFastPollQueue
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:931    .bss:00000004 xStartTime.3545
-C:\Users\ajo\AppData\Local\Temp\ccrTm3MR.s:935    .bss:00000008 xCurrentTime.3546
+                            *COM*:00000004 xCurrentTime
+                            *COM*:00000004 xStartTime
+                            *COM*:00000004 xARPTimer
+     /tmp/cc8C0JB6.s:424    .text:00000230 uip_task_init
+     /tmp/cc8C0JB6.s:421    .text:00000230 $t
+     /tmp/cc8C0JB6.s:458    .text:00000254 $d
+     /tmp/cc8C0JB6.s:474    .data:00000000 useDHCP
+     /tmp/cc8C0JB6.s:475    .data:00000000 $d
+     /tmp/cc8C0JB6.s:481    .bss:00000000 netIF
+     /tmp/cc8C0JB6.s:485    .bss:00000004 uip_task_last_linked
+     /tmp/cc8C0JB6.s:2926   .text:00000264 $t
 
 UNDEFINED SYMBOLS
-httpd_init
-resolv_init
-streamer_init
+resolv_conf
+dhcp_configured_uip
 uip_hostaddr
 uip_netmask
 uip_draddr
-dhcpc_appcall
-resolv_appcall
-uip_udp_conn
-httpd_appcall
-streamer_appcall
-uip_conn
-stream_connection
-vTaskDelete
-xprintf
-htons
-resolv_conf
 uip_sntpaddr
 uip_timeoffset
-xTaskCreate
-xQueueCreate
-uip_init
-uip_arp_init
-delay_ms
-ZG2100_Init
-ZG2100_LinkMgrInit
-ZG2100_LinkMgrSetNextMode
-ZG2100_SetAllRfChannels
-ZG2100_SetSSID
-ZG2100_SetWEPKeyLong
-ZG2100_SetEncryptionType
-ZG2100_SetAuthType
-xTaskGetTickCount
-ZG2100_IsLinked
-ZG2100_GetMacAddr
+dhcpc_appcall
+resolv_appcall
+dispatch_udp_appcall_uip
+uip_udp_conn
+dispatch_tcp_appcall_uip
 memcpy
 dhcpc_init
 dhcpc_request
-ZG2100_WaitData
-ZG2100_Process
-ZG2100_LinkMgr
-ZG2100_GetUip
+htons
 uip_arp_ipin
 uip_process
 uip_arp_out
 uip_arp_arpin
-ZG2100_PutUip
-xQueueGenericReceive
+t1_get_ms
 uip_arp_timer
 uip_ethaddr
 uip_len
 uip_conns
+uip_conn
 uip_udp_conns
-xQueueGenericSend
+uip_init
+uip_arp_init
