@@ -18,16 +18,15 @@ FLASH_DRIVE_WINDOWS=N:
 FLASH_DRIVE=$(FLASH_DRIVE_WINDOWS)
 FLASH_TOOL = DRIVE
 
-#include uip.mk
+include uip.mk
 
 
 # c-only (16bit compressed thumb mode)
-SRC = main.c  
-#uiptask.c $(SRC_UIP) $(SRC_UIP_DHCP) $(SRC_UIP_RESOLV) 
+SRC = main.c  uiptask.c $(SRC_UIP) $(SRC_UIP_DHCP) $(SRC_UIP_RESOLV) 
         
 	
 # c-only (32bit arm mode)
-SRCARM = 
+SRCARM = $(SRC_ENC28J60)
 
 # c++ (16 bit compressed thumb mode)
 CPPSRC = 
@@ -65,8 +64,8 @@ RUN_MODE=ROM_RUN
 ## Create RAM-Image (debugging)
 #RUN_MODE=RAM_RUN
 
-#BOOTLOADER-LINKSCRIPT=-32k-gdb
-BOOTLOADER-LINKSCRIPT=-8k-bootloader
+BOOTLOADER-LINKSCRIPT=-32k-gdb
+#BOOTLOADER-LINKSCRIPT=-8k-bootloader
 
 # Output format. (can be srec, ihex, binary)
 FORMAT = binary

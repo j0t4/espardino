@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <ZG2100MAC.h>
 #include <netif.h>
+#include "hardware/enc28j60.h"
 
 char uip_buf[2048];
 
@@ -42,11 +43,11 @@ int main(void)
 	IO_init(FAST_IO);
 
 	LEDS_init();	/* init the LEDs for this board  */
-    VCOM_init(); /* init the USB Virtual COM port */
+    //VCOM_init(); /* init the USB Virtual COM port */
 	                /* We link with vcom_rtos lib, that's better designed
 						for use with freertos */
 
-    xprintf_output(&VCOM_putchar_nl);      /* define the output for the printf/puts */
+    //xprintf_output(&VCOM_putchar_nl);      /* define the output for the printf/puts */
 
 	LEDS_off(LED1|LED2|LED3); /* switch off all the leds */
 
@@ -54,6 +55,7 @@ int main(void)
 
 	/* ZG2100 specific setup */
 
+	/*
 	ZG2100_SetOutput(&VCOM_putchar_nonblock);  // setup debug output (if you want to watch)
 	ZG2100_Init();	// Init the driver
 	ZG2100_LinkMgrInit();	// Init the link manager
@@ -62,8 +64,10 @@ int main(void)
 	{
 		ZG2100_LinkMgrSetNextMode(kZGLMNetworkModeInfrastructure);
 		ZG2100_SetAllRfChannels();
-		ZG2100_SetSSID((unsigned char*)"ajocasa",7);
-		ZG2100_SetWEPKeyLong((unsigned char*)"pelayopelayop",0);
+//		ZG2100_SetSSID((unsigned char*)"ajocasa",7);
+//		ZG2100_SetWEPKeyLong((unsigned char*)"pelayopelayop",0);
+		ZG2100_SetSSID((unsigned char*)"dialway",7);
+		ZG2100_SetWEPKeyShort((unsigned char*)"\x99\x15\x26\x56\x16",0);
 		ZG2100_SetEncryptionType(kKeyTypeWep);
 		ZG2100_SetAuthType(kZGAuthAlgOpen);
 	}
@@ -78,6 +82,16 @@ int main(void)
 	}
 
 	net = ZG2100_GetNetIf();
+	*/
+
+	if (!enc28j60Init())
+	{
+		LEDS_on(LED2);
+		while(1){};
+	}
+
+	net = enc28j60_GetNetIf();
+
 	while(1)
 	{
 
@@ -113,12 +127,12 @@ void dump_hex(char *buf, int len)
 
 		if (++l>=16)
 		{
-			if (i<(len-1))	xprintf("\r\n      ");
+			if (i<(len-1))	xprintf("\n      ");
 			l=0;
 		}
 	}
 
-	xprintf("\r\n");
+	xprintf("\n");
 
 }
 

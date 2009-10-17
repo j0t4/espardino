@@ -13,6 +13,8 @@ SRC_UIP = $(UIP)/clock.c \
 SRC_UIP_RESOLV = $(UIP)/apps/resolv/resolv.c
 SRC_UIP_DHCP = 	$(UIP)/apps/dhcpc/dhcpc.c
 
+SRC_ENC28J60 = $(UIP)/hardware/enc28j60.c $(UIP)/hardware/enc28j60_isr.c
+
 OPTS_UIP = -I$(UIP)
 	  
 		  
