@@ -11,7 +11,9 @@ extern xSemaphoreHandle xENC28J60Semaphore;
 
 
 void enc28j60_eint0ISR_Handler (void);
-static int enc28j60_had_interrupt=0;
+
+int enc28j60_had_interrupt=0;
+
 void enc28j60_eint0ISR_Handler (void)
 {
 
