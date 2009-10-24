@@ -126,7 +126,7 @@ void delay_us (unsigned long usdelay)
 		while(T1TC&0xffffff00); // wait while all the upper bits are "ON"
 	}
 
-	while (T1TC<next_T1TC); /* we assume that we'll do it on time */
+	while ((T1TC<next_T1TC) && (T1TC>c_T1TC) ); /* we assume that we'll do it on time */
 
 }
 
