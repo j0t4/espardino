@@ -29,7 +29,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.      */
 /***************************************************************/
 
-#include <LPC214X.h>
+#include <LPC214x.h>
 
 int SYSCLK_speed_Hz = 60000000;
 
