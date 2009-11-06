@@ -130,7 +130,7 @@ int PWM_pc_precalc_factor;
 
 
 
-void PWM_dutycycle (int mask, int percentage)
+int PWM_dutycycle (int mask, int percentage)
 {
 
 	int val = (PWM_pc_precalc_factor * percentage)/100;
@@ -140,14 +140,14 @@ void PWM_dutycycle (int mask, int percentage)
 
 
   if (mask&PWM_1)
-  {	
+  {
 	pwmPercentage[0] = percentage;
 	PWM_MR1 = val;
 	PWM_LER = PWM_LER_M1L;
   }
- 
+
   if (mask&PWM_2)
-  {	
+  {
 	pwmPercentage[1] = percentage;
 	PWM_MR2 = val;
 	PWM_LER = PWM_LER_M2L;
@@ -155,29 +155,29 @@ void PWM_dutycycle (int mask, int percentage)
 
 
   if (mask&PWM_3)
-  {	
+  {
 	pwmPercentage[2] = percentage;
 	PWM_MR3 = val;
 	PWM_LER = PWM_LER_M3L;
   }
 
   if (mask&PWM_4)
-  {	
+  {
     pwmPercentage[3] = percentage;
 	PWM_MR4 = val;
 	PWM_LER = PWM_LER_M4L;
   }
-  
+
   if (mask&PWM_5)
-  {	
+  {
     pwmPercentage[4] = percentage;
 	PWM_MR5 = val;
 	PWM_LER = PWM_LER_M5L;
   }
-  
-  
+
+
   if (mask&PWM_6)
-  {	
+  {
     pwmPercentage[5] = percentage;
 	PWM_MR6 = val;
 	PWM_LER = PWM_LER_M6L;
@@ -188,49 +188,49 @@ void PWM_dutycycle (int mask, int percentage)
 
 
 
-void PWM_length(int mask, unsigned int count)
+int PWM_length(int mask, unsigned int count)
 {
   int latch_enable = 0;
-	
+
   if (count > PWM_MR0)
     return -1;
 
   if (mask&PWM_1)
-  {	
+  {
 	PWM_MR1 = count;
 	latch_enable |= PWM_LER_M1L;
   }
 
   if (mask&PWM_2)
-  {	
+  {
 	PWM_MR2 = count;
 	latch_enable |= PWM_LER_M2L;
   }
-  
+
   if (mask&PWM_3)
-  {	
+  {
 	PWM_MR3 = count;
 	latch_enable |= PWM_LER_M3L;
   }
-  
+
   if (mask&PWM_4)
-  {	
+  {
 	PWM_MR4 = count;
 	latch_enable |= PWM_LER_M4L;
   }
-  
+
   if (mask&PWM_5)
-  {	
+  {
 	PWM_MR5 = count;
 	latch_enable |= PWM_LER_M5L;
   }
-  
+
   if (mask&PWM_6)
-  {	
+  {
 	PWM_MR6 = count;
 	latch_enable |= PWM_LER_M6L;
   }
-  
+
   PWM_LER |= latch_enable;
 
   return 0;
@@ -243,7 +243,7 @@ void PWM_length(int mask, unsigned int count)
 
 
 
-void PWM_pulsewidth_us (int mask, int us)
+int PWM_pulsewidth_us (int mask, int us)
 {
   unsigned int count =  PWM_us_precalc_factor * us;
   return PWM_length(mask,count);
@@ -251,14 +251,14 @@ void PWM_pulsewidth_us (int mask, int us)
 
 
 //
-// 
+//
 //
 
-void PWM_frequency (int frequency)
+int PWM_frequency (int frequency)
 {
   if ((frequency < 1) || (frequency >= VPB_get_speed() ))
     return -1;
-	
+
   PWM_MR0 = (VPB_get_speed() / (pwmPulseWidth = frequency));
   PWM_pc_precalc_factor = VPB_get_speed() / pwmPulseWidth;
   PWM_MR1 = 0;
@@ -276,25 +276,25 @@ void PWM_frequency (int frequency)
 void PWM_init (int mask)
 {
   PCONP |= 1<<5; // Enable PWM power
- 
+
   if (mask&PWM_1)
 	PINSEL0 = (PINSEL0 & ~(3<<0)) | (2<<0); // PWM1 on P0.0 (shared with TXD0)
-	
+
   if (mask&PWM_2)
 	PINSEL0 = (PINSEL0 & ~(3<<14)) | (2<<14); // PWM2 on P0.7 (shared with SSEL0)
-	
+
   if (mask&PWM_3)
 	PINSEL0 = (PINSEL0 & ~(3<<2)) | (2<<2); // PWM3 on P0.1 (shared with RXD0)
-  
+
   if (mask&PWM_4)
 	PINSEL0 = (PINSEL0 & ~(3<<16)) | (2<<16); // PWM4 on P0.8 (shared with TXD1)
 
   if (mask&PWM_5)
 	PINSEL1 = (PINSEL1 & ~(3<<10)) | (1<<10); // PWM5 on P0.21
-	
+
   if (mask&PWM_6)
 	PINSEL0 = (PINSEL0 & ~(3<<18)) | (2<<18); // PWM6 on P0.9 (shared with RXD1)
-  
+
 
   PWM_us_precalc_factor = VPB_get_speed() / 1000000;
   PWM_pc_precalc_factor = VPB_get_speed() / pwmPulseWidth;
@@ -303,15 +303,15 @@ void PWM_init (int mask)
   PWM_PR   = 0;
   PWM_MR0  = (VPB_get_speed() / pwmPulseWidth);
   PWM_MCR |= PWM_MCR_MR0R;
-  
+
  if (mask&PWM_1) PWM_PCR |= PWM_PCR_ENA1;
  if (mask&PWM_2) PWM_PCR |= PWM_PCR_ENA2;
  if (mask&PWM_3) PWM_PCR |= PWM_PCR_ENA3;
  if (mask&PWM_4) PWM_PCR |= PWM_PCR_ENA4;
  if (mask&PWM_5) PWM_PCR |= PWM_PCR_ENA5;
  if (mask&PWM_6) PWM_PCR |= PWM_PCR_ENA6;
- 
-  
+
+
   PWM_TCR  = (PWM_TCR_CE | PWM_TCR_PWME);
 
   PWM_pulsewidth_us (mask,1800);

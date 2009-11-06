@@ -46,7 +46,7 @@
 /*==INTRO
 
 PWM output library allows you to use up to 6 hardware PWM outputs. PWM_1 .. PWM_6.
-PWM outputs are useful to control the position of servos, or motor speed with the 
+PWM outputs are useful to control the position of servos, or motor speed with the
 help of mosfets / h bridges.
 
 They can be used to output analog signals too, with the use of an R/C filter at pin output.
@@ -79,7 +79,7 @@ PWM_init(PWM_1|PWM_4); // P0.0 and P0.8 as PWM outputs
 4rd) Call PWM_frequency(Hz_freq) with the Hz frequency you want the PWM output to work.
 
 <code c>
-PWM_frequency(50); // 50Hz / 20ms / control de servos 
+PWM_frequency(50); // 50Hz / 20ms / control de servos
 </code>
 
 */
@@ -103,7 +103,7 @@ void PWM_init (int mask);
 Setups the PWM frequency in Hertzs ( rising edge, to the next rising edge). This frequency affects
 to all the PWM outputs.
 */
-void  PWM_frequency (int frequency);
+int  PWM_frequency (int frequency);
 
 
 /*==FUN int PWM_dutycycle (int mask, int percentage) ===================================================
@@ -112,7 +112,7 @@ Setups the PWM duty cycle for a selected mask of PWM outputs. (The duty cycle is
 PWM will be up during the frequency. A 100% means all the time up, a 0% means all the time down. 50% means
 half time up, half time down.
 */
-void  PWM_dutycycle (int mask, int percentage);
+int  PWM_dutycycle (int mask, int percentage);
 
 
 /*==FUN int PWM_length(int mask, unsigned int count) ===================================================
@@ -124,15 +124,15 @@ anyway this could change in the next library releases, use it with caution.
 This function behaviour could change in next library releases, use it with caution.
 </note>
 */
-void  PWM_length(int mask, unsigned int count);
+int  PWM_length(int mask, unsigned int count);
 
 /*==FUN int PWM_pulsewidth_us (int mask, int us) ===================================================
 ==ACTION
-Setups the PWM "up" time width for a selected mask of PWM outputs. This is the time the pulse will be high 
+Setups the PWM "up" time width for a selected mask of PWM outputs. This is the time the pulse will be high
 during frequency.
 
 */
-void  PWM_pulsewidth_us (int mask, int us);
+int PWM_pulsewidth_us (int mask, int us);
 
 
 

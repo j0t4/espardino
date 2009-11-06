@@ -29,22 +29,45 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.      */
 /***************************************************************/
 
-
-
+#include <LPC214X.h>
 
 int SYSCLK_speed_Hz = 60000000;
-int VPB_speed_Hz = 30000000;
-
-
 
 void VPB_set_speed(int speed_hz)
 {
-	VPB_speed_Hz = speed_hz;
+	int sysclk_d1 = SYSCLK_speed_Hz;
+	int sysclk_d4 = SYSCLK_speed_Hz/4;
+	int sysclk_d2 = SYSCLK_speed_Hz/2;
+
+	sysclk_d1-=speed_hz;
+	if (sysclk_d1<0) sysclk_d1=-sysclk_d1;
+
+	sysclk_d2-=speed_hz;
+	if (sysclk_d2<0) sysclk_d2=-sysclk_d2;
+
+	sysclk_d4-=speed_hz;
+	if (sysclk_d4<0) sysclk_d4=-sysclk_d4;
+
+	/* check differences from the given hz */
+
+	if      (sysclk_d1<sysclk_d2) VPBDIV=1;  /* div by 1 */
+	else if (sysclk_d2<sysclk_d4) VPBDIV=2; /* div by 2 */
+	else				   		  VPBDIV=4; /* div by 4 */
 }
 
 int VPB_get_speed()
 {
-	return VPB_speed_Hz;
+
+
+	switch(VPBDIV&0x3)
+	{
+		case 0: return SYSCLK_speed_Hz/4;
+		case 1: return SYSCLK_speed_Hz;
+		case 2: return SYSCLK_speed_Hz/2;
+		default: return SYSCLK_speed_Hz; /*reserved, shouldn't happen */
+
+	}
+
 }
 
 
