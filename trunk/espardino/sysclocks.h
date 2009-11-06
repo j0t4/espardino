@@ -75,9 +75,9 @@ extern "C" {
 
 /*==FUN void SYSCLK_set_speed(int speed_hz) ===================================================
 ==ACTION
-Setups the library info about system clock speed, all the other libraries will ask 
-for this value at initialization, so it's important to setup this value before calling
-any other libraries _init function.
+Setups the library info about system clock speed, all the other libraries will ask
+for this value at initialization, so it's important to setup this value based on our
+clock/PLL settings before calling any other libraries _init function.
 */
 
 void SYSCLK_set_speed(int speed_hz);
@@ -94,16 +94,19 @@ int SYSCLK_get_speed();
 
 /*==FUN void VPB_set_speed(int speed_hz) ===================================================
 ==ACTION
-Setups the library info about peripheral clock speed, all the other libraries will ask 
-for this value at initialization, so it's important to setup this value before calling
-any other libraries _init function.
+Setups the VPB clock divisor based on the nearest divided frequency to the one given.
+speeds can be SYSCLK, SYSCLK/2 or SYSCLK/4, it will be rounded up to the nearest one.
+All other libraries setup peripherals based on this. So do it at boot, before initializing
+any other libraries.
+**If you set VPB to less than SYSCLK/2 USB will malfunction.**
+
 */
 void VPB_set_speed(int speed_hz);
 
 /*==FUN int VPB_get_speed() ===================================================
 ==ACTION
 Gets the current info about peripheral clock speed, useful if we need to setup some hardware
-register manually.
+register manually. All other libraries setup peripherals based on this.
 ==RESULT
 System clock speed in Hz.
 */
@@ -117,5 +120,5 @@ int VPB_get_speed();
 }
 #endif
 
-#endif 
+#endif
 
