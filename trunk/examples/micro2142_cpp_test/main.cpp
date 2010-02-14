@@ -26,7 +26,17 @@
 #include <micro214x.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "Servo.hpp"
+#include "servo.hpp"
+
+
+#ifdef USE_GDB
+#define xprintf(s,...)
+#define xputs(s)
+#define VCOM_init()
+#define VCOM_getchar() '+'
+#define VCOM_putchar(x)
+#endif
+
 
 void limit_angle(double *angle)
 {
@@ -43,10 +53,10 @@ int main(void)
 	double angle;
 	
 	LEDS_init();	/* init the LEDs for this board  */
+
 	VCOM_init();	/* init the USB Virtual COM port */
 	
 	xprintf_output(&VCOM_putchar_nl);	/* define the output for the xprintf/puts */
-
 	
 	LEDS_on(LED3);
 	
@@ -62,7 +72,7 @@ int main(void)
 	while (1)
 	{
 		key = VCOM_getchar();
-		
+
 		if (key=='+')
 		{
 			angle = angle + 0.5f;

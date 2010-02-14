@@ -1,10 +1,3 @@
-//
-//  $Id: telnetd.h 345 2008-11-11 03:05:06Z jcw $
-//  $Revision: 345 $
-//  $Author: jcw $
-//  $Date: 2008-11-10 22:05:06 -0500 (Mon, 10 Nov 2008) $
-//  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/uip/apps/telnetd/telnetd.h $
-//
 
 /*
  * Copyright (c) 2003, Adam Dunkels.

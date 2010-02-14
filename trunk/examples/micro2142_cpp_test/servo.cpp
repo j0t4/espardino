@@ -22,7 +22,7 @@
 
 
 #include <micro214x.h>
-#include "Servo.hpp"
+#include "servo.hpp"
 
 
 MyServo::MyServo()

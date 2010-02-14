@@ -1,10 +1,3 @@
-//
-//  $Id: webserver.h 249 2008-10-31 00:51:53Z jcw $
-//  $Revision: 249 $
-//  $Author: jcw $
-//  $Date: 2008-10-30 20:51:53 -0400 (Thu, 30 Oct 2008) $
-//  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/uip/apps/webserver/webserver.h $
-//
 
 /*
  * Copyright (c) 2002, Adam Dunkels.

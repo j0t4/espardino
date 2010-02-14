@@ -1,10 +1,3 @@
-//
-//  $Id: uip_timer.c 180 2008-10-19 01:17:37Z jcw $
-//  $Revision: 180 $
-//  $Author: jcw $
-//  $Date: 2008-10-18 21:17:37 -0400 (Sat, 18 Oct 2008) $
-//  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/uip/uip/uip_timer.c $
-//
 
 /**
  * \addtogroup timer

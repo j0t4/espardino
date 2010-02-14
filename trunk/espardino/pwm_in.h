@@ -48,10 +48,10 @@ extern "C" {
 #endif
 
 
-volatile extern unsigned int CCP1_start[4];
-volatile extern unsigned int CCP1_end[4];
-volatile extern unsigned int CCP1_length[4];
-volatile extern unsigned int CCP1_count[4];
+extern volatile unsigned int CCP1_start[4];
+extern volatile unsigned int CCP1_end[4];
+extern volatile unsigned int CCP1_length[4];
+extern volatile unsigned int CCP1_count[4];
 
 void CCP_init(int mask);
 void PWM_in_init(int mask);

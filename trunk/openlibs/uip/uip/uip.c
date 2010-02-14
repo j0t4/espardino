@@ -1,10 +1,3 @@
-//
-//  $Id: uip.c 273 2008-11-02 17:28:07Z jcw $
-//  $Revision: 273 $
-//  $Author: jcw $
-//  $Date: 2008-11-02 12:28:07 -0500 (Sun, 02 Nov 2008) $
-//  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/uip/uip/uip.c $
-//
 
 #define DEBUG_PRINTF(...) /*printf(__VA_ARGS__)*/
 

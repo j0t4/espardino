@@ -40,7 +40,7 @@ extern char end[];              /*  end is set in the linker command 	*/
 
 static char *heap_ptr;		/* Points to current end of the heap.	*/
 void * _sbrk_r(
-    struct _reent *_s_r __attribute__ ((unused)),
+    struct _reent *_s_r   __attribute__ ((unused)), 
     ptrdiff_t nbytes)
 {
  char  *base;		/*  errno should be set to  ENOMEM on error	*/
