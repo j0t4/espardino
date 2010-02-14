@@ -73,7 +73,7 @@ ADEFS =  $(MY_ADEFS)
 #    -adhlns...: create assembler listing
 #
 # Flags for C and C++ (arm-elf-gcc/arm-elf-g++)
-CFLAGS = -g$(DEBUG)
+CFLAGS = $(MY_CFLAGS)-g$(DEBUG)
 CFLAGS += $(CDEFS) $(CINCS)
 CFLAGS += -O$(OPT)
 CFLAGS += -Wall -Wcast-align -Wcast-qual -Wimplicit 
@@ -369,7 +369,8 @@ clean: begin clean_list finished end
 clean_list :
 	@echo
 	@echo $(MSG_CLEANING)
-	$(REMOVE) $(TARGET).hex $(TARGET).obj $(TARGET).elf $(TARGET).map $(TARGET).obj $(TARGET).a90 $(TARGET).sym $(TARGET).lnk $(TARGET).lss
+	$(REMOVE) *~	
+	$(REMOVE) $(TARGET).bin $(TARGET).hex $(TARGET).obj $(TARGET).elf $(TARGET).map $(TARGET).obj $(TARGET).a90 $(TARGET).sym $(TARGET).lnk $(TARGET).lss
 	$(REMOVE) $(COBJ) $(CPPOBJ) $(AOBJ) $(COBJARM) $(CPPOBJARM) $(AOBJARM) $(LST) $(SRC:.c=.s) $(SRC:.c=.d)
 	$(REMOVE) $(SRCARM:.c=.s) $(SRCARM:.c=.d) $(CPPSRC:.cpp=.s) $(CPPSRC:.cpp=.d) $(CPPSRCARM:.cpp=.s)  $(CPPSRCARM:.cpp=.d).dep/*
 

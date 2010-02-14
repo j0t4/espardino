@@ -24,7 +24,7 @@ CPPSRCARM =
 ASRC = 
 
 # Assembler (32 bit arm mode) always capital .S at the end
-ASRCARM = startup.S 
+ASRCARM = 
 
 # System libraries to be linked with
 MY_LIBS = -lefs -lvcom 

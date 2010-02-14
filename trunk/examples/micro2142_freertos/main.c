@@ -34,6 +34,13 @@ void vATaskFunction( void *pvParameters );
 void vBTaskFunction( void *pvParameters );
 void vCTaskFunction( void *pvParameters );
 
+#ifdef USE_GDB
+#define xprintf(s,...)
+#define xputs(s)
+#define VCOM_RT_init()
+#define VCOM_getchar() 
+#define VCOM_putchar(x)
+#endif
 
 
 int main(void)
