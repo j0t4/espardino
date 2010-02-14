@@ -38,7 +38,6 @@
 extern "C" {
 #endif
 
-static unsigned int delay_coef_us;
 void delay_init(void);
 void delay_us (unsigned long usdelay);
 void delay_ms ( unsigned long mdelay);

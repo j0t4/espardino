@@ -1,5 +1,23 @@
 LIBNAME	= micro214x
 
+ifeq ($(MODE),thumb)
+	MODE_DIR = thumb
+        MODE=thumb
+else
+	MODE_DIR = .
+        MODE=arm
+endif
+
+
+ifeq ($(INTERWORK),no)
+	INTERWORK_PARAM = 
+	TARGET_LIBDIR = $(MODE_DIR)
+else	
+	INTERWORK_PARAM = -mthumb-interwork
+	TARGET_LIBDIR = $(MODE_DIR)/interwork
+endif
+
+
 # Package definitions
 PKG_NAME	= target
 DATE		= $$(date +%Y%m%d)
@@ -16,10 +34,13 @@ RM		= rm
 TAR		= tar
 COPY	= cp
 
-CFLAGS  = -I./ -I../ -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -mthumb
+CFLAGS  = -I./ -I../ -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -m$(MODE)
 CFLAGS_ARM  = -I./ -I../ -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -marm
 ASFLAGS = -mcpu=arm7tdmi -mthumb-interwork -I.  -x assembler-with-cpp
 ARFLAGS = -rcs
+
+LIBCPPSRCS = nanoc++.cpp
+LIBCPPOBJS = $(LIBCPPSRCS:.cpp=.o)
 
 LIBSRCS = leds.c pwm.c efsutils.c _sbrk_r.c adc.c sysclocks.c iolib.c rtc.c delay.c dabt_handler.c
 LIBOBJS = $(LIBSRCS:.c=.o)
@@ -27,11 +48,11 @@ LIBOBJS = $(LIBSRCS:.c=.o)
 LIBSRCS_ARM = arm_irqs.c i2c_device.c pwm_in.c miniprintf.c
 LIBOBJS_ARM = $(LIBSRCS_ARM:.c=.o)
 
-LIBSRCS_ASM = dabt_handler_asm.s
+LIBSRCS_ASM = startup.s dabt_handler_asm.s
 LIBOBJS_ASM = $(LIBSRCS_ASM:.s=.o)
 
 
-all: comp_ARM comp lib  
+all: lib  
 
 $(LIBOBJS_ASM) : %.o : %.s
 	$(CC) $(ASFLAGS) $< -c
@@ -39,18 +60,14 @@ $(LIBOBJS_ASM) : %.o : %.s
 $(LIBOBJS) : %.o : %.c
 	$(CC) $(CFLAGS)  $< -c
     
+$(LIBCPPOBJS) : %.o : %.cpp
+	$(CPP) $(CFLAGS)  $< -c
+
 $(LIBOBJS_ARM) : %.o : %.c
 	$(CC) $(CFLAGS_ARM)  $< -c
 
-
-comp_ARM: $(LIBSRCS_ARM)
-	$(CC) $(CFLAGS_ARM)  $< -c  
-
-comp: $(LIBSRCS)
-	$(CC) $(CFLAGS)  $< -c  	
-
 install: all
-	$(COPY) -f $(LIBNAME).a "$(ESPARDINO)/arm-elf/lib/lib$(LIBNAME).a"
+	$(COPY) -f $(LIBNAME).a "$(ESPARDINO)/arm-elf/lib/$(TARGET_LIBDIR)/lib$(LIBNAME).a"
 	$(COPY) -f *.h "$(ESPARDINO)/arm-elf/include/"
 
 clean:
@@ -62,7 +79,7 @@ program:
 # build lib
 lib: $(LIBNAME).a
 
-$(LIBNAME).a: $(LIBOBJS) $(LIBOBJS_ARM) $(LIBOBJS_ASM)
+$(LIBNAME).a: $(LIBOBJS) $(LIBOBJS_ARM) $(LIBOBJS_ASM) $(LIBCPPOBJS)
 	$(AR) $(ARFLAGS) $@ $^
 
 # Builds release tar file

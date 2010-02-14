@@ -1,10 +1,3 @@
-//
-//  $Id: psock.c 192 2008-10-19 14:39:27Z jcw $
-//  $Revision: 192 $
-//  $Author: jcw $
-//  $Date: 2008-10-19 10:39:27 -0400 (Sun, 19 Oct 2008) $
-//  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/uip/uip/psock.c $
-//
 
 /*
  * Copyright (c) 2004, Swedish Institute of Computer Science.

@@ -25,13 +25,13 @@
 
 # Stack config
 
-        .equ    Top_Stack,      0x40003FF0
+        .equ    Top_Stack,      (0x40000000 + RAM_LENGTH - 0x10)
         .equ    UND_Stack_Size, 0x00000004
-        .equ    SVC_Stack_Size, 0x00000004
-        .equ    ABT_Stack_Size, 0x00000004
-        .equ    FIQ_Stack_Size, 0x00000004
-        .equ    IRQ_Stack_Size, 0x00000180
-        .equ    USR_Stack_Size, 0x00000800
+        .equ    SVC_Stack_Size, 0x00000020
+        .equ    ABT_Stack_Size, 0x00000020
+        .equ    FIQ_Stack_Size, 0x00000020
+        .equ    IRQ_Stack_Size, 0x00000100
+        .equ    SYS_Stack_Size, 0x00000800
 
 # PLL config
         .equ    PLLCFG_Val,     0x00000024   /* mult=5 , div=2 */
@@ -188,11 +188,11 @@ PLL_Loop:       LDR     R3, [R0, #PLLSTAT_OFS]
                 SUB     R0, R0, #SVC_Stack_Size
 
 #  Enter User Mode and set its Stack Pointer
-                MSR     CPSR_c, #Mode_USR
+                MSR     CPSR_c, #Mode_SYS
                 MOV     SP, R0
 
 #  Setup a default Stack Limit. useful for "-mapcs-stack-check" gcc option
-                SUB     SL, SP, #USR_Stack_Size
+                SUB     SL, SP, #SYS_Stack_Size
 
 
 # Relocate .data section (Copy from ROM to RAM)

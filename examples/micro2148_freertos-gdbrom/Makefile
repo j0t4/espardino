@@ -149,9 +149,9 @@ LDFLAGS += $(MY_LIBS)
 
 # Set Linker-Script Depending On Selected Memory
 ifeq ($(RUN_MODE),RAM_RUN)
-LDFLAGS +=-T$(ESPARDINO)\\linkerscripts\\$(SUBMDL)-RAM$(BOOTLOADER-LINKSCRIPT).ld
+LDFLAGS +=-T$(ESPARDINO)/linkerscripts/$(SUBMDL)-RAM$(BOOTLOADER-LINKSCRIPT).ld
 else 
-LDFLAGS +=-T$(ESPARDINO)\\linkerscripts\\$(SUBMDL)-ROM$(BOOTLOADER-LINKSCRIPT).ld
+LDFLAGS +=-T$(ESPARDINO)/linkerscripts/$(SUBMDL)-ROM$(BOOTLOADER-LINKSCRIPT).ld
 endif
 
 

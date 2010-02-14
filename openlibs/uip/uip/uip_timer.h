@@ -1,10 +1,3 @@
-//
-//  $Id: uip_timer.h 179 2008-10-19 01:17:24Z jcw $
-//  $Revision: 179 $
-//  $Author: jcw $
-//  $Date: 2008-10-18 21:17:24 -0400 (Sat, 18 Oct 2008) $
-//  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/uip/uip/uip_timer.h $
-//
 
 /**
  * \defgroup timer Timer library

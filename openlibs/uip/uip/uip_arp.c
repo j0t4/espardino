@@ -1,10 +1,3 @@
-//
-//  $Id: uip_arp.c 319 2008-11-08 05:04:56Z jcw $
-//  $Revision: 319 $
-//  $Author: jcw $
-//  $Date: 2008-11-08 00:04:56 -0500 (Sat, 08 Nov 2008) $
-//  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/uip/uip/uip_arp.c $
-//
 
 /**
  * \addtogroup uip

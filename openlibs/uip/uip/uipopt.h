@@ -1,10 +1,3 @@
-//
-//  $Id: uipopt.h 254 2008-10-31 00:56:39Z jcw $
-//  $Revision: 254 $
-//  $Author: jcw $
-//  $Date: 2008-10-30 20:56:39 -0400 (Thu, 30 Oct 2008) $
-//  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/uip/uip/uipopt.h $
-//
 
 /**
  * \defgroup uipopt Configuration options for uIP
