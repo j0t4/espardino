@@ -48,7 +48,7 @@ LIBOBJS = $(LIBSRCS:.c=.o)
 LIBSRCS_ARM = arm_irqs.c i2c_device.c pwm_in.c miniprintf.c
 LIBOBJS_ARM = $(LIBSRCS_ARM:.c=.o)
 
-LIBSRCS_ASM = startup.s dabt_handler_asm.s
+LIBSRCS_ASM = dabt_handler_asm.s
 LIBOBJS_ASM = $(LIBSRCS_ASM:.s=.o)
 
 
