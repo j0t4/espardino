@@ -53,7 +53,7 @@ void ADC_init (int mask)
 	PINSEL1 = (PINSEL1 & ~(3<<26)) | (1<<26); // AD0.2 on P0.29 
 	
   if (mask&AD0_3)
-	PINSEL1 = (PINSEL1 & ~(3<<28)) | (2<<28); // AD0.3 on P0.30
+	PINSEL1 = (PINSEL1 & ~(3<<28)) | (1<<28); // AD0.3 on P0.30
   
   if (mask&AD0_4)
 	PINSEL1 = (PINSEL1 & ~(3<<18)) | (1<<18); // AD0.4 on P0.25
