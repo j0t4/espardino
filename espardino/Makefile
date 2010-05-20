@@ -71,7 +71,7 @@ install: all
 	$(COPY) -f *.h "$(ESPARDINO)/arm-elf/include/"
 
 clean:
-	$(RM) -f $(LIBNAME).a $(LIBOBJS) $(LIBOBJS_ARM) .depend
+	$(RM) -f $(LIBNAME).a $(LIBOBJS) $(LIBOBJS_ARM) $(LIBCPPOBJS) .depend
 
 program:
 	c:/python26/python docbuild.py
