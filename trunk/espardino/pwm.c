@@ -136,7 +136,7 @@ int PWM_dutycycle (int mask, int percentage)
 	int val = (PWM_pc_precalc_factor * percentage)/100;
 
   if ((percentage < 0) || (percentage > 100))
-    return;
+    return -1;
 
 
   if (mask&PWM_1)
@@ -183,7 +183,7 @@ int PWM_dutycycle (int mask, int percentage)
 	PWM_LER = PWM_LER_M6L;
   }
 
-  return;
+  return 1;
 }
 
 
@@ -193,7 +193,7 @@ int PWM_length(int mask, unsigned int count)
   int latch_enable = 0;
 
   if (count > PWM_MR0)
-    return;
+    return -1;
 
   if (mask&PWM_1)
   {
@@ -233,7 +233,7 @@ int PWM_length(int mask, unsigned int count)
 
   PWM_LER |= latch_enable;
 
-  return ;
+  return 1;
 }
 
 
@@ -247,6 +247,7 @@ int PWM_pulsewidth_us (int mask, int us)
 {
   unsigned int count =  PWM_us_precalc_factor * us;
   PWM_length(mask,count);
+  return count;
 }
 
 
@@ -257,7 +258,7 @@ int PWM_pulsewidth_us (int mask, int us)
 int PWM_frequency (int frequency)
 {
   if ((frequency < 1) || (frequency >= VPB_get_speed() ))
-    return;
+    return-1;
 
   PWM_MR0 = (VPB_get_speed() / (pwmPulseWidth = frequency));
   PWM_pc_precalc_factor = VPB_get_speed() / pwmPulseWidth;
@@ -269,7 +270,7 @@ int PWM_frequency (int frequency)
   PWM_MR6 = 0;
   PWM_LER = PWM_LER_M0L|PWM_LER_M1L|PWM_LER_M2L|PWM_LER_M3L|PWM_LER_M4L|PWM_LER_M5L|PWM_LER_M6L;
 
-  return;
+  return 1;
 }
 
 

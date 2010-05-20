@@ -48,6 +48,17 @@
 #include <rtc.h>
 #include <delay.h>
 
+#ifdef __cplusplus
+
+  typedef void(*ptVoidFunction)(void);
+
+	#include <digital_io.h>
+	#include <digital_bus.h>
+	#include <pwm_c++.h>
+	#include <ticker.h>
+	#include <servo.hpp>
+	
+#endif
 #define __ESPARDINO_LIB_VER  "1.00.02"
 
 #endif

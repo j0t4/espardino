@@ -30,7 +30,7 @@
 /***************************************************************/
 
 
-#include <LPC214x.h>                     /* LPC21xx definitions               */
+#include <LPC214x.h>                    /* LPC21xx definitions */
 #include "i2c_device.h"
 #include <sysclocks.h>
 
