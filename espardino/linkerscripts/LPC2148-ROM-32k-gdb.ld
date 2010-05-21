@@ -10,7 +10,7 @@ RAM_LENGTH = 32k; /* used for stack calculation */
 MEMORY
 {
   ROM (rx) : ORIGIN = 0x00008000, LENGTH = 416k
-  RAM (rw) : ORIGIN = 0x40000000, LENGTH = 32k
+  RAM (rw) : ORIGIN = 0x40000040, LENGTH = 32k -0x60
 }
 
 

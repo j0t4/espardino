@@ -9,7 +9,7 @@ RAM_LENGTH = 16k; /* used for stack calculation */
 /* Memory Definitions */
 MEMORY
 {
-  RAM (rw) : ORIGIN = 0x40000000, LENGTH = 16k
+  RAM (rw) : ORIGIN = 0x40000040, LENGTH = 16k -0x60
 }
 
 

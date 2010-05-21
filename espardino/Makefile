@@ -34,18 +34,18 @@ RM		= rm
 TAR		= tar
 COPY	= cp
 
-CFLAGS  = -I./ -I../ -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -m$(MODE)
-CFLAGS_ARM  = -I./ -I../ -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -marm
+CFLAGS  = -I. -I.. -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -m$(MODE)
+CFLAGS_ARM  = -I. -I.. -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -marm
 ASFLAGS = -mcpu=arm7tdmi -mthumb-interwork -I.  -x assembler-with-cpp
 ARFLAGS = -rcs
 
-LIBCPPSRCS = nanoc++.cpp
+LIBCPPSRCS = nanoc++.cpp digital_bus.cpp pwm_c++.cpp ticker.cpp
 LIBCPPOBJS = $(LIBCPPSRCS:.cpp=.o)
 
-LIBSRCS = leds.c pwm.c efsutils.c _sbrk_r.c adc.c sysclocks.c iolib.c rtc.c delay.c dabt_handler.c
+LIBSRCS = leds.c pwm.c efsutils.c _sbrk_r.c adc.c sysclocks.c iolib.c rtc.c delay.c dabt_handler.c buffer.c serial_device.c 
 LIBOBJS = $(LIBSRCS:.c=.o)
 
-LIBSRCS_ARM = arm_irqs.c i2c_device.c pwm_in.c miniprintf.c
+LIBSRCS_ARM = arm_irqs.c i2c_device.c pwm_in.c miniprintf.c serial_device_ARM_handler.c
 LIBOBJS_ARM = $(LIBSRCS_ARM:.c=.o)
 
 LIBSRCS_ASM = dabt_handler_asm.s

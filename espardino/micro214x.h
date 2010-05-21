@@ -34,6 +34,9 @@
 #ifndef __MICRO214x_H
 #define __MICRO214x_H
 
+#define __ESPARDINO_LIB_VER  "1.00.03"
+
+#include <micro214x_types.h>
 #include <leds.h>
 #include <efsutil.h>
 #include <pwm.h>
@@ -59,7 +62,5 @@
 	#include <servo.hpp>
 	
 #endif
-#define __ESPARDINO_LIB_VER  "1.00.02"
-
 #endif
 
