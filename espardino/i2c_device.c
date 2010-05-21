@@ -32,6 +32,7 @@
 
 #include <LPC214x.h>                    /* LPC21xx definitions */
 #include "i2c_device.h"
+#include <arm_irqs.h>
 #include <sysclocks.h>
 
 
@@ -71,11 +72,12 @@ void I2C_init(int mask, int speed_hz)
 		 I2C0SCLL = val;    /* low scl time */
 
 		/* Setup interrupt vector */
-
+/*
 		 VICVectAddr3 = (unsigned long)irq_handler_I2C0; // set interrupt vector in 0
 		 VICVectCntl3 = 0x20 | 9;                    // use it for I2C0 Interrupt
 		 VICIntEnable = (1<<9);                  // Enable I2C0 Interrupt
-	 
+	*/
+		VIC_setup_irq(9, irq_handler_I2C0);
 	}
 	
 	if (mask&I2C_1)
@@ -90,9 +92,12 @@ void I2C_init(int mask, int speed_hz)
 		 I2C1SCLL = val;
 
 		 /* Setup interrupt vector */
+		 /*
 		 VICVectAddr4 = (unsigned long)irq_handler_I2C1; // set interrupt vector in 0
 		 VICVectCntl4 = 0x20 | 19;                    // use it for I2C1 Interrupt
 		 VICIntEnable = (1<<19);                  // Enable I2C1 Interrupt
+		 */
+		 VIC_setup_irq(19, irq_handler_I2C1);
 	}
 
 }

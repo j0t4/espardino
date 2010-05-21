@@ -51,6 +51,7 @@
 #include "usbdebug.h"
 
 #include "armVIC.h"
+int VIC_setup_irq(int intnum,  void *IRQHandler);
 
 #include "console.h"
 #include "usbapi.h"
@@ -422,12 +423,16 @@ int main(void)
 
 	DBG("Starting USB communication\n");
 
+/*
 	// set up USB interrupt
 	VICIntSelect &= ~(1<<22);               // select IRQ for USB
 	VICIntEnable |= (1<<22);
 
 	(*(&VICVectCntl0+INT_VECT_NUM)) = 0x20 | 22; // choose highest priority ISR slot 	
 	(*(&VICVectAddr0+INT_VECT_NUM)) = (int)USBIntHandler;
+	*/
+	
+	VIC_setup_irq(22,USBIntHandler);
 	
 	enableIRQ();
 

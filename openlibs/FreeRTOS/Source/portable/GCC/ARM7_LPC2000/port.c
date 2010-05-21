@@ -78,6 +78,7 @@
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
+#include <arm_irqs.h>
 
 /* Constants required to setup the task context. */
 #define portINITIAL_SPSR				( ( portSTACK_TYPE ) 0x1f ) /* System mode, ARM mode, interrupts enabled. */
@@ -238,15 +239,18 @@ unsigned portLONG ulCompareMatch;
 	/* Generate tick with timer 0 compare match. */
 	T0MCR = portRESET_COUNT_ON_MATCH | portINTERRUPT_ON_MATCH;
 
+
 	/* Setup the VIC for the timer. */
-	VICIntSelect &= ~( portTIMER_VIC_CHANNEL_BIT );
-	VICIntEnable |= portTIMER_VIC_CHANNEL_BIT;
+//	VICIntSelect &= ~( portTIMER_VIC_CHANNEL_BIT );
+	//VICIntEnable |= portTIMER_VIC_CHANNEL_BIT;
 	
 	/* The ISR installed depends on whether the preemptive or cooperative
 	scheduler is being used. */
 
-	VICVectAddr5 = ( portLONG ) vTickISR;
-	VICVectCntl5 = portTIMER_VIC_CHANNEL | portTIMER_VIC_ENABLE;
+//	VICVectAddr5 = ( portLONG ) vTickISR;
+//	VICVectCntl5 = portTIMER_VIC_CHANNEL | portTIMER_VIC_ENABLE;
+
+	VIC_setup_irq(portTIMER_VIC_CHANNEL,vTickISR);
 
 	/* Start the timer - interrupts are disabled when this function is called
 	so it is okay to do this here. */

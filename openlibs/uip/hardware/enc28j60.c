@@ -43,6 +43,7 @@
 #include <stdio.h>
 #include <string.h>
 
+
 #ifdef USE_FREERTOS
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -60,6 +61,7 @@
 #include "enc28j60.h"
 
 #include <micro214x.h>
+#include <arm_irqs.h>
 #include <netif.h>
 
 //
@@ -273,11 +275,13 @@ int enc28j60Init (void)
   EXTMODE = EXTMODE | 1;   	      // EINT0 is edge sensitive
   EXTPOLAR = EXTPOLAR & (~1);    // EINT0 on falling edge
 
+/*
   VICIntSelect &= ~(1<<14);    // enable as IRQ (not as FIQ)
   VICVectAddr6 = (unsigned long) enc28j60_eint0ISR;
   VICVectCntl6 = 0x20 | 14;
   VICIntEnable = (1<<14);
-
+*/
+	VIC_setup_irq(14,  enc28j60_eint0ISR);
 
   // SPI1 init
   enc28j60_spiInit();
