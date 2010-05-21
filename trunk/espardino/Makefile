@@ -69,6 +69,7 @@ $(LIBOBJS_ARM) : %.o : %.c
 install: all
 	$(COPY) -f $(LIBNAME).a "$(ESPARDINO)/arm-elf/lib/$(TARGET_LIBDIR)/lib$(LIBNAME).a"
 	$(COPY) -f *.h "$(ESPARDINO)/arm-elf/include/"
+	$(COPY) -f *.hpp "$(ESPARDINO)/arm-elf/include/"
 
 clean:
 	$(RM) -f $(LIBNAME).a $(LIBOBJS) $(LIBOBJS_ARM) $(LIBCPPOBJS) .depend
