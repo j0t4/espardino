@@ -32,15 +32,13 @@
 #include <LPC214x.H>              
 #include <serial_device.h>      
 #include <sysclocks.h>
+#include <arm_irqs.h>
 
 
 #define CR     0x0D
 
-#define BR_115200 0x08
-#define BR_460800 0x02
-
-#define BR_UART0 BR_115200
-#define BR_UART1 BR_115200
+#define BR_UART0 115200
+#define BR_UART1 115200
 
 
 // define serial IRQ functions ////////////////////////////////////////////////
@@ -153,6 +151,8 @@ void serial_setup(volatile unsigned char *UART, unsigned char bitrate_const) {
 
 }
 
+unsigned int serial_setbaud(volatile unsigned char *UART, unsigned int baudrate);
+
 void serial_init (void)  {               /* Initialize Serial Interface*/
 
 
@@ -166,7 +166,7 @@ void serial_init (void)  {               /* Initialize Serial Interface*/
   // initialize the RX buffers					
   buffer_init(&uart1_rx_buffer,uart1_rx_buffer_data,sizeof(uart1_rx_buffer_data));
 
-
+/*
   // setup the UART0 IRQ handler and enable 
   VICVectAddr7   = (unsigned int)serial_irq_handler_UART0;
   VICVectCntl7   =  0x0026; // enable int source 6 (UART0)
@@ -174,20 +174,27 @@ void serial_init (void)  {               /* Initialize Serial Interface*/
   // setup the UART0 IRQ handler and enable 
   VICVectAddr8   = (unsigned int)serial_irq_handler_UART1;
   VICVectCntl8   =  0x0027; // enable int source 7 (UART1)
+*/
+  serial_setup(UART0_BASE,0);
+  serial_setup(UART1_BASE,0);
+  serial_setbaud(UART0_BASE,BR_115200);
+  serial_setbaud(UART1_BASE,BR_115200);
 
-  serial_setup(UART0_BASE,BR_UART0);
-  serial_setup(UART1_BASE,BR_UART1);
 
+/*  VICIntEnable   = 0x000000C0;*/
 
-  VICIntEnable   = 0x000000C0;
-}
+	VIC_setup_irq(6, serial_irq_handler_UART0);
+	VIC_setup_irq(7, serial_irq_handler_UART1);
+	
+	
+	}
 
 
 bool serial_putchar(volatile unsigned char *UART,c_buffer *tx_buffer, unsigned char ch) {
 	
 	int result;
 
-	// if transmission resgister isn't free....
+	// if transmission register isn't free....
   	if (buffer_num(tx_buffer)>0||(!(UART[LSR] & 0x20))) {	
 
   		do {

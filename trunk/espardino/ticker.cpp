@@ -9,8 +9,8 @@ void irq_handler_TIMER0()
 {
 	if (Ticker::m_functionT0) Ticker::m_functionT0();
 	
-	T0IR        = 1;                         
-	VICVectAddr = 0; 
+	T0IR        = 1; /* clear timer 0 interrupt */                 
+	VICVectAddr = 0; /* acknowledge to the VIC controller */
 }
 
 
@@ -18,8 +18,8 @@ void irq_handler_TIMER1()
 {
 	if (Ticker::m_functionT1) Ticker::m_functionT1();
 
-	T1IR        = 1;                         
-	VICVectAddr = 0; 
+	T1IR        = 1; /* clear timer 0 interrupt */                         
+	VICVectAddr = 0; /* acknowledge to the VIC controller */
 
 }
 
@@ -31,10 +31,11 @@ ptVoidFunction Ticker::m_functionT1 = 0;
 Ticker::Ticker(int timer)
 {
 	m_timer = timer;
-	/*
-	VICVectAddr0 = (unsigned long)tc0;      
-  VICVectCntl0 = 0x20 | 4;                
-  */
+	
+  if (m_timer==TIMER0)
+  	VIC_setup_irq(4,(void *)irq_handler_TIMER0);
+  else
+    VIC_setup_irq(5,(void *)irq_handler_TIMER1);
 }
 
 Ticker::~Ticker()

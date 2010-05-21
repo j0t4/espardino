@@ -32,6 +32,7 @@
 
 
 #include <LPC214x.h>
+#include <arm_irqs.h>
 
 
 #define CAP0_0  (1<<0)
@@ -155,10 +156,13 @@ static void CCP_IRQ_T1(void)
 
 void CCP1_IRQ_Init()
 {
+	/*
 	VICIntSelect &= ~(1<<5);    
 	VICVectAddr1 = (unsigned long) CCP_IRQ_T1;
 	VICVectCntl1 = 0x20 | 5;
 	VICIntEnable = (1<<5);
+	*/
+	VIC_setup_irq(5, CCP_IRQ_T1);
 }
 
 

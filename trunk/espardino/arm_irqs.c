@@ -31,6 +31,9 @@
 
 
 #include "arm_irqs.h"
+#include <LPC214x.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 static inline unsigned __get_cpsr(void)
@@ -128,3 +131,50 @@ unsigned INT_enable(void)
 	return _cpsr_val;
 }
 
+int VIC_setup_irq(int intnum,  void *IRQHandler)
+{
+	int vector;
+	
+	/* look for a free vector */
+	for (vector=0;vector<32;vector++)
+	{
+		/* free vector */
+		if (((((&VICVectCntl0))[vector])&0x20)==0)
+			break;
+		/* vector already serving this IRQ */
+		if (((((&VICVectCntl0))[vector])&0x1f)==(unsigned int)intnum)
+			break;
+			
+	}
+	if (vector>=16) return -1;
+	
+	VICIntSelect &= ~(1<<intnum);
+	(&(VICVectAddr0))[vector]= (unsigned int)IRQHandler;
+	((&VICVectCntl0))[vector]= 0x20 | intnum;
+	VICIntEnable |= 1<<intnum;
+	
+	return vector;
+	
+}
+
+
+extern char _boot;
+
+void LPC2xxx_copy_vectors (void)  {
+   int origin_flash=(int)(&_boot);
+   memcpy ((void*)0x40000000,(void*) origin_flash, 0x40);   // copy original IRQ vectors to RAM
+   MEMMAP = 2;                    // fetch vectors from RAM
+}
+
+
+int VIC_setup_fiq(int intnum,  void *IRQHandler)
+{
+		
+	LPC2xxx_copy_vectors();
+	*((unsigned int *)0x4000003c)=(unsigned int)IRQHandler;
+	VICIntSelect |= ~(1<<intnum);
+	VICIntEnable |= 1<<intnum;
+	
+	return 1;
+	
+}
