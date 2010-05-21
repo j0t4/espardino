@@ -17,6 +17,9 @@ int DigitalBus::attach(int p0, int p1,int p2,int p3,int p4,int p5,int p6,int p7)
 {
 	p[0]=p0; p[1]=p1; p[2]=p2; p[3]=p3;
 	p[4]=p4; p[5]=p5; p[6]=p6; p[7]=p7;
+	p[8]=NO_PIN;
+	
+	last_pin = DIGITALBUS_MAX_PIN-1;
 	
 	for (int i=0;i<DIGITALBUS_MAX_PIN;i++)
 	{
@@ -38,7 +41,7 @@ void DigitalBus::writeBitByBit(int data)
          * output signals
          */
 	int bmask=1;
-	for (int i=0;i<=last_pin;i++)
+	for (int i=0;i<last_pin;i++)
 	{
 		IO_output(p[i],data&bmask);
 		bmask=bmask<<1;
@@ -62,9 +65,9 @@ int DigitalBus::readBitByBit()
 	int bmask=1;
 
 	/*
-         * Scan all bits in the input pins to read a word
-         */
-	for (int i=0;i<=last_pin;i++)
+   * Scan all bits in the input pins to read a word
+   */
+	for (int i=0;i<last_pin;i++)
 	{
 		if (IO_input(p[i])) data|=bmask;
 		bmask=bmask<<1;
