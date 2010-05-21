@@ -52,6 +52,8 @@ void serial_irq_handler_UART1 (void) __attribute__ ((interrupt("IRQ")));
 unsigned char 		 uart0_tx_buffer_data[PACKET_SIZE];
 c_buffer uart0_tx_buffer;
 
+unsigned char 		 uart0_rx_buffer_data[PACKET_SIZE];
+c_buffer uart0_rx_buffer;
 
 unsigned char 		 uart1_rx_buffer_data[PACKET_SIZE];
 c_buffer uart1_rx_buffer;
@@ -113,6 +115,10 @@ void serial_irq_handler(volatile unsigned char *UART,
 }
 
 
+void serial_rx_handler_uart0(unsigned char data) {
+
+	buffer_put(&uart0_rx_buffer,data);
+}
 
 void serial_rx_handler_uart1(unsigned char data) {
 
@@ -121,7 +127,10 @@ void serial_rx_handler_uart1(unsigned char data) {
 
 void serial_set_uart0_handler(thandler uart0_handl){
 
-	uart0_rx_handler = uart0_handl;
+	if (uart0_handl)
+		uart0_rx_handler = uart0_handl;
+	else
+		uart0_rx_handler = &serial_rx_handler_uart1;
 }
 
 void serial_set_uart1_handler(thandler uart1_handl){
@@ -132,7 +141,8 @@ void serial_set_uart1_handler(thandler uart1_handl){
 		uart1_rx_handler = &serial_rx_handler_uart1;
 }
 
-void serial_clear_FIFO(volatile unsigned char *UART) {
+void serial_clear_FIFO_(volatile unsigned char *UART) 
+{
 
 	UART[FCR] = 0x07; // enable FIFO, clear RX/TX // rx trigger level = 0
 
@@ -145,52 +155,16 @@ void serial_setup(volatile unsigned char *UART, unsigned char bitrate_const) {
   UART[DLL] = bitrate_const;             /* Baud Rate @ 15MHz VPB Clock		*/
   UART[LCR] = 0x03;                /* DLAB = 0                          */
 
-  serial_clear_FIFO(UART);
+  serial_clear_FIFO_(UART);
 
   UART[IER] = 0x01; // UART0 Interrupt Enable Register: bits 2=status 1=tx 0=rx
 
 }
 
-unsigned int serial_setbaud(volatile unsigned char *UART, unsigned int baudrate);
-
-void serial_init (void)  {               /* Initialize Serial Interface*/
+unsigned int serial_setbaud_(volatile unsigned char *UART, unsigned int baudrate);
 
 
-  serial_set_uart0_handler(NULL);
-  serial_set_uart1_handler(NULL);
-
-  // initialize the TX buffers
-  buffer_init(&uart0_tx_buffer,uart0_tx_buffer_data,sizeof(uart0_tx_buffer_data));						
-  buffer_init(&uart1_tx_buffer,uart1_tx_buffer_data,sizeof(uart1_tx_buffer_data));
-
-  // initialize the RX buffers					
-  buffer_init(&uart1_rx_buffer,uart1_rx_buffer_data,sizeof(uart1_rx_buffer_data));
-
-/*
-  // setup the UART0 IRQ handler and enable 
-  VICVectAddr7   = (unsigned int)serial_irq_handler_UART0;
-  VICVectCntl7   =  0x0026; // enable int source 6 (UART0)
-  
-  // setup the UART0 IRQ handler and enable 
-  VICVectAddr8   = (unsigned int)serial_irq_handler_UART1;
-  VICVectCntl8   =  0x0027; // enable int source 7 (UART1)
-*/
-  serial_setup(UART0_BASE,0);
-  serial_setup(UART1_BASE,0);
-  serial_setbaud(UART0_BASE,BR_115200);
-  serial_setbaud(UART1_BASE,BR_115200);
-
-
-/*  VICIntEnable   = 0x000000C0;*/
-
-	VIC_setup_irq(6, serial_irq_handler_UART0);
-	VIC_setup_irq(7, serial_irq_handler_UART1);
-	
-	
-	}
-
-
-bool serial_putchar(volatile unsigned char *UART,c_buffer *tx_buffer, unsigned char ch) {
+bool serial_putchar_(volatile unsigned char *UART,c_buffer *tx_buffer, unsigned char ch) {
 	
 	int result;
 
@@ -211,7 +185,7 @@ bool serial_putchar(volatile unsigned char *UART,c_buffer *tx_buffer, unsigned c
   	return true;
 }
 
-unsigned int serial_setbaud(volatile unsigned char *UART, unsigned int baudrate) {
+unsigned int serial_setbaud_(volatile unsigned char *UART, unsigned int baudrate) {
 
 	unsigned int BR_constant;
 	unsigned int real_baudrate;
@@ -229,132 +203,128 @@ unsigned int serial_setbaud(volatile unsigned char *UART, unsigned int baudrate)
 	return real_baudrate;
 }
 
-void serial_setopts(volatile unsigned char *UART, unsigned int opts) {
+void serial_setopts_(volatile unsigned char *UART, unsigned int opts) {
    UART[LCR] = opts&(~LCR_DLAB );		
 }
 
 
+void serial_init (int channel,int init_pins)  {               /* Initialize Serial Interface*/
 
 
-/************************************************************* 
- * 				UART 0 access functions 					 *
- *************************************************************/
-
-
-bool serial_putchar0 (unsigned char ch)  {  /* Write character to Serial Port    */
+	if (channel==0)
+	{
+		if (init_pins & SERIAL_INIT_RX)
+		{
+				PINSEL0 = (PINSEL0 & (~(3<<2)))|(1<<2); /* P0.1 as RXD0 */
+		}
+		
+		if (init_pins & SERIAL_INIT_TX)
+		{
+			PINSEL0 = (PINSEL0 & (~3))|1;		        /* P0.0 as TXD0 */
+		}
+		
+		
+	  serial_set_uart0_handler(NULL);
+	  buffer_init(&uart0_tx_buffer,uart0_tx_buffer_data,sizeof(uart0_tx_buffer_data));						
+	  buffer_init(&uart0_rx_buffer,uart1_rx_buffer_data,sizeof(uart0_rx_buffer_data));
+	  serial_setup(UART0_BASE,0);
+	  serial_setbaud_(UART0_BASE,BR_115200);
+	  VIC_setup_irq(6, serial_irq_handler_UART0);
+	}
+	else if (channel==1)
+	{	  
   
-  	return 	serial_putchar(UART0_BASE,&uart0_tx_buffer,ch);
-}
-
-
-void serial_putchar0_blocking(unsigned char data) {
-
-		while (!(U0LSR & 0x20)); // wait until UART0 has space in FIFO
-		U0THR = data;	 // put the data in FIFO
-}
-
-void serial_clear_FIFO_0() {
- serial_clear_FIFO(UART0_BASE);
-}
-
-void serial_flush0() {
-
-	unsigned char t_data;
-
-	while (buffer_get(&uart0_tx_buffer,&t_data)==res_OK) 
-		serial_putchar0_blocking(t_data);
-
-}
-
-void serial_setopts0(unsigned int opts) {
-	serial_setopts(UART0_BASE,opts);
+  	if (init_pins & SERIAL_INIT_RX)
+		{
+  		PINSEL0 = (PINSEL0 & (~(3<<18)))|(1<<18);		/* P0.9 as RXD1 */
+  	}
+  	
+  	if (init_pins & SERIAL_INIT_TX)
+		{
+  		PINSEL0 = (PINSEL0 & (~(3<<16)))|(1<<16);   /* P0.8 as TXD1 */
+  	}
+  	
+		
+		
+  	serial_set_uart1_handler(NULL);
+		buffer_init(&uart1_tx_buffer,uart1_tx_buffer_data,sizeof(uart1_tx_buffer_data));
+  	buffer_init(&uart1_rx_buffer,uart1_rx_buffer_data,sizeof(uart1_rx_buffer_data));
+  	serial_setup(UART1_BASE,0);
+  	serial_setbaud_(UART1_BASE,BR_115200);
+  	VIC_setup_irq(7, serial_irq_handler_UART1);
+	}
+  
 
 }
 
-unsigned int serial_setbaud0(unsigned int baudrate) {
-
-	return serial_setbaud(UART0_BASE,baudrate);
+            
+void serial_set_handler(int channel, thandler uart_handl)
+{
+	if (channel==0) serial_set_uart0_handler(uart_handl);
+	if (channel==1) serial_set_uart1_handler(uart_handl);
 }
 
-/************************************************************* 
- * 				UART 1 access functions 					 *
- *************************************************************/
-
-bool serial_putchar1 (unsigned char ch)  {           /* Write character to Serial Port    */
-	
-	return serial_putchar(UART1_BASE,&uart1_tx_buffer,ch);
+bool serial_putchar (int channel, unsigned char ch) 
+{
+	if (channel==0) return 	serial_putchar_(UART0_BASE,&uart0_tx_buffer,ch);
+	if (channel==1) return 	serial_putchar_(UART1_BASE,&uart1_tx_buffer,ch);
+	return 0;
 }
 
-bool serial_sendbuffer1 (unsigned char *data, int len) {
 
- 	while (len--) serial_putchar1(*data++);
+unsigned int serial_setbaud (int channel,unsigned int baudrate)
+{
+	if (channel==0) return serial_setbaud_(UART0_BASE,baudrate);
+	if (channel==1) return serial_setbaud_(UART1_BASE,baudrate);
+	return 0;
+}
+
+
+void serial_clear_FIFO(int channel)
+{
+	if (channel==0) return serial_clear_FIFO_(UART0_BASE);
+	if (channel==1) return serial_clear_FIFO_(UART1_BASE);
+}
+
+
+bool serial_sendbuffer (int channel, unsigned char *data, int len)
+{
+	while (len--) serial_putchar(channel, *data++);
 	return true;
 }
 
-void serial_putchar1_blocking(unsigned char data) {
-
-		while (!(U1LSR & 0x20)); // wait until UART0 has space in FIFO
-
-		U1THR = data;	 // put the data in FIFO
+int serial_recvbuffer (int channel, unsigned char *data, int len)
+{
+	while (len--) 
+	{
+		*data++= serial_getchar(channel);
+	}
+	return true;
 }
 
-void serial_flush_uart1_tx() {
+bool serial_getchar_nonblock(int channel, unsigned char *data)
+{
+	if (channel==0) return (buffer_get(&uart0_rx_buffer,data)==res_OK);
+	if (channel==1) return (buffer_get(&uart1_rx_buffer,data)==res_OK);
+	return 0;
+}
 
-	unsigned char t_data;
+unsigned char serial_getchar(int channel)
+{
+	unsigned char r_data=0xff;
 
-	while (buffer_get(&uart1_tx_buffer,&t_data)==res_OK)
-		serial_putchar1_blocking(t_data);
+	if (channel==0)  { while (buffer_get(&uart0_rx_buffer,&r_data)!=res_OK);  }
+	if (channel==1)  { while (buffer_get(&uart1_rx_buffer,&r_data)!=res_OK);  }
 		
-}
-
-bool serial_getkey1_nonblock(unsigned char *data) {
-
-	return (buffer_get(&uart1_rx_buffer,data)==res_OK);
-}
-
-
-
-
-
-unsigned char serial_getkey1(void) 
-{		
-	unsigned char r_data;
-
-	while (buffer_get(&uart1_rx_buffer,&r_data)!=res_OK);  //bloqueante
-
 	return r_data;	
-
-}
-
-int serial_recvbuffer1 (unsigned char *data, int len) {
 	
-	int rlen = len;
- 	while (len--) *data++=serial_getkey1();
-
-	return rlen;
 }
 
-void serial_setopts1(unsigned int opts) {
-	serial_setopts(UART1_BASE,opts);
-
+unsigned int serial_num(int channel)
+{
+	 if (channel==0) return buffer_num(&uart1_rx_buffer);
+	 if (channel==1) return buffer_num(&uart1_rx_buffer);
+		return -1;
 }
-unsigned int serial_setbaud1(unsigned int baudrate) {
 	
-	return serial_setbaud(UART1_BASE,baudrate);
-}
-
-unsigned int serial_num1() {
-
-	  return buffer_num(&uart1_rx_buffer);
-
-}
-
-	void serial_clear_FIFO_1() {
- serial_clear_FIFO(UART1_BASE);
-}
-
-
-
-
-
 

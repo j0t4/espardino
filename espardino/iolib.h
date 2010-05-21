@@ -260,8 +260,7 @@ Wait until FLASH_EN button is pressed, then wait until it's released
 #define P1_31 	(31|PORT_P1)
 
 
-
-
+#define NO_PIN -400
 
 
 

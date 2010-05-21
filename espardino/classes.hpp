@@ -62,6 +62,8 @@ class Serial : public HasPrintf
 
 	int write(char c); /* for printf compatibility */
 	
+	int putc(char c) { write(c); }
+	
 	/* send&receive functions: buffer */
 	int send(char *buffer,int len);
 	int recv(char *buffer,int len);

@@ -51,6 +51,7 @@ void DigitalBus::writeBitByBit(int data)
 
 void DigitalBus::writeFastByte(int data)
 {
+
 	/* this function is meant for 8bit fast output
 	   on aligned 8bit ports, still unimplemented,
 	   the optimizable condition must be detected on
@@ -89,5 +90,6 @@ int DigitalBus::read()
 
 void DigitalBus::write(int data)
 {
+	last_val = data;
 	writeBitByBit(data);
 }
