@@ -1,13 +1,15 @@
 #ifndef __DIGITAL_BUS_H
 #define __DIGITAL_BUS_H
 
-#define NO_PIN -1
+#include <micro214x.h>
+
 #define DIGITALBUS_MAX_PIN 16
 class DigitalBus
 {
    private:
 	int p[DIGITALBUS_MAX_PIN];
 	int last_pin;
+	int last_val;
 	int opt_level;
 	int opt_register;
 	void writeBitByBit(int data);
@@ -24,6 +26,8 @@ class DigitalBus
                    int p4=NO_PIN,int p5=NO_PIN,int p6=NO_PIN,int p7=NO_PIN);
 
 	int read();
+	int hiz() { return read(); }
+	void output() { write(last_val); }
 	void write(int data);	
 };
 

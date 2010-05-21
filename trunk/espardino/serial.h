@@ -1,0 +1,62 @@
+#ifndef __SERIAL_H
+#define __SERIAL_H
+
+#include <micro214x.h>
+#include <hasprintf.h>
+
+#define USB_TX (-1)
+#define USB_RX (-2)
+
+#define GDB_TX (-3)
+#define GDB_RX (-4)
+
+
+#define U0_TX  (P0_0)
+#define U0_RX  (P0_1)
+
+#define U1_TX  (P0_8)
+#define U1_RX  (P0_9)
+
+class Serial : public HasPrintf
+{
+
+  private:
+	int rx_port,tx_port;
+	int bps;
+	
+	static bool usb_initialized;
+
+  public:
+	Serial();
+	~Serial();
+	
+	int attach (int TX_pin=NO_PIN, int RX_pin=NO_PIN);
+
+	/* send&receive functions: character */
+	int send(char c);
+	int recv();
+	int write(char c) { return send(c); } /* for printf compatibility */
+	
+	int putc(char c) { return write(c); }
+	
+	int puts(char* str);
+	int puts(const char* str) { return puts((char*)str); }
+	
+	/* send&receive functions: buffer */
+	int send(char *buffer,int len);
+	int recv(char *buffer,int len);
+	
+	/* non blocking reception: won't wait if there is no data */
+	int recvNonblocking();
+
+	
+	/* kbhit: checks if there is data waiting in read buffer */
+	int kbhit();
+
+	/* set bits per second */
+	int setBps(int bps);
+	int getBps() { return bps; }
+    
+};
+
+#endif

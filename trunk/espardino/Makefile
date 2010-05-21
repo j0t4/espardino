@@ -34,12 +34,12 @@ RM		= rm
 TAR		= tar
 COPY	= cp
 
-CFLAGS  = -I. -I.. -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -m$(MODE)
+CFLAGS  =  -I. -I.. -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -m$(MODE)
 CFLAGS_ARM  = -I. -I.. -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -marm
 ASFLAGS = -mcpu=arm7tdmi -mthumb-interwork -I.  -x assembler-with-cpp
 ARFLAGS = -rcs
 
-LIBCPPSRCS = nanoc++.cpp digital_bus.cpp pwm_c++.cpp ticker.cpp
+LIBCPPSRCS = nanoc++.cpp digital_bus.cpp pwm_c++.cpp ticker.cpp hasprintf.cpp serial.cpp 
 LIBCPPOBJS = $(LIBCPPSRCS:.cpp=.o)
 
 LIBSRCS = leds.c pwm.c efsutils.c _sbrk_r.c adc.c sysclocks.c iolib.c rtc.c delay.c dabt_handler.c buffer.c serial_device.c 
@@ -61,7 +61,7 @@ $(LIBOBJS) : %.o : %.c
 	$(CC) $(CFLAGS)  $< -c
     
 $(LIBCPPOBJS) : %.o : %.cpp
-	$(CPP) $(CFLAGS)  $< -c
+	$(CPP) -fno-rtti $(CFLAGS)  $< -c
 
 $(LIBOBJS_ARM) : %.o : %.c
 	$(CC) $(CFLAGS_ARM)  $< -c

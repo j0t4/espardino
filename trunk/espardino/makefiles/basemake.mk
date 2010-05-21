@@ -102,7 +102,7 @@ CONLYFLAGS += $(CSTANDARD)
 
 # flags only for C++ (arm-elf-g++)
 # CPPFLAGS = -fno-rtti -fno-exceptions
-CPPFLAGS = 
+CPPFLAGS = -fno-rtti -fno-exceptions
 
 # Assembler flags.
 #  -Wa,...:   tell GCC to pass this to the assembler.
@@ -127,7 +127,7 @@ MATH_LIB = -lm
 #    -Map:      create map file
 #    --cref:    add cross reference to  map file
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--cref
-LDFLAGS += -lc
+LDFLAGS += -lc 
 LDFLAGS += $(NEWLIBLPC) $(MATH_LIB) $(EFS_LIB)
 LDFLAGS += -lc -lgcc 
 LDFLAGS += $(CPLUSPLUS_LIB)

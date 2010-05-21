@@ -60,6 +60,7 @@
 	#include <pwm_c++.h>
 	#include <ticker.h>
 	#include <servo.hpp>
+	#include <serial.h>
 	
 #endif
 #endif
