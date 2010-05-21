@@ -30,6 +30,15 @@ else
 	BOOTLOADER-LINKSCRIPT=-8k-bootloader
 endif
 
+ifeq ($(NOBOOTLOADER),yes)
+	BOOTLOADER-LINKSCRIPT=
+endif
+
+ifeq ($(USEHEX),yes)
+    OUTPUT_FORMAT=ihex
+	OUTPUT_EXT=hex
+endif
+
 ifeq ($(CODESPACE),ram)
 	CODESPACE_LKR=RAM
 else

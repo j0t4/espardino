@@ -1,16 +1,16 @@
 #
 # Copyright (c) 2009  http:#www.espardino.com
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,16 +28,16 @@
         .equ    Top_Stack,      (0x40000000 + RAM_LENGTH - 0x10)
         .equ    UND_Stack_Size, 0x00000004
         .equ    SVC_Stack_Size, 0x00000020
-        .equ    ABT_Stack_Size, 0x00000020
-        .equ    FIQ_Stack_Size, 0x00000020
-        .equ    IRQ_Stack_Size, 0x00000100
+        .equ    ABT_Stack_Size, 0x00000400
+        .equ    FIQ_Stack_Size, 0x00000080
+        .equ    IRQ_Stack_Size, 0x00000400
         .equ    SYS_Stack_Size, 0x00000800
 
 # PLL config
         .equ    PLLCFG_Val,     0x00000024   /* mult=5 , div=2 */
 # VBPDiv Config
 		.equ	VPBDIV_Val,		0x00000002   /* VPB = Main clock */
-		
+
 # MAM config
         .equ    MAMCR_Val,      0x00000002 /* 0- disabled, 1-partially enabled, 2-fully enabled */
         .equ    MAMTIM_Val,     0x00000004
@@ -59,17 +59,17 @@
 
 
 		.equ    VPBDIV,			0xE01FC100
-		
-        .equ    PLL_BASE,       0xE01FC080  
-        .equ    PLLCON_OFS,     0x00        
-        .equ    PLLCFG_OFS,     0x04        
-        .equ    PLLSTAT_OFS,    0x08        
-        .equ    PLLFEED_OFS,    0x0C        
-        .equ    PLLCON_PLLE,    1      
+
+        .equ    PLL_BASE,       0xE01FC080
+        .equ    PLLCON_OFS,     0x00
+        .equ    PLLCFG_OFS,     0x04
+        .equ    PLLSTAT_OFS,    0x08
+        .equ    PLLFEED_OFS,    0x0C
+        .equ    PLLCON_PLLE,    1
         .equ    PLLCON_PLLC,    2
-        .equ    PLLCFG_MSEL,    (0x1F<<0)   
-        .equ    PLLCFG_PSEL,    (0x03<<5)   
-        .equ    PLLSTAT_PLOCK,  (1<<10)     
+        .equ    PLLCFG_MSEL,    (0x1F<<0)
+        .equ    PLLCFG_PSEL,    (0x03<<5)
+        .equ    PLLSTAT_PLOCK,  (1<<10)
 
 
 
@@ -84,14 +84,14 @@
 
         .text
         .arm
-		
+
 
         .global _boot
         .func   _boot
-_boot:		
-		
+_boot:
 
-Vectors:        LDR     PC, Reset_Addr         
+
+Vectors:        LDR     PC, Reset_Addr
                 LDR     PC, Undef_Addr
                 LDR     PC, SWI_Addr
                 LDR     PC, PAbt_Addr
@@ -103,6 +103,7 @@ Vectors:        LDR     PC, Reset_Addr
 Reset_Addr:     .word   Reset_Handler
 Undef_Addr:     .word   Undef_Handler
 SWI_Addr:       .word   SWI_Handler
+/*SWI_Addr:  		 .word vPortYieldProcessor       /* FreeRtos: SWI	*/
 PAbt_Addr:      .word   PAbt_Handler
 DAbt_Addr:      .word   DAbt_Handler
                 .word   0                      /* Reserved Address */
@@ -116,8 +117,7 @@ DAbt_Handler:   B       DAbt_Handler
 IRQ_Handler:    B       IRQ_Handler
 FIQ_Handler:    B       FIQ_Handler
 
-
-Reset_Handler:  
+Reset_Handler:
 
 # Setup the PLL
 
@@ -126,7 +126,7 @@ Reset_Handler:
                 MOV     R2, #0x55
 
                 MOV     R3, #PLLCFG_Val
-                STR     R3, [R0, #PLLCFG_OFS] 
+                STR     R3, [R0, #PLLCFG_OFS]
                 MOV     R3, #PLLCON_PLLE
                 STR     R3, [R0, #PLLCON_OFS]
                 STR     R1, [R0, #PLLFEED_OFS]
@@ -153,9 +153,9 @@ PLL_Loop:       LDR     R3, [R0, #PLLSTAT_OFS]
 
                 LDR     R0, =MAM_BASE
                 MOV     R1, #MAMTIM_Val
-                STR     R1, [R0, #MAMTIM_OFS] 
+                STR     R1, [R0, #MAMTIM_OFS]
                 MOV     R1, #MAMCR_Val
-                STR     R1, [R0, #MAMCR_OFS] 
+                STR     R1, [R0, #MAMCR_OFS]
 
 
 # Setup Stack for each mode
@@ -187,12 +187,18 @@ PLL_Loop:       LDR     R3, [R0, #PLLSTAT_OFS]
                 MOV     SP, R0
                 SUB     R0, R0, #SVC_Stack_Size
 
+
 #  Enter User Mode and set its Stack Pointer
                 MSR     CPSR_c, #Mode_SYS
                 MOV     SP, R0
 
 #  Setup a default Stack Limit. useful for "-mapcs-stack-check" gcc option
                 SUB     SL, SP, #SYS_Stack_Size
+
+/* We want to start in supervisor mode.  Operation will switch to system
+	mode when the first task starts. */
+				msr   CPSR_c, #Mode_SVC|I_Bit|F_Bit
+
 
 
 # Relocate .data section (Copy from ROM to RAM)
@@ -223,13 +229,13 @@ ctor_loop:
 		LDR 	r2, [r0], #4
 		STMFD 	sp!, {r0-r1}
 		MOV 	lr, pc
-		bx r2
+		MOV 	pc, r2
 		LDMFD 	sp!, {r0-r1}
 		B 		ctor_loop
 ctor_end:
 
 # Enter the C code
- 
+
                 LDR     R0,=main
                 TST     R0,#1             // Bit-0 set: main is Thumb
                 LDREQ   LR,=__exit_ARM    // ARM Mode
