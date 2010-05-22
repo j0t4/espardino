@@ -30,41 +30,24 @@
 /***************************************************************/
 
 
+#ifndef __LEDS_H__
+#define __LEDS_H__
 
-#ifndef __MICRO214x_H
-#define __MICRO214x_H
+class Led
+{
+  private: 
+		int m_pin;
+		int m_led;
+		int m_stat;
+		int m_inverted;
+  public:
+	Led();
+	Led(int led);
+	void attach_led(int led);
+	void attach_pin(int pin, bool inverted=true);
+	void on();
+	void off();
+	int getStat();
+};
 
-#define __ESPARDINO_LIB_VER  "1.00.03"
-
-#include <micro214x_types.h>
-#include <leds.h>
-#include <efsutil.h>
-#include <pwm.h>
-#include <miniprintf.h>
-#include <adc.h>
-#include <pwm_in.h>
-#include <pwm.h>
-#include <i2c_device.h>
-#include <arm_irqs.h>
-#include <sysclocks.h>
-#include <iolib.h>
-#include <rtc.h>
-#include <delay.h>
-
-
-#ifdef __cplusplus
-
-  typedef void(*ptVoidFunction)(void);
-
-	#include <digital_io.h>
-	#include <digital_bus.h>
-	#include <pwm_c++.h>
-	#include <ticker.h>
-	#include <servo.hpp>
-	#include <serial.h>
-	#include <dac.h>
-	#include <leds_c++.h>
-	
 #endif
-#endif
-

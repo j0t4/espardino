@@ -31,40 +31,62 @@
 
 
 
-#ifndef __MICRO214x_H
-#define __MICRO214x_H
+#include <leds_c++.h>
+#include <micro214x.h>
 
-#define __ESPARDINO_LIB_VER  "1.00.03"
-
-#include <micro214x_types.h>
-#include <leds.h>
-#include <efsutil.h>
-#include <pwm.h>
-#include <miniprintf.h>
-#include <adc.h>
-#include <pwm_in.h>
-#include <pwm.h>
-#include <i2c_device.h>
-#include <arm_irqs.h>
-#include <sysclocks.h>
-#include <iolib.h>
-#include <rtc.h>
-#include <delay.h>
-
-
-#ifdef __cplusplus
-
-  typedef void(*ptVoidFunction)(void);
-
-	#include <digital_io.h>
-	#include <digital_bus.h>
-	#include <pwm_c++.h>
-	#include <ticker.h>
-	#include <servo.hpp>
-	#include <serial.h>
-	#include <dac.h>
-	#include <leds_c++.h>
+Led::Led()
+	{
+		m_pin = NO_PIN;
+		m_led = 0;
+		m_stat = 0;
+		m_inverted =0;
+	}
+Led::Led(int led) 
+	{ 
+		attach_led(led); 
+	}
 	
-#endif
-#endif
+void Led::attach_led(int led)
+	{
+		m_pin=NO_PIN;
+		m_led = led;
+		m_stat =0;
+	}
+	
+void Led::attach_pin(int pin, bool inverted)
+	{
+		m_pin = pin;
+		m_inverted = inverted;
+	}
+	
+void Led::on()
+	{
+		m_stat = 1;
+		
+		if (m_led) { LEDS_on(m_led); return; }
+			
+		if (m_pin!=NO_PIN)
+			{
+			 	IO_output(m_pin,!m_inverted);
+			}
+	}
+	
+void Led::off()
+	{
+		m_stat = 0;
+		
+		if (m_led) { LEDS_off(m_led); return; }
+			
+		if (m_pin!=NO_PIN)
+			{
+				IO_output(m_pin,m_inverted);
+			}
+		
+	}
+	
+	
+int Led::getStat()
+	{
+		return m_stat;	
+	}
 

@@ -29,7 +29,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.      */
 /***************************************************************/
 
-#include <LPC214x.H>              
+#include <LPC214x.h>              
 #include <serial_device.h>      
 #include <sysclocks.h>
 #include <arm_irqs.h>

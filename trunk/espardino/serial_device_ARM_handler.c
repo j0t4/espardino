@@ -1,4 +1,4 @@
-#include <LPC214x.H>                     /* LPC21xx definitions               */
+#include <LPC214x.h>                     /* LPC21xx definitions               */
 #include "serial_device.h"
 
 extern u8 		uart0_tx_buffer_data[PACKET_SIZE];
