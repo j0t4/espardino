@@ -45,6 +45,8 @@ static unsigned int ovf_t1tc_ms_inc;
 static unsigned int ovf_t1tc_us;
 static unsigned int ovf_t1tc_us_inc;
 
+int delay_initialized = 0;
+
 void delay_init()
 {
 		T1MCR = 0;
@@ -63,7 +65,7 @@ void delay_init()
 		ovf_t1tc_ms_inc = (0xffffffff)/delay_coef_ms;
 		ovf_t1tc_us_inc = (0xffffffff)/delay_coef_us;
 
-
+	  delay_initialized = 1;
 }
 
 void t1_init()
@@ -76,6 +78,8 @@ void t1_init()
 unsigned int t1_get_ms()
 {
 	unsigned int c_T1TC;
+
+  if (!delay_initialized) t1_init();
 
 	c_T1TC = T1TC;
 	if (c_T1TC<last_t1tc_ms)
@@ -92,6 +96,9 @@ unsigned int t1_get_ms()
 unsigned int t1_get_us()
 {
 	unsigned int c_T1TC;
+
+	if (!delay_initialized) t1_init();
+	
 	c_T1TC = T1TC;
 
 	if (c_T1TC<last_t1tc_us)
@@ -117,6 +124,7 @@ void delay_us (unsigned long usdelay)
 	unsigned int c_T1TC;
 	unsigned int next_T1TC;
 
+	if (!delay_initialized) delay_init();
 
 	c_T1TC= T1TC;
 	next_T1TC = c_T1TC + usdelay*delay_coef_us;
@@ -132,6 +140,6 @@ void delay_us (unsigned long usdelay)
 
 void delay_ms ( unsigned long mdelay)
 {
-
+		
 	delay_us(mdelay*1000);
 }
