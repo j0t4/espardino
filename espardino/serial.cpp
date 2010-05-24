@@ -26,7 +26,19 @@ Serial::Serial()
 	bps = 115200;		
 	rx_port = NO_PIN;
 	tx_port = NO_PIN;
+	gdb_use_buffering=false;
 }
+
+Serial::Serial(int TX_pin, int RX_pin)
+{
+	bps = 115200;		
+	rx_port = NO_PIN;
+	tx_port = NO_PIN;
+	gdb_use_buffering=false;
+	attach(TX_pin,RX_pin);
+}
+
+
 Serial::~Serial()
 {
 }
@@ -64,6 +76,7 @@ int Serial::attach (int TX_pin, int RX_pin)
 		} else if (usb_initialized == false)
  		{
  			VCOM_init();
+ 			usb_initialized=true;
  		}
 
 		rx_port = RX_pin;
@@ -115,19 +128,28 @@ int Serial::attach (int TX_pin, int RX_pin)
 	
 }
 
+void Serial::useBuffer(bool use_buf)
+{
+	gdb_use_buffering = use_buf;
+}
+
 int Serial::GDB_putchar(char c)
 {
-gdb_putc(c);
-/*
-	gdb_buffer[gdb_buffer_n++]=c;
-
-	if ((c=='\0')||(c=='\n')||(gdb_buffer_n>=(GDB_BUFFER_SIZE-1)))
+	if (gdb_use_buffering)
 	{
-		gdb_buffer[gdb_buffer_n]='\0';
-		gdb_puts(gdb_buffer);
-		gdb_buffer_n=0;
+		gdb_buffer[gdb_buffer_n++]=c;
+	
+		if ((c=='\0')||(c=='\n')||(gdb_buffer_n>=(GDB_BUFFER_SIZE-1)))
+		{
+			gdb_buffer[gdb_buffer_n]='\0';
+			gdb_puts(gdb_buffer);
+			gdb_buffer_n=0;
+		}
 	}
-*/
+	else
+	{
+		gdb_putc(c);
+	}
 return 1;
 }
 

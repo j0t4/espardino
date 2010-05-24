@@ -35,12 +35,14 @@ class Serial : public HasPrintf
 	bool detect_gdbmonitor(void);
 
 #define GDB_BUFFER_SIZE 16
+	int gdb_use_buffering;
 	char gdb_buffer[GDB_BUFFER_SIZE];
 	int gdb_buffer_n;
 	int GDB_putchar(char c);
 
   public:
 	Serial();
+	Serial(int TX_pin=NO_PIN, int RX_pin=NO_PIN);
 	~Serial();
 	
 	int attach (int TX_pin=NO_PIN, int RX_pin=NO_PIN);
@@ -54,6 +56,9 @@ class Serial : public HasPrintf
 	
 	int puts(char* str);
 	int puts(const char* str) { return puts((char*)str); }
+	
+	/* use buffering for GDB/others*/
+	void useBuffer(bool use_buffer);
 	
 	/* send&receive functions: buffer */
 	int send(char *buffer,int len);

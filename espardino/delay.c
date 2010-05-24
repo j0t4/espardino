@@ -124,7 +124,7 @@ void delay_us (unsigned long usdelay)
 	unsigned int c_T1TC;
 	unsigned int next_T1TC;
 
-	if (!delay_initialized) delay_init();
+	if (!delay_initialized) delay_init(); 
 
 	c_T1TC= T1TC;
 	next_T1TC = c_T1TC + usdelay*delay_coef_us;
@@ -142,4 +142,10 @@ void delay_ms ( unsigned long mdelay)
 {
 		
 	delay_us(mdelay*1000);
+}
+
+
+void delay(float time)
+{
+	delay_us(time*1000000.0);
 }
