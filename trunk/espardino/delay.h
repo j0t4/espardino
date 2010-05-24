@@ -42,6 +42,10 @@ void delay_init(void);
 void delay_us (unsigned long usdelay);
 void delay_ms ( unsigned long mdelay);
 
+void delay(float time);
+
+#define wait(x) delay(x)
+
 void t1_init(void);
 unsigned int t1_get_us(void);
 unsigned int t1_get_ms(void);

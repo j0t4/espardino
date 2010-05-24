@@ -197,7 +197,8 @@ PLL_Loop:       LDR     R3, [R0, #PLLSTAT_OFS]
 
 /* We want to start in supervisor mode.  Operation will switch to system
 	mode when the first task starts. */
-		msr   CPSR_c, #Mode_SVC
+				msr   CPSR_c, #Mode_SVC    
+#|I_Bit|F_Bit
 
 
 
