@@ -30,7 +30,24 @@ Serial::Serial()
 Serial::~Serial()
 {
 }
-	
+
+bool Serial::detect_gdbmonitor(void)
+{
+	unsigned int *p=(unsigned int*)0x203c;
+	if (p[0]==0xdebdebde)
+	{
+		gdb_putc =  (putCharFunc)(p[2]);
+		gdb_puts =  (putStrFunc) (p[3]);
+		gdb_buffer_n=0;
+		return true;
+	}
+	else
+	{
+		gdb_putc=NULL;
+		gdb_puts=NULL;
+		return false;
+	}
+}
 int Serial::attach (int TX_pin, int RX_pin)
 {
 	/* store for later use */
@@ -39,14 +56,20 @@ int Serial::attach (int TX_pin, int RX_pin)
 		  (TX_pin==USB_TX && RX_pin==USB_RX)||
 		  (TX_pin==NO_PIN && RX_pin==USB_RX))
  	{
- 		if (usb_initialized == false)
- 			{
- 				VCOM_init();
- 			}
- 			rx_port = RX_pin;
-			tx_port = TX_pin;		
+
+		if (detect_gdbmonitor()) /* we don't want to init USB if the gdb monitor is there */
+		{
+			RX_pin = GDB_RX;
+			TX_pin = GDB_TX;
+		} else if (usb_initialized == false)
+ 		{
+ 			VCOM_init();
+ 		}
+
+		rx_port = RX_pin;
+		tx_port = TX_pin;		
 			
- 			return 1;
+		return 1;
 	}
 	
 	if ((TX_pin==U0_TX && RX_pin==NO_PIN)||
@@ -92,6 +115,22 @@ int Serial::attach (int TX_pin, int RX_pin)
 	
 }
 
+int Serial::GDB_putchar(char c)
+{
+gdb_putc(c);
+/*
+	gdb_buffer[gdb_buffer_n++]=c;
+
+	if ((c=='\0')||(c=='\n')||(gdb_buffer_n>=(GDB_BUFFER_SIZE-1)))
+	{
+		gdb_buffer[gdb_buffer_n]='\0';
+		gdb_puts(gdb_buffer);
+		gdb_buffer_n=0;
+	}
+*/
+return 1;
+}
+
 int Serial::send(char c)
 {
 	switch (tx_port)
@@ -99,6 +138,7 @@ int Serial::send(char c)
 		case U0_TX: return serial_putchar(0,c);
 		case U1_TX: return serial_putchar(1,c);
 		case USB_TX: return VCOM_putchar(c);
+		case GDB_TX: return GDB_putchar(c);
 		default: return -1;
 	}
 			
