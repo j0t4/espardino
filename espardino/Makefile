@@ -73,6 +73,7 @@ install: all
 	$(COPY) -f $(LIBNAME).a "$(ESPARDINO)/arm-elf/lib/thumb/lib$(LIBNAME).a"
 	$(COPY) -f *.h "$(ESPARDINO)/arm-elf/include/"
 	$(COPY) -f *.hpp "$(ESPARDINO)/arm-elf/include/"
+	$(COPY) -f mon48.bin "$(ESPARDINO)/arm-elf/monitor/espardino_monitor_lpc2148.bin"
 
 clean:
 	$(RM) -f $(LIBNAME).a $(LIBOBJS) $(LIBOBJS_ARM) $(LIBCPPOBJS) .depend
