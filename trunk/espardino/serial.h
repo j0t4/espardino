@@ -17,6 +17,9 @@
 #define U1_TX  (P0_8)
 #define U1_RX  (P0_9)
 
+typedef void(*putCharFunc)(char);
+typedef void(*putStrFunc)(char*);
+
 class Serial : public HasPrintf
 {
 
@@ -25,6 +28,16 @@ class Serial : public HasPrintf
 	int bps;
 	
 	static bool usb_initialized;
+
+	putCharFunc gdb_putc;
+	putStrFunc  gdb_puts;
+
+	bool detect_gdbmonitor(void);
+
+#define GDB_BUFFER_SIZE 16
+	char gdb_buffer[GDB_BUFFER_SIZE];
+	int gdb_buffer_n;
+	int GDB_putchar(char c);
 
   public:
 	Serial();
