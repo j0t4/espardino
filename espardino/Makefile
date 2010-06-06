@@ -39,8 +39,12 @@ CFLAGS_ARM  = -I. -I.. -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -marm
 ASFLAGS = -mcpu=arm7tdmi -mthumb-interwork -I.  -x assembler-with-cpp
 ARFLAGS = -rcs
 
-LIBCPPSRCS = nanoc++.cpp digital_bus.cpp pwm_c++.cpp ticker.cpp hasprintf.cpp serial.cpp dac.cpp leds_c++.cpp
+LIBCPPSRCS = nanoc++.cpp digital_bus.cpp pwm_c++.cpp hasprintf.cpp serial.cpp dac.cpp leds_c++.cpp
 LIBCPPOBJS = $(LIBCPPSRCS:.cpp=.o)
+
+LIBCPPSRCS_ARM = ticker.cpp
+LIBCPPOBJS_ARM = $(LIBCPPSRCS_ARM:.cpp=.o)
+
 
 LIBSRCS = leds.c pwm.c efsutils.c _sbrk_r.c adc.c sysclocks.c iolib.c rtc.c delay.c dabt_handler.c buffer.c serial_device.c 
 LIBOBJS = $(LIBSRCS:.c=.o)
@@ -63,14 +67,15 @@ $(LIBOBJS) : %.o : %.c
 $(LIBCPPOBJS) : %.o : %.cpp
 	$(CPP) -fno-rtti $(CFLAGS)  $< -c
 
+$(LIBCPPOBJS_ARM) : %.o : %.cpp
+	$(CC) $(CFLAGS_ARM)  $< -c
+
+
 $(LIBOBJS_ARM) : %.o : %.c
 	$(CC) $(CFLAGS_ARM)  $< -c
 
 install: all
 	$(COPY) -f $(LIBNAME).a "$(ESPARDINO)/arm-elf/lib/$(TARGET_LIBDIR)/lib$(LIBNAME).a"
-	$(COPY) -f $(LIBNAME).a "$(ESPARDINO)/arm-elf/lib/lib$(LIBNAME).a"
-	$(COPY) -f $(LIBNAME).a "$(ESPARDINO)/arm-elf/lib/thumb/interwork/lib$(LIBNAME).a"
-	$(COPY) -f $(LIBNAME).a "$(ESPARDINO)/arm-elf/lib/thumb/lib$(LIBNAME).a"
 	$(COPY) -f *.h "$(ESPARDINO)/arm-elf/include/"
 	$(COPY) -f *.hpp "$(ESPARDINO)/arm-elf/include/"
 	$(COPY) -f mon48.bin "$(ESPARDINO)/arm-elf/monitor/espardino_monitor_lpc2148.bin"
