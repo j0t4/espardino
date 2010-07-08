@@ -81,7 +81,7 @@ install: all
 	$(COPY) -f mon48.bin "$(ESPARDINO)/arm-elf/monitor/espardino_monitor_lpc2148.bin"
 
 clean:
-	$(RM) -f $(LIBNAME).a $(LIBOBJS) $(LIBOBJS_ARM) $(LIBCPPOBJS) .depend
+	$(RM) -f $(LIBNAME).a $(LIBOBJS) $(LIBOBJS_ARM) $(LIBCPPOBJS) $(LIBCPPOBJS_ARM) .depend
 
 program:
 	c:/python26/python docbuild.py
@@ -89,7 +89,7 @@ program:
 # build lib
 lib: $(LIBNAME).a
 
-$(LIBNAME).a: $(LIBOBJS) $(LIBOBJS_ARM) $(LIBOBJS_ASM) $(LIBCPPOBJS)
+$(LIBNAME).a: $(LIBOBJS) $(LIBOBJS_ARM) $(LIBOBJS_ASM) $(LIBCPPOBJS) $(LIBCPPOBJS_ARM)
 	$(AR) $(ARFLAGS) $@ $^
 
 # Builds release tar file

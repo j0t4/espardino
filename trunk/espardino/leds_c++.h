@@ -48,6 +48,10 @@ class Led
 	void on();
 	void off();
 	int getStat();
+	Led& operator= (int 	val) { if(val) on(); else off(); return *this; }
+	operator int() { return m_stat; }
+
+	
 };
 
 #endif
