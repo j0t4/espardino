@@ -243,7 +243,7 @@ int Serial::setBps(int bps)
 	
 	if ((tx_port==U1_TX)||(rx_port==U1_RX))
 	{
-		serial_setbaud(0,bps);
+		serial_setbaud(1,bps);
 	}
 	
 	return bps;
