@@ -30,20 +30,32 @@
 /***************************************************************/
 
 
-#include  <digital_bus.h>
+#include <digital_bus.h>
 #include <iolib.h>
 
+/** DigitalBus constructor.
+ *  you will have to attach to the pins later, \see attach 
+ */
 DigitalBus::DigitalBus()
 {
 	for (int i=0;i<DIGITALBUS_MAX_PIN;i++)
 		p[i]=NO_PIN;
 }
-
+/**DigitalBus constructor, directly attached.
+ * Every pin that we want to attach to this digital bus should be set in the
+ * parameters, one by one, starting from bit0 to the last one.
+ * @param p0 is the pin for bit0
+ * @param p1 is the pin for bit1
+ * @param p2,p3,p4,p5 is the pin for bit2
+ */
 DigitalBus::DigitalBus(int p0, int p1,int p2,int p3,int p4,int p5,int p6,int p7)
 {
 	this->attach(p0,p1,p2,p3,p4,p5,p6,p7);	
 }
 
+/**Attach to a series of pins.
+ * \see DigitalBus constructor with pins
+ */
 int DigitalBus::attach(int p0, int p1,int p2,int p3,int p4,int p5,int p6,int p7)
 {
 	p[0]=p0; p[1]=p1; p[2]=p2; p[3]=p3;
@@ -114,11 +126,21 @@ int DigitalBus::readFastByte()
 	return 0;
 }
 
+/** Read data.
+ *  this function reads the data from the bus of pins that we 
+ *  described on the constructor or at attach time.
+ *  @return the data from p0 to px in bits fron 0 to x of a word. 
+ */
 int DigitalBus::read()
 {
 	return readBitByBit();
 }
 
+/** Write data.
+ * This function writes data to the bus of pins that we described 
+ * on the constructor or at attach time.
+ * @param data is the data to be written
+ */
 void DigitalBus::write(int data)
 {
 	last_val = data;
