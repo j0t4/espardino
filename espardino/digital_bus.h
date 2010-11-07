@@ -36,16 +36,30 @@
 
 #include <micro214x.h>
 
-#define DIGITALBUS_MAX_PIN 16
+#define DIGITALBUS_MAX_PIN 16 //!< Max number of pins that will be handled together
+
+/** The DigitalBus class.
+ * It's used to access set's of pins as a single word, we can connect
+ * from 1 to 16 bits to this class 
+ *    
+ * \Example
+ * \code
+ *    DigitalBus d(P0_0,P0_1);
+ *    d.write(3);
+ *  \endcode
+ */
+
+
 class DigitalBus
 {
    private:
-	int p[DIGITALBUS_MAX_PIN];
-	int last_pin;
-	int last_val;
-	int opt_level;
-	int opt_register;
-	void writeBitByBit(int data);
+	int p[DIGITALBUS_MAX_PIN]; //!< A reference to each bit pin 
+	int last_pin; 
+	int last_val;              //!< Last value that was written to the bus
+	int opt_level;             //!< Optimization level used
+	int opt_register;          //!< Optimized register address
+	
+	void writeBitByBit(int data); 
 	void writeFastByte(int data);
 	int readBitByBit();
 	int readFastByte();
@@ -63,5 +77,7 @@ class DigitalBus
 	void output() { write(last_val); }
 	void write(int data);	
 };
+
+
 
 #endif
