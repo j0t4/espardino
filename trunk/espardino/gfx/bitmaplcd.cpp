@@ -1,5 +1,14 @@
 #include <micro214x.h>
 
+#include "font6x8.h"
+#include "font8x16.h"
+
+
+BitmapLCD::BitmapLCD()
+{
+	this->setFont(FONT_6x8,false);
+}
+
 #define MYABS(x) (((x)<0)?(-(x)):(x))
 #define SWAP(a,b) swptmp=a;a=b;b=swptmp;
 
@@ -13,7 +22,7 @@ void BitmapLCD::line(int x0,int y0,int x1,int y1,int c)
 	int steep,deltax,deltay,error;
 	int ystep,y,x;
 
-	steep  = MYABS(y1-ºy0) > MYABS(x1-x0);
+	steep  = MYABS(y1-y0) > MYABS(x1-x0);
 
 	if (steep)
 	{
@@ -52,7 +61,7 @@ void BitmapLCD::line(int x0,int y0,int x1,int y1,int c)
 
 
 
-void putImg(const char* img, short int x, short int y, int opts)
+int BitmapLCD::putImg(const unsigned char *img,int x, int y, int opts)
 {
 	unsigned char ix,iy;
 	unsigned char sx,sy;
@@ -100,8 +109,8 @@ void putImg(const char* img, short int x, short int y, int opts)
 	} /* compressed format 1 */
 	else if (img[7]==2)
 	{
-		
-		RLE rle(img+8);
+
+		RLE rle((void*)(img+8));
 		rem_bits = 0;
 		t_bits = 0;
 		dy = y;
@@ -110,7 +119,7 @@ void putImg(const char* img, short int x, short int y, int opts)
 			dx = x;
 			for (ix=0;ix<sx;ix++)
 			{
-				
+
 				if (rem_bits<=0)
 				{
 					rem_bits = 8;
@@ -126,7 +135,7 @@ void putImg(const char* img, short int x, short int y, int opts)
 				if ((opts&TRANSPARENT)&&(!bitval)){ dx++; continue; }
 
 				if (opts&INVERTED) bitval=!bitval;
-				plot(scr,dx,dy,bitval); /* bit={1->white 0->blue} */
+				plot(dx,dy,bitval); /* bit={1->white 0->blue} */
 				dx++;
 			}
 			dy++;
@@ -144,62 +153,51 @@ void BitmapLCD::gotoxy (int x, int y)
 	m_y = y;
 }
 
-/*
-void lcd_NewLine(unsigned char fontHeight, unsigned char offset);
-void lcd_NewLine(unsigned char fontHeight, unsigned char offset) 
-{
-	if (m_y + fontHeight < 64)
-		lcd_gotoxy(offset, m_y + fontHeight);
-	else
-		lcd_gotoxy(offset, 0);
-}
 
-*/
-
-int write(char c)
+int BitmapLCD::write(char c)
 {
 	unsigned int index;
 	unsigned char pages, tmp, i, j, xPos, yPos, xtmp,ibit;
 	unsigned char last;
-	
+
 	if (c=='\f')
 	{
 		clear();
-		return;
-	}		
-	
+		return 0;
+	}
+
 	if(c == '\n')
 	{
-		if (m_y+f->height<m_y_size) gotoxy(m_x,m_y + f->height);
-		else								  		  gotoxy(m_x,m_y - m_y_size + f->height); 
-		return;
+		if (m_y+f_height<m_y_size) gotoxy(m_x,m_y + f_height);
+		else								  		  gotoxy(m_x,m_y - m_y_size + f_height);
+		return 0;
 	}
-	
+
 	if(c < 32)										// ignore escape characters
-		return;
-	
+		return 0;
+
 	xPos = m_x;									// save old coordinates
 	yPos = m_y;
-	
+
 	c -= 32;
-	
-	pages = f->height/8;		// calculate pages
+
+	pages = f_height/8;		// calculate pages
 													// Small Font = 0;
 													// BIG FONT	  = 1 ->upper;
-	if(f->height%8 != 0)
+	if(f_height%8 != 0)
 		pages++;
-	
-	index = (unsigned int)(c) * f->width * pages;					// get the needed array index
 
-	for(j = 0; j < pages; j++) 
+	index = (unsigned int)(c) * f_width * pages;					// get the needed array index
+
+	for(j = 0; j < pages; j++)
 	{
 		xtmp = xPos;
-		
-		last = (f->width) * pages;
-		for(i=j; i<= last; i += pages) 
+
+		last = (f_width) * pages;
+		for(i=j; i<= last; i += pages)
 		{
 			if (i==last) tmp = 0x00;
-			else 		 tmp = f->data[index + i];
+			else 		 tmp = f_data[index + i];
 
 			if (m_inv)							// NORMAL = 0, INV = 1;
 				  tmp =~ tmp;						// Convert Data
@@ -215,80 +213,35 @@ int write(char c)
 		}
 		gotoxy(xPos, m_y + 8);
 	}
-	gotoxy(m_x + f->width, yPos);			// go to the upper right corner	
-	
+	gotoxy(m_x + f_width, yPos);			// go to the upper right corner
+
+	return 1;
+
 }
 
-void BitmapLCD::setFont(tFont t)
+void BitmapLCD::setFont(int t, bool inverted)
 {
+	m_inv = inverted;
 
 	switch(t)
 	{
-		
-		case FONT_8x16:	
-				f.width 	= FONT8X16_WIDTH;
-				f.height 	= FONT8X16_HEIGHT;
-				f.data 		= Font8x16;
+
+		case FONT_8x16:
+				f_width 	= FONT8X16_WIDTH;
+				f_height 	= FONT8X16_HEIGHT;
+				f_data 		= Font8x16;
 				break;
-				
-		case FONT_6x8:	
-				f.width 	= FONT6X8_WIDTH;
-				f.height 	= FONT6X8_HEIGHT;
-				f.data	 	= Font6x8;
+
+		case FONT_6x8:
+				f_width 	= FONT6X8_WIDTH;
+				f_height 	= FONT6X8_HEIGHT;
+				f_data	 	= Font6x8;
 				break;
-		eso estaba pensando yo
-		
+
 	}
-			
+
 }
 
 
 
-
-void lcd_Printf (unsigned char *scr, unsigned char x, unsigned char y, char *string, unsigned char inv, unsigned char type)
-{
-		font_t f;
-		m_inv 			= inv;
-			
-		if(!type)
-		{
-			f.width 	= FONT8X16_WIDTH;
-			f.height 	= FONT8X16_HEIGHT;
-			f.data 		= Font8x16;
-		}
-		else
-		{
-			f.width 	= FONT6X8_WIDTH;
-			f.height 	= FONT6X8_HEIGHT;
-			f.data	 	= Font6x8;
-		}
-			
-		lcd_gotoxy (x,y);
-		lcd_PutString (scr, string, &f);
-	
-}
-
-
-void lcd_Printf_rom (unsigned char *scr, unsigned char x, unsigned char y, rom char *string, unsigned char inv, unsigned char type)
-{
-		font_t f;
-		m_inv 			= inv;
-			
-		if(!type)
-		{
-			f.width 	= FONT8X16_WIDTH;
-			f.height 	= FONT8X16_HEIGHT;
-			f.data 		= Font8x16;
-		}
-		else
-		{
-			f.width 	= FONT6X8_WIDTH;
-			f.height 	= FONT6X8_HEIGHT;
-			f.data	 	= Font6x8;
-		}
-			
-		lcd_gotoxy (x,y);
-		lcd_PutString_rom (scr, string, &f);
-	
-}
 
