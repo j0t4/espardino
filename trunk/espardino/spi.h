@@ -31,45 +31,26 @@
 
 
 
-#ifndef __MICRO214x_H
-#define __MICRO214x_H
+#ifndef __SPI_H
+#define __SPI_H
 
-#define __ESPARDINO_LIB_VER  "1.00.03"
+#define SPI0 1
+#define SPI1 2
 
-#include <micro214x_types.h>
-#include <leds.h>
-#include <efsutil.h>
-#include <pwm.h>
-#include <miniprintf.h>
-#include <adc.h>
-#include <pwm_in.h>
-#include <pwm.h>
-#include <i2c_device.h>
-#include <arm_irqs.h>
-#include <sysclocks.h>
-#include <iolib.h>
-#include <rtc.h>
-#include <delay.h>
-#include <spi.h>
+#define SPI_8BIT    8
+#define SPI_16BIT   16 
+
 
 #ifdef __cplusplus
+extern "C" {
+#endif
 
-  typedef void(*ptVoidFunction)(void);
+void SPI_wait(int channel_mask);
+void SPI_init (int channel_mask, int bits, int bps);
+unsigned int SPI_xfer (int channel, unsigned int data);
 
-	#include <digital_io.h>
-	#include <digital_bus.h>
-	#include <pwm_c++.h>
-	#include <ticker.h>
-	#include <servo.hpp>
-	#include <serial.h>
-	#include <dac.h>
-	#include <leds_c++.h>
-	#include <spi_c++.h>
-	/*#include <gfx/rle.h>
-	#include <gfx/bitmaplcd.h>*/
-	#include <gfx/ssd1308.h>
-	
+#ifdef __cplusplus
+}
 #endif
 
 #endif
-

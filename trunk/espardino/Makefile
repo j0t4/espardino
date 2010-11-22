@@ -33,20 +33,21 @@ OD		= arm-elf-objdump
 RM		= rm
 TAR		= tar
 COPY	= cp
+MKDIR = mkdir
 
-CFLAGS  =  -I. -I.. -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -m$(MODE)
-CFLAGS_ARM  = -I. -I.. -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -marm
-ASFLAGS = -mcpu=arm7tdmi -mthumb-interwork -I.  -x assembler-with-cpp
+CFLAGS  =  -g -I. -I.. -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -m$(MODE)
+CFLAGS_ARM  = -g -I. -I.. -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -marm
+ASFLAGS = -g -mcpu=arm7tdmi -mthumb-interwork -I.  -x assembler-with-cpp
 ARFLAGS = -rcs
 
-LIBCPPSRCS = nanoc++.cpp digital_bus.cpp pwm_c++.cpp hasprintf.cpp serial.cpp dac.cpp leds_c++.cpp
+LIBCPPSRCS = gfx/ssd1308.cpp nanoc++.cpp digital_bus.cpp pwm_c++.cpp hasprintf.cpp serial.cpp dac.cpp leds_c++.cpp spi_c++.cpp
 LIBCPPOBJS = $(LIBCPPSRCS:.cpp=.o)
 
 LIBCPPSRCS_ARM = ticker.cpp
 LIBCPPOBJS_ARM = $(LIBCPPSRCS_ARM:.cpp=.o)
 
 
-LIBSRCS = leds.c pwm.c efsutils.c _sbrk_r.c adc.c sysclocks.c iolib.c rtc.c delay.c dabt_handler.c buffer.c serial_device.c 
+LIBSRCS = spi.c leds.c pwm.c efsutils.c _sbrk_r.c adc.c sysclocks.c iolib.c rtc.c delay.c dabt_handler.c buffer.c serial_device.c 
 LIBOBJS = $(LIBSRCS:.c=.o)
 
 LIBSRCS_ARM = arm_irqs.c i2c_device.c pwm_in.c miniprintf.c serial_device_ARM_handler.c
@@ -59,24 +60,26 @@ LIBOBJS_ASM = $(LIBSRCS_ASM:.s=.o)
 all: lib  
 
 $(LIBOBJS_ASM) : %.o : %.s
-	$(CC) $(ASFLAGS) $< -c
+	$(CC) $(ASFLAGS) $< -c -o $@
 
 $(LIBOBJS) : %.o : %.c
-	$(CC) $(CFLAGS)  $< -c
+	$(CC) $(CFLAGS)  $< -c -o $@
     
 $(LIBCPPOBJS) : %.o : %.cpp
-	$(CPP) -fno-rtti $(CFLAGS)  $< -c
+	$(CPP) -fno-rtti $(CFLAGS)  $< -c -o $@
 
 $(LIBCPPOBJS_ARM) : %.o : %.cpp
-	$(CC) $(CFLAGS_ARM)  $< -c
+	$(CC) $(CFLAGS_ARM)  $< -c -o $@
 
 
 $(LIBOBJS_ARM) : %.o : %.c
-	$(CC) $(CFLAGS_ARM)  $< -c
+	$(CC) $(CFLAGS_ARM)  $< -c -o $@
 
 install: all
 	$(COPY) -f $(LIBNAME).a "$(ESPARDINO)/arm-elf/lib/$(TARGET_LIBDIR)/lib$(LIBNAME).a"
 	$(COPY) -f *.h "$(ESPARDINO)/arm-elf/include/"
+	$(MKDIR) -p "$(ESPARDINO)/arm-elf/include/gfx"
+	$(COPY) -rf gfx/*.h "$(ESPARDINO)/arm-elf/include/gfx/"
 	$(COPY) -f *.hpp "$(ESPARDINO)/arm-elf/include/"
 	$(COPY) -f mon48.bin "$(ESPARDINO)/arm-elf/monitor/espardino_monitor_lpc2148.bin"
 

@@ -46,7 +46,7 @@ DigitalBus::DigitalBus()
  * parameters, one by one, starting from bit0 to the last one.
  * @param p0 is the pin for bit0
  * @param p1 is the pin for bit1
- * @param p2,p3,p4,p5 is the pin for bit2
+ * @param p2,p3,p4,p5,p6,p7 is the pin for bits 2 to 7
  */
 DigitalBus::DigitalBus(int p0, int p1,int p2,int p3,int p4,int p5,int p6,int p7)
 {
