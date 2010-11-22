@@ -35,7 +35,7 @@ class SSD1308 : public BitmapLCD
 		void dump();
 		void setContrast(unsigned char contrast);
 		unsigned char getContrast() { return m_contrast; }
-		void plot(unsigned char p_y,unsigned char p_x,int c);
+		void plot(int p_y,int p_x,int c);
 };
 
 #endif

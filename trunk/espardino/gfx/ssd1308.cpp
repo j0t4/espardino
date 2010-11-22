@@ -128,7 +128,7 @@ void SSD1308::setContrast(unsigned char contrast)
     m_contrast = contrast;
 }
 
-void SSD1308::plot(unsigned char p_y,unsigned char p_x,int c)
+void SSD1308::plot(int p_y,int p_x,int c)
 {
 	int addr;
 	int bitmask;
