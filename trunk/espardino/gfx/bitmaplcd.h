@@ -17,6 +17,8 @@ class BitmapLCD : public HasPrintf
 	   int write(char data); /* for printf compatibility */
 	  void gotoxy(int x,int y);
 	  void putImg(unsigned char *img,int x, int y, int opts);
+	  virtual plot(int x, int y, int c)=0;
+	  virtual clear()=0;
 };	
 
 #endif

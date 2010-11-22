@@ -40,7 +40,7 @@ CFLAGS_ARM  = -g -I. -I.. -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -marm
 ASFLAGS = -g -mcpu=arm7tdmi -mthumb-interwork -I.  -x assembler-with-cpp
 ARFLAGS = -rcs
 
-LIBCPPSRCS = gfx/ssd1308.cpp nanoc++.cpp digital_bus.cpp pwm_c++.cpp hasprintf.cpp serial.cpp dac.cpp leds_c++.cpp spi_c++.cpp
+LIBCPPSRCS = gfx/rle.cpp gfx/ssd1308.cpp nanoc++.cpp digital_bus.cpp pwm_c++.cpp hasprintf.cpp serial.cpp dac.cpp leds_c++.cpp spi_c++.cpp
 LIBCPPOBJS = $(LIBCPPSRCS:.cpp=.o)
 
 LIBCPPSRCS_ARM = ticker.cpp
