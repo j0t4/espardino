@@ -1,4 +1,4 @@
-
+#include <micro214x.h>
 
 #define MYABS(x) (((x)<0)?(-(x)):(x))
 #define SWAP(a,b) swptmp=a;a=b;b=swptmp;
@@ -7,13 +7,13 @@
 // Bresenham integer optimized line drawing algorithm
 // http://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 
-void display_line(unsigned char *scr, int x0,int y0,int x1,int y1,int c)
+void BitmapLCD::line(int x0,int y0,int x1,int y1,int c)
 {
 	int swptmp;
 	int steep,deltax,deltay,error;
 	int ystep,y,x;
 
-	steep  = MYABS(y1-y0) > MYABS(x1-x0);
+	steep  = MYABS(y1-ºy0) > MYABS(x1-x0);
 
 	if (steep)
 	{
@@ -37,8 +37,8 @@ void display_line(unsigned char *scr, int x0,int y0,int x1,int y1,int c)
 
 	for (x=x0;x<=x1;x++)
 	{
-		if (steep) display_plot(scr,y,x,c);
-		else       display_plot(scr,x,y,c);
+		if (steep) plot(y,x,c);
+		else       plot(x,y,c);
 		error -= deltay;
 
 		if (error<0)
@@ -47,22 +47,18 @@ void display_line(unsigned char *scr, int x0,int y0,int x1,int y1,int c)
 			error +=deltax;
 		}
 	}
-
-
-
 }
 
 
 
 
-int display_img(unsigned char *scr, const rom char* img, short int x, short int y, int opts)
+void putImg(const char* img, short int x, short int y, int opts)
 {
 	unsigned char ix,iy;
 	unsigned char sx,sy;
 	unsigned char dx,dy;
 	unsigned char rem_bits;
 	unsigned char t_bits,bitval;
-	rle_status rle;
 
 	if (img[0]!='E') return -1;  // not espardino img format
 	if (img[1]!=1)   return -4;  // only version 1 supported
@@ -96,7 +92,7 @@ int display_img(unsigned char *scr, const rom char* img, short int x, short int 
 				rem_bits--;
 				if ((opts&TRANSPARENT)&&(!t_bits)){ dx++; continue;}
 				if (opts&INVERTED) t_bits=!t_bits;
-				display_plot(scr,dx,dy,t_bits);
+				plot(dx,dy,t_bits);
 				dx++;
 			}
 			dy++;
@@ -104,7 +100,8 @@ int display_img(unsigned char *scr, const rom char* img, short int x, short int 
 	} /* compressed format 1 */
 	else if (img[7]==2)
 	{
-		RLE_init(&rle,(rom unsigned char *)(img+8));
+		
+		RLE rle(img+8);
 		rem_bits = 0;
 		t_bits = 0;
 		dy = y;
@@ -113,11 +110,11 @@ int display_img(unsigned char *scr, const rom char* img, short int x, short int 
 			dx = x;
 			for (ix=0;ix<sx;ix++)
 			{
-
+				
 				if (rem_bits<=0)
 				{
 					rem_bits = 8;
-					t_bits = RLE_get(&rle);
+					t_bits = rle.get();
 				}
 
 				if (t_bits&0x80) bitval=1;
@@ -129,7 +126,7 @@ int display_img(unsigned char *scr, const rom char* img, short int x, short int 
 				if ((opts&TRANSPARENT)&&(!bitval)){ dx++; continue; }
 
 				if (opts&INVERTED) bitval=!bitval;
-				display_plot(scr,dx,dy,bitval); /* bit={1->white 0->blue} */
+				plot(scr,dx,dy,bitval); /* bit={1->white 0->blue} */
 				dx++;
 			}
 			dy++;
@@ -141,13 +138,13 @@ int display_img(unsigned char *scr, const rom char* img, short int x, short int 
 
 
 
-void lcd_gotoxy (unsigned char x, unsigned char y)
+void BitmapLCD::gotoxy (int x, int y)
 {
 	m_x = x;
 	m_y = y;
 }
 
-
+/*
 void lcd_NewLine(unsigned char fontHeight, unsigned char offset);
 void lcd_NewLine(unsigned char fontHeight, unsigned char offset) 
 {
@@ -157,24 +154,36 @@ void lcd_NewLine(unsigned char fontHeight, unsigned char offset)
 		lcd_gotoxy(offset, 0);
 }
 
+*/
 
-
-void lcd_PutChar(unsigned char *scr,char c, font_t *f)
+int write(char c)
 {
 	unsigned int index;
 	unsigned char pages, tmp, i, j, xPos, yPos, xtmp,ibit;
 	unsigned char last;
 	
+	if (c=='\f')
+	{
+		clear();
+		return;
+	}		
+	
 	if(c == '\n')
-		lcd_NewLine(f->height, 0);
+	{
+		if (m_y+f->height<m_y_size) gotoxy(m_x,m_y + f->height);
+		else								  		  gotoxy(m_x,m_y - m_y_size + f->height); 
+		return;
+	}
+	
 	if(c < 32)										// ignore escape characters
 		return;
 	
 	xPos = m_x;									// save old coordinates
 	yPos = m_y;
+	
 	c -= 32;
 	
-	pages = f->height/8;							// calculate pages
+	pages = f->height/8;		// calculate pages
 													// Small Font = 0;
 													// BIG FONT	  = 1 ->upper;
 	if(f->height%8 != 0)
@@ -196,52 +205,44 @@ void lcd_PutChar(unsigned char *scr,char c, font_t *f)
 				  tmp =~ tmp;						// Convert Data
 			for (ibit=8;ibit;ibit--)
 			{
-				display_plot(scr, m_x,m_y++,tmp&0x01);
+				plot(m_x,m_y++,tmp&0x01);
 				tmp >>=1;
 			}
 			m_y-=8; /* reverse all the pos we increased */
 
-			lcd_gotoxy (xtmp++,m_y);
+			gotoxy (xtmp++,m_y);
 
 		}
-		lcd_gotoxy(xPos, m_y + 8);
+		gotoxy(xPos, m_y + 8);
 	}
-	lcd_gotoxy(m_x + f->width, yPos);			// go to the upper right corner
+	gotoxy(m_x + f->width, yPos);			// go to the upper right corner	
+	
 }
 
-void lcd_PutString(unsigned char *scr,char *string, font_t *f) 
+void BitmapLCD::setFont(tFont t)
 {
-	unsigned char startx = m_x, i=0;
-	
-	
-	while(*string)
+
+	switch(t)
 	{
-		if(*string == '\f')
-			lcd_clear();	
-		if(*string == '\n')
-			lcd_NewLine(f->height, startx);
-		else
-			lcd_PutChar(scr, *string, f);
-		string++;
+		
+		case FONT_8x16:	
+				f.width 	= FONT8X16_WIDTH;
+				f.height 	= FONT8X16_HEIGHT;
+				f.data 		= Font8x16;
+				break;
+				
+		case FONT_6x8:	
+				f.width 	= FONT6X8_WIDTH;
+				f.height 	= FONT6X8_HEIGHT;
+				f.data	 	= Font6x8;
+				break;
+		eso estaba pensando yo
+		
 	}
+			
 }
 
-void lcd_PutString_rom(unsigned char *scr,rom char *string, font_t *f) 
-{
-	unsigned char startx = m_x, i=0;
-	
-	
-	while(*string)
-	{
-		if(*string == '\f')
-			lcd_clear();	
-		if(*string == '\n')
-			lcd_NewLine(f->height, startx);
-		else
-			lcd_PutChar(scr, *string, f);
-		string++;
-	}
-}
+
 
 
 void lcd_Printf (unsigned char *scr, unsigned char x, unsigned char y, char *string, unsigned char inv, unsigned char type)

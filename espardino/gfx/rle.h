@@ -10,9 +10,10 @@ class RLE
 		unsigned char last_c;
 		unsigned int rep;
 		unsigned char state;
+		int m_rsize;
 
 	public:
-		RLE(char *compressed);
+		RLE(void *compressed,int len=0x70000000);
 		int get();
 		
 };

@@ -65,8 +65,8 @@
 	#include <dac.h>
 	#include <leds_c++.h>
 	#include <spi_c++.h>
-	/*#include <gfx/rle.h>
-	#include <gfx/bitmaplcd.h>*/
+	#include <gfx/rle.h>
+	#include <gfx/bitmaplcd.h>
 	#include <gfx/ssd1308.h>
 	
 #endif
