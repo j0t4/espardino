@@ -26,7 +26,7 @@ class Serial : public HasPrintf
   private:
 	int rx_port,tx_port;
 	int bps;
-	
+
 	static bool usb_initialized;
 
 	putCharFunc gdb_putc;
@@ -44,37 +44,38 @@ class Serial : public HasPrintf
 	Serial();
 	Serial(int TX_pin=NO_PIN, int RX_pin=NO_PIN);
 	~Serial();
-	
+
 	int attach (int TX_pin=NO_PIN, int RX_pin=NO_PIN);
 
 	/* send&receive functions: character */
 	int send(char c);
 	int recv();
 	int write(char c) { return send(c); } /* for printf compatibility */
-	
+
 	int putc(char c) { return write(c); }
-	
+
 	int puts(char* str);
 	int puts(const char* str) { return puts((char*)str); }
-	
+	char* gets(char *buf, int maxLen=2048);
+
 	/* use buffering for GDB/others*/
 	void useBuffer(bool use_buffer);
-	
+
 	/* send&receive functions: buffer */
 	int send(char *buffer,int len);
 	int recv(char *buffer,int len);
-	
+
 	/* non blocking reception: won't wait if there is no data */
 	int recvNonblocking();
 
-	
+
 	/* kbhit: checks if there is data waiting in read buffer */
 	int kbhit();
 
 	/* set bits per second */
 	int setBps(int bps);
 	int getBps() { return bps; }
-    
+
 };
 
 #endif

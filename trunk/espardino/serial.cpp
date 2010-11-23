@@ -17,13 +17,13 @@
 #define U1_RX  (P0_44)
 
 
-*/ 
+*/
 
 bool Serial::usb_initialized = false;
 
 Serial::Serial()
 {
-	bps = 115200;		
+	bps = 115200;
 	rx_port = NO_PIN;
 	tx_port = NO_PIN;
 	gdb_use_buffering=false;
@@ -31,7 +31,7 @@ Serial::Serial()
 
 Serial::Serial(int TX_pin, int RX_pin)
 {
-	bps = 115200;		
+	bps = 115200;
 	rx_port = NO_PIN;
 	tx_port = NO_PIN;
 	gdb_use_buffering=false;
@@ -63,7 +63,7 @@ bool Serial::detect_gdbmonitor(void)
 int Serial::attach (int TX_pin, int RX_pin)
 {
 	/* store for later use */
-	
+
 	if ((TX_pin==USB_TX && RX_pin==NO_PIN)||
 		  (TX_pin==USB_TX && RX_pin==USB_RX)||
 		  (TX_pin==NO_PIN && RX_pin==USB_RX))
@@ -80,52 +80,52 @@ int Serial::attach (int TX_pin, int RX_pin)
  		}
 
 		rx_port = RX_pin;
-		tx_port = TX_pin;		
-			
+		tx_port = TX_pin;
+
 		return 1;
 	}
-	
+
 	if ((TX_pin==U0_TX && RX_pin==NO_PIN)||
 		  (TX_pin==U0_TX && RX_pin==U0_RX)||
 		  (TX_pin==NO_PIN && RX_pin==U0_RX))
  	{
  		int pinsetup=0;
- 		
+
  		if (TX_pin!=NO_PIN) pinsetup|=SERIAL_INIT_TX;
  		if (RX_pin!=NO_PIN) pinsetup|=SERIAL_INIT_TX;
- 			
+
  		serial_init(0,pinsetup);
- 		
+
  		rx_port = RX_pin;
-		tx_port = TX_pin;		
- 			
+		tx_port = TX_pin;
+
  		return 1;
 	}
-	
+
 	if ((TX_pin==U1_TX && RX_pin==NO_PIN)||
 		  (TX_pin==U1_TX && RX_pin==U1_RX)||
 		  (TX_pin==NO_PIN && RX_pin==U1_RX))
  	{
  		int pinsetup=0;
- 		
+
  		if (TX_pin!=NO_PIN) pinsetup|=SERIAL_INIT_TX;
  		if (RX_pin!=NO_PIN) pinsetup|=SERIAL_INIT_TX;
- 			
+
  		serial_init(1,pinsetup);
- 		
+
  		rx_port = RX_pin;
-		tx_port = TX_pin;		
- 			
+		tx_port = TX_pin;
+
  		return 1;
 	}
-	
+
 	if (TX_pin==GDB_TX)
 	{
 		return 0;
 	}
-	
+
 	return -1;
-	
+
 }
 
 void Serial::useBuffer(bool use_buf)
@@ -138,7 +138,7 @@ int Serial::GDB_putchar(char c)
 	if (gdb_use_buffering)
 	{
 		gdb_buffer[gdb_buffer_n++]=c;
-	
+
 		if ((c=='\0')||(c=='\n')||(gdb_buffer_n>=(GDB_BUFFER_SIZE-1)))
 		{
 			gdb_buffer[gdb_buffer_n]='\0';
@@ -163,8 +163,8 @@ int Serial::send(char c)
 		case GDB_TX: return GDB_putchar(c);
 		default: return -1;
 	}
-			
-}	
+
+}
 
 int Serial::recv()
 {
@@ -185,8 +185,25 @@ int Serial::puts(char *str)
 		 send(*str++);
 		 len++;
 	}
-	
+
 	return len;
+}
+
+char* Serial::gets(char *buf, int maxlen)
+{
+	char d;
+
+	maxlen--;
+	while(maxlen)
+	{
+		d = recv();
+		if (d=='\r') continue;
+		if (d=='\n') break;
+		*buf++=d;
+		maxlen--;
+	}
+	*buf++='\0';
+	return buf;
 }
 
 int Serial::send(char *buffer,int len)
@@ -201,8 +218,8 @@ int Serial::recv(char *buffer,int len)
 	while (len--) *buffer++ = (char) recv();
 	return old_len;
 }
-	
-	
+
+
 /* non blocking reception: won't wait if there is no data */
 int Serial::recvNonblocking()
 {
@@ -218,7 +235,7 @@ int Serial::recvNonblocking()
 	}
 }
 
-	
+
 	/* kbhit: checks if there is data waiting in read buffer */
 int Serial::kbhit()
 {
@@ -240,16 +257,16 @@ int Serial::setBps(int bps)
 	{
 		serial_setbaud(0,bps);
 	}
-	
+
 	if ((tx_port==U1_TX)||(rx_port==U1_RX))
 	{
 		serial_setbaud(1,bps);
 	}
-	
+
 	return bps;
-	
+
 }
 
 
-    
+
 
