@@ -51,6 +51,7 @@
 <tool id="org.eclipse.cdt.cross.arm.gnu.windows.printsize.base.1031048698" name="ARM Windows GNU Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.windows.printsize.base"/>
 </toolChain>
 </folderInfo>
+<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.toolchain.base.1050666646.311542453" name="serial.h" rcbsApplicability="disable" resourcePath="serial.h" toolsToInvoke=""/>
 <fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.toolchain.base.1050666646.1872815361" name="bitmaplcd.h" rcbsApplicability="disable" resourcePath="gfx/bitmaplcd.h" toolsToInvoke=""/>
 </configuration>
 </storageModule>
@@ -424,8 +425,17 @@
 </scannerConfigBuildInfo>
 </storageModule>
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
-<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings">
+<doc-comment-owner id="org.eclipse.cdt.ui.doxygen">
+<path value=""/>
+</doc-comment-owner>
+</storageModule>
+<storageModule moduleId="org.eclipse.cdt.core.language.mapping">
+<project-mappings>
+<file-mapping configuration="org.eclipse.cdt.cross.arm.gnu.windows.toolchain.base.1050666646" language="org.eclipse.cdt.core.g++" path="gfx/bitmaplcd.h"/>
+<file-mapping configuration="" language="org.eclipse.cdt.core.g++" path="serial.h"/>
+</project-mappings>
+</storageModule>
 </cconfiguration>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
