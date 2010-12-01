@@ -149,7 +149,7 @@ LDFLAGS += $(CPLUSPLUS_LIB)
 LDFLAGS += $(MY_LIBS) $(DEFAULT_LIBS) $(MY_LIBS) $(DEFAULT_LIBS)
 
 # Set Linker-Script Depending On Selected Memory and bootloader
-LDFLAGS_GDB = $(LDFLAGS)  -Wl,-Map=$(TARGET).gdb_map,--cref -T$(ESPARDINO)/src/espardino/linkerscripts/$(SUBMDL)-$(CODESPACE_LKR)$(BOOTLOADER-LINKSCRIPT-GDB).ld
+LDFLAGS_GDB = $(LDFLAGS)  -Wl,-Map=$(TARGET)_gdb.map,--cref -T$(ESPARDINO)/src/espardino/linkerscripts/$(SUBMDL)-$(CODESPACE_LKR)$(BOOTLOADER-LINKSCRIPT-GDB).ld
 LDFLAGS_ELF = $(LDFLAGS)  -Wl,-Map=$(TARGET).map,--cref -T$(ESPARDINO)/src/espardino/linkerscripts/$(SUBMDL)-$(CODESPACE_LKR)$(BOOTLOADER-LINKSCRIPT).ld
 
 
@@ -237,14 +237,14 @@ ALL_ASFLAGS = -mcpu=$(MCU) $(THUMB_IW) -I. -x assembler-with-cpp $(ASFLAGS)
 
 # Default target.
 #all: begin gccversion sizebefore build sizeafter finished end
-all: build sizeafter
+all: build setup_debug sizeafter
 
 build: elf bin lss sym
 
-elf: $(TARGET).elf $(TARGET).gdb_elf
+elf: $(TARGET).elf $(TARGET)_gdb.elf
 bin: $(TARGET).bin
-lss: $(TARGET).lss 
-sym: $(TARGET).sym
+lss: $(TARGET).lss $(TARGET)_gdb.lss
+sym: $(TARGET).sym $(TARGET)_gdb.sym
 
 # Eye candy.
 begin:
@@ -262,14 +262,14 @@ end:
 # Display size of file.
 HEXSIZE = $(SIZE) --target=$(FORMAT) $(TARGET).hex
 ELFSIZE = $(SIZE) -B $(TARGET).elf
-ELFSIZE_GDB = $(SIZE) -B $(TARGET).gdb_elf
+ELFSIZE_GDB = $(SIZE) -B $(TARGET)_gdb.elf
 
 sizebefore:
 	@if [ -f $(TARGET).elf ]; then echo; echo $(MSG_SIZE_BEFORE); $(ELFSIZE); echo; fi
 
 sizeafter:
 	@if [ -f $(TARGET).elf ]; then echo; echo $(MSG_SIZE_AFTER); $(ELFSIZE); echo; fi
-	@if [ -f $(TARGET).gdb_elf ]; then echo; echo $(MSG_SIZE_AFTER); $(ELFSIZE_GDB); echo; fi
+	@if [ -f $(TARGET)_gdb.elf ]; then echo; echo $(MSG_SIZE_AFTER); $(ELFSIZE_GDB); echo; fi
 
 # Display compiler version information.
 gccversion : 
@@ -314,6 +314,24 @@ program: $(TARGET).bin
 	$(LPC21ISP) $(LPC21ISP_CONTROL) $(LPC21ISP_DEBUG) $(LPC21ISP_FLASHFILE) $(LPC21ISP_PORT) $(LPC21ISP_BAUD) $(LPC21ISP_XTAL)
 endif
 
+
+setup_debug:
+	@echo
+	@echo Building .gdbinit for port $(ESPARDINO_VCOM_PORT) 
+	@echo \(remember to setup ESPARDINO_VCOM_PORT on C:/espardino/config.mk\)
+	@echo
+	@echo
+	echo target remote $(ESPARDINO_VCOM_PORT) >.gdbinit
+	echo set remote memory-read-packet-size 60 >>.gdbinit
+	echo set remote memory-write-packet-size 60 >>.gdbinit
+	echo load >>.gdbinit
+	@echo
+
+
+debug: $(TARGET)_gdb.elf setup_debug
+	arm-elf-gdb main_gdb.elf
+		
+
 # Create final output files (.hex, .eep) from ELF output file.
 # TODO: handling the .eeprom-section should be redundant
 %.bin: %.elf
@@ -338,18 +356,21 @@ endif
 
 
 # Link: create ELF output file from object files.
-.SECONDARY : $(TARGET).elf $(TARGET).gdb.elf
+.SECONDARY : $(TARGET).elf $(TARGET)_gdb.elf
 .PRECIOUS : $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) 
+
+main_gdb.elf:  $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) 
+	@echo
+	@echo $(MSG_LINKING) $@
+	$(CC)  $(LINK_MODE) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS_GDB)
+
+
 %.elf:  $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) 
 	@echo
 	@echo $(MSG_LINKING) $@
 	$(CC)  $(LINK_MODE) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS_ELF)
 #	$(CPP) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS)
 
-%.gdb_elf:  $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) 
-	@echo
-	@echo $(MSG_LINKING) $@
-	$(CC)  $(LINK_MODE) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS_GDB)
 
 
 # Compile: create .h image from .gif source
@@ -411,6 +432,7 @@ clean_list :
 	@echo $(MSG_CLEANING)
 	$(REMOVE) *~	
 	$(REMOVE) $(TARGET).bin $(TARGET).hex $(TARGET).obj $(TARGET).elf $(TARGET).map $(TARGET).obj $(TARGET).a90 $(TARGET).sym $(TARGET).lnk $(TARGET).lss
+	$(REMOVE) $(TARGET)_gdb.elf $(TARGET)_gdb.map $(TARGET)_gdb.sym $(TARGET)_gdb.lss
 	$(REMOVE) $(COBJ) $(CPPOBJ) $(AOBJ) $(COBJARM) $(CPPOBJARM) $(AOBJARM) $(LST) $(SRC:.c=.s) $(SRC:.c=.d)
 	$(REMOVE) $(SRCARM:.c=.s) $(SRCARM:.c=.d) $(CPPSRC:.cpp=.s) $(CPPSRC:.cpp=.d) $(CPPSRCARM:.cpp=.s)  $(CPPSRCARM:.cpp=.d).dep/*
 	$(REMOVE) $(HIMG)

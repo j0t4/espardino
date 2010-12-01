@@ -80,6 +80,7 @@ install: all
 	$(COPY) -f $(LIBNAME).a "$(ESPARDINO)/arm-elf/lib/$(TARGET_LIBDIR)/lib$(LIBNAME).a"
 	$(COPY) -f *.h "$(ESPARDINO)/arm-elf/include/"
 	$(MKDIR) -p "$(ESPARDINO)/arm-elf/include/gfx"
+	$(COPY) -rf gfx/*.hpp "$(ESPARDINO)/arm-elf/include/gfx/"
 	$(COPY) -rf gfx/*.h "$(ESPARDINO)/arm-elf/include/gfx/"
 	$(COPY) -f *.hpp "$(ESPARDINO)/arm-elf/include/"
 	$(COPY) -f mon48.bin "$(ESPARDINO)/arm-elf/monitor/espardino_monitor_lpc2148.bin"
