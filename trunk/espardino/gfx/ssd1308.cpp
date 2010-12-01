@@ -4,11 +4,13 @@
 
 SSD1308::SSD1308()
 {
+	setSize(64,128);
 }
 
 SSD1308::SSD1308(int MISO_pin,int MOSI_pin, int SCK_pin, int CS_pin, int DC_pin, int RST_pin)
 {
 
+	setSize(64,128);
 	attach(MISO_pin,MOSI_pin,SCK_pin,CS_pin,DC_pin,RST_pin);
 
 }
@@ -133,8 +135,9 @@ void SSD1308::plot(int p_y,int p_x,int c)
 	int addr;
 	int bitmask;
 
-	p_y = p_y & 0x7F;
-	p_x = p_x & 0x3F;
+	if (p_y>127) return;
+	if (p_x>63) return;
+
 
 
 	addr = (((int)p_y)<<3)+(p_x>>3);
@@ -149,6 +152,43 @@ void SSD1308::plot(int p_y,int p_x,int c)
 	{
 		m_scr[addr] &= ~bitmask; /* clear bit */
 	}
+}
+
+void SSD1308::xorScr(SSD1308 *scr)
+{
+	unsigned char * o_scr = scr->getScrData();
+	unsigned int i;
+
+	for (i=0;i<sizeof(m_scr);i++)
+	{
+		m_scr[i]=m_scr[i] | o_scr[i];
+	}
+
+}
+
+void SSD1308::orScr(SSD1308 *scr)
+{
+	unsigned char * o_scr = scr->getScrData();
+	unsigned int i;
+
+	for (i=0;i<sizeof(m_scr);i++)
+	{
+		m_scr[i]=m_scr[i] ^ o_scr[i];
+	}
+
+}
+
+void SSD1308::andScr(SSD1308 *scr)
+{
+	unsigned char * o_scr = scr->getScrData();
+	unsigned int i;
+
+	for (i=0;i<sizeof(m_scr);i++)
+	{
+		m_scr[i]=m_scr[i] & o_scr[i];
+	}
+
+
 }
 
 
