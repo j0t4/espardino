@@ -436,6 +436,7 @@ clean_list :
 	$(REMOVE) $(COBJ) $(CPPOBJ) $(AOBJ) $(COBJARM) $(CPPOBJARM) $(AOBJARM) $(LST) $(SRC:.c=.s) $(SRC:.c=.d)
 	$(REMOVE) $(SRCARM:.c=.s) $(SRCARM:.c=.d) $(CPPSRC:.cpp=.s) $(CPPSRC:.cpp=.d) $(CPPSRCARM:.cpp=.s)  $(CPPSRCARM:.cpp=.d).dep/*
 	$(REMOVE) $(HIMG)
+	$(REMOVE) -r .dep
 
 # Include the dependency files.
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
