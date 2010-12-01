@@ -53,6 +53,7 @@ class Serial : public HasPrintf
 	int write(char c) { return send(c); } /* for printf compatibility */
 
 	int putc(char c) { return write(c); }
+	int getc() { return recv(); }
 
 	int puts(char* str);
 	int puts(const char* str) { return puts((char*)str); }
