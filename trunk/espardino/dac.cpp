@@ -1,9 +1,9 @@
-#include <dac.h>
+#include <dac.hpp>
 #include <stdlib.h>
 
-DAC* DAC::singleton=NULL;
+DACBuffer* DACBuffer::singleton=NULL;
 	
-DAC::DAC() 
+DACBuffer::DACBuffer() 
 { 
 		underruns = 0;
 		ticker_started= false; 
@@ -14,19 +14,19 @@ DAC::DAC()
 
 };
 
-DAC::~DAC() 
+DACBuffer::~DACBuffer() 
 { 
 	if (ticker_started) ticker.stop(); 
 	if (buffer) free(buffer);
 }
 
-void DAC_tickPlayer()
+void DACBuffer_tickPlayer()
 {
-	if (DAC::singleton) DAC::singleton->tickPlay();
+	if (DACBuffer::singleton) DACBuffer::singleton->tickPlay();
 }
 
 
-void DAC::tickPlay(void)
+void DACBuffer::tickPlay(void)
 {
 		write(buffer[buffer_p_play]);
 		if (buffer_p_play!=buffer_p) buffer_p_play++;
@@ -34,7 +34,7 @@ void DAC::tickPlay(void)
 		if (buffer_p_play>=buffer_size) buffer_p_play=0;
 }
 
-int DAC::add(signed short data)
+int DACBuffer::add(signed short data)
 {
 	int next_p;
 	
@@ -48,14 +48,14 @@ int DAC::add(signed short data)
 	return 1;
 }
 
-int DAC::add(signed short *data, int len)
+int DACBuffer::add(signed short *data, int len)
 {
 	int old_len=len;
 	while (len--) add(*data++);
 	return old_len;
 }
 
-int DAC::setTicker(int frequency,int buffer_size)
+int DACBuffer::setFrequency(int frequency,int buffer_size)
 {
 	/* setup the buffer and pointers */
 	buffer = (signed short *)malloc(buffer_size*sizeof(signed short));
@@ -64,8 +64,8 @@ int DAC::setTicker(int frequency,int buffer_size)
 	buffer_p = 0;
 	buffer_p_play=0;
 	
-	/* setup the ticker to call DAC_tickPlayer */
-	ticker.attach(DAC_tickPlayer);
+	/* setup the ticker to call DACBuffer_tickPlayer */
+	ticker.attach(DACBuffer_tickPlayer);
 	ticker.setFrequency(frequency);
 	ticker.start();
 	ticker_started = true;
@@ -73,7 +73,7 @@ int DAC::setTicker(int frequency,int buffer_size)
 }
 	
 		
-int DAC::space()
+int DACBuffer::space()
 {
 	
 	if (buffer_p_play<buffer_p)
