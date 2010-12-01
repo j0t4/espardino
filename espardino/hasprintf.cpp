@@ -1,4 +1,4 @@
-#include <hasprintf.h>
+#include <hasprintf.hpp>
 #include <micro214x.h>
 
 int hasprintf_locked=false;

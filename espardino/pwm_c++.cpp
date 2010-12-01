@@ -33,7 +33,7 @@
 
 #include <micro214x.h>
 
-#include <pwm_c++.h>
+#include <pwm_c++.hpp>
 #include <pwm.h>
 
 /*class PWM 

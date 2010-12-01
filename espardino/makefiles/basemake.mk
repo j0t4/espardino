@@ -4,10 +4,25 @@ DEFAULT_LIBS = -lmicro214x -lm
 
 # MCU name and submodel
 
+ifeq ($(BOARD),micro2148)
 MCU = arm7tdmi-s
 SUBMDL = LPC2148
 THUMB    = -mthumb
 THUMB_IW = -mthumb-interwork
+else
+MCU = arm7tdmi-s
+SUBMDL = LPC2142
+THUMB    = -mthumb
+THUMB_IW = -mthumb-interwork
+endif
+
+
+ifeq ($(FORCE2142),yes)
+MCU = arm7tdmi-s
+SUBMDL = LPC2142
+THUMB    = -mthumb
+THUMB_IW = -mthumb-interwork
+endif
 
 ifeq ($(LINK_MODE),)
 LINK_MODE = -mthumb
@@ -24,11 +39,11 @@ ASRCARM += $(MY_STARTUP)
 endif
 
 
-ifeq ($(GDB),yes)
-	BOOTLOADER-LINKSCRIPT=-32k-gdb
-else
-	BOOTLOADER-LINKSCRIPT=-8k-bootloader
-endif
+
+BOOTLOADER-LINKSCRIPT-GDB=-32k-gdb
+
+BOOTLOADER-LINKSCRIPT=-8k-bootloader
+
 
 ifeq ($(NOBOOTLOADER),yes)
 	BOOTLOADER-LINKSCRIPT=
@@ -126,7 +141,7 @@ MATH_LIB = -lm
 #  -Wl,...:     tell GCC to pass this to linker.
 #    -Map:      create map file
 #    --cref:    add cross reference to  map file
-LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--cref
+LDFLAGS = -nostartfiles
 LDFLAGS += -lc 
 LDFLAGS += $(NEWLIBLPC) $(MATH_LIB) $(EFS_LIB)
 LDFLAGS += -lc -lgcc 
@@ -134,7 +149,8 @@ LDFLAGS += $(CPLUSPLUS_LIB)
 LDFLAGS += $(MY_LIBS) $(DEFAULT_LIBS) $(MY_LIBS) $(DEFAULT_LIBS)
 
 # Set Linker-Script Depending On Selected Memory and bootloader
-LDFLAGS +=-T$(ESPARDINO)/src/espardino/linkerscripts/$(SUBMDL)-$(CODESPACE_LKR)$(BOOTLOADER-LINKSCRIPT).ld
+LDFLAGS_GDB = $(LDFLAGS)  -Wl,-Map=$(TARGET).gdb_map,--cref -T$(ESPARDINO)/src/espardino/linkerscripts/$(SUBMDL)-$(CODESPACE_LKR)$(BOOTLOADER-LINKSCRIPT-GDB).ld
+LDFLAGS_ELF = $(LDFLAGS)  -Wl,-Map=$(TARGET).map,--cref -T$(ESPARDINO)/src/espardino/linkerscripts/$(SUBMDL)-$(CODESPACE_LKR)$(BOOTLOADER-LINKSCRIPT).ld
 
 
 
@@ -172,6 +188,7 @@ SIZE = arm-elf-size
 NM = arm-elf-nm
 REMOVE = rm -f
 COPY = cp
+IMGCONVERT = imgconvert.bat
 
 
 # Define Messages
@@ -202,6 +219,7 @@ COBJARM   = $(SRCARM:.c=.o)
 AOBJARM   = $(ASRCARM:.S=.o)
 CPPOBJ    = $(CPPSRC:.cpp=.o) 
 CPPOBJARM = $(CPPSRCARM:.cpp=.o)
+HIMG	  = $(IMGS:.gif=.h)
 
 # Define all listing files.
 LST = $(ASRC:.S=.lst) $(ASRCARM:.S=.lst) $(SRC:.c=.lst) $(SRCARM:.c=.lst)
@@ -223,7 +241,7 @@ all: build sizeafter
 
 build: elf bin lss sym
 
-elf: $(TARGET).elf
+elf: $(TARGET).elf $(TARGET).gdb_elf
 bin: $(TARGET).bin
 lss: $(TARGET).lss 
 sym: $(TARGET).sym
@@ -244,12 +262,14 @@ end:
 # Display size of file.
 HEXSIZE = $(SIZE) --target=$(FORMAT) $(TARGET).hex
 ELFSIZE = $(SIZE) -B $(TARGET).elf
+ELFSIZE_GDB = $(SIZE) -B $(TARGET).gdb_elf
+
 sizebefore:
 	@if [ -f $(TARGET).elf ]; then echo; echo $(MSG_SIZE_BEFORE); $(ELFSIZE); echo; fi
 
 sizeafter:
 	@if [ -f $(TARGET).elf ]; then echo; echo $(MSG_SIZE_AFTER); $(ELFSIZE); echo; fi
-
+	@if [ -f $(TARGET).gdb_elf ]; then echo; echo $(MSG_SIZE_AFTER); $(ELFSIZE_GDB); echo; fi
 
 # Display compiler version information.
 gccversion : 
@@ -318,34 +338,45 @@ endif
 
 
 # Link: create ELF output file from object files.
-.SECONDARY : $(TARGET).elf
-.PRECIOUS : $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM)
-%.elf:  $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM)
+.SECONDARY : $(TARGET).elf $(TARGET).gdb.elf
+.PRECIOUS : $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) 
+%.elf:  $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) 
 	@echo
 	@echo $(MSG_LINKING) $@
-	$(CC)  $(LINK_MODE) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS)
+	$(CC)  $(LINK_MODE) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS_ELF)
 #	$(CPP) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS)
 
+%.gdb_elf:  $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) 
+	@echo
+	@echo $(MSG_LINKING) $@
+	$(CC)  $(LINK_MODE) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS_GDB)
+
+
+# Compile: create .h image from .gif source
+$(HIMG) : %.h : %.gif
+	@echo Converting image $< to $@
+	$(IMGCONVERT) $<
+
 # Compile: create object files from C source files. ARM/Thumb
-$(COBJ) : %.o : %.c
+$(COBJ) : %.o : %.c $(HIMG)
 	@echo
 	@echo $(MSG_COMPILING) $<
 	$(CC) -c $(THUMB) $(ALL_CFLAGS) $(CONLYFLAGS) $< -o $@ 
 
 # Compile: create object files from C source files. ARM-only
-$(COBJARM) : %.o : %.c
+$(COBJARM) : %.o : %.c $(HIMG)
 	@echo
 	@echo $(MSG_COMPILING_ARM) $<
 	$(CC) -c $(ALL_CFLAGS) $(CONLYFLAGS) $< -o $@ 
 
 # Compile: create object files from C++ source files. ARM/Thumb
-$(CPPOBJ) : %.o : %.cpp
+$(CPPOBJ) : %.o : %.cpp $(HIMG)
 	@echo
 	@echo $(MSG_COMPILINGCPP) $<
 	$(CPP) -c $(THUMB) $(ALL_CFLAGS) $(CPPFLAGS) $< -o $@ 
 
 # Compile: create object files from C++ source files. ARM-only
-$(CPPOBJARM) : %.o : %.cpp
+$(CPPOBJARM) : %.o : %.cpp $(HIMG)
 	@echo
 	@echo $(MSG_COMPILINGCPP_ARM) $<
 	$(CPP) -c $(ALL_CFLAGS) $(CPPFLAGS) $< -o $@ 
@@ -382,7 +413,7 @@ clean_list :
 	$(REMOVE) $(TARGET).bin $(TARGET).hex $(TARGET).obj $(TARGET).elf $(TARGET).map $(TARGET).obj $(TARGET).a90 $(TARGET).sym $(TARGET).lnk $(TARGET).lss
 	$(REMOVE) $(COBJ) $(CPPOBJ) $(AOBJ) $(COBJARM) $(CPPOBJARM) $(AOBJARM) $(LST) $(SRC:.c=.s) $(SRC:.c=.d)
 	$(REMOVE) $(SRCARM:.c=.s) $(SRCARM:.c=.d) $(CPPSRC:.cpp=.s) $(CPPSRC:.cpp=.d) $(CPPSRCARM:.cpp=.s)  $(CPPSRCARM:.cpp=.d).dep/*
-
+	$(REMOVE) $(HIMG)
 
 # Include the dependency files.
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)

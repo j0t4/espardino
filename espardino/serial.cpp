@@ -1,4 +1,4 @@
-#include <serial.h>
+#include <serial.hpp>
 #include <vcom.h>
 #include <serial_device.h>
 

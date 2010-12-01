@@ -1,4 +1,5 @@
 LIBNAME	= micro214x
+OPT=-O2
 
 ifeq ($(MODE),thumb)
 	MODE_DIR = thumb
@@ -35,8 +36,8 @@ TAR		= tar
 COPY	= cp
 MKDIR = mkdir
 
-CFLAGS  =  -g -I. -I.. -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -m$(MODE)
-CFLAGS_ARM  = -g -I. -I.. -c -W -Wall -Os -mcpu=arm7tdmi -mthumb-interwork -marm
+CFLAGS  =  -g -I. -I.. -c -W -Wall $(OPT) -mcpu=arm7tdmi -mthumb-interwork -m$(MODE)
+CFLAGS_ARM  = -g -I. -I.. -c -W -Wall $(OPT) -mcpu=arm7tdmi -mthumb-interwork -marm
 ASFLAGS = -g -mcpu=arm7tdmi -mthumb-interwork -I.  -x assembler-with-cpp
 ARFLAGS = -rcs
 

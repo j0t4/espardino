@@ -1,4 +1,4 @@
-#include "spi_c++.h"
+#include "spi_c++.hpp"
 #include "micro214x.h"
 
 Spi::Spi()
