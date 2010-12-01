@@ -23,6 +23,7 @@ class SSD1308 : public BitmapLCD
 
 	public:
 
+		unsigned char *getScrData(){ return m_scr; }
 
 		SSD1308();
 		SSD1308(int MISO_pin,int MOSI_pin, int SCK_pin, int CS_pin, int DC_pin, int RST_pin);
@@ -30,12 +31,17 @@ class SSD1308 : public BitmapLCD
 
 		void init();
 		void clear();
-
 		void dumpInit();
 		void dump();
 		void setContrast(unsigned char contrast);
 		unsigned char getContrast() { return m_contrast; }
 		void plot(int p_y,int p_x,int c);
+
+		void xorScr(SSD1308 *scr);
+		void orScr(SSD1308 *scr);
+		void andScr(SSD1308 *scr);
+
+
 };
 
 #endif

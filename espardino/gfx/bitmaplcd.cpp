@@ -63,11 +63,11 @@ void BitmapLCD::line(int x0,int y0,int x1,int y1,int c)
 
 int BitmapLCD::putImg(const unsigned char *img,int x, int y, int opts)
 {
-	unsigned char ix,iy;
-	unsigned char sx,sy;
-	unsigned char dx,dy;
-	unsigned char rem_bits;
-	unsigned char t_bits,bitval;
+	int ix,iy;
+	int sx,sy;
+	int dx,dy;
+	int rem_bits;
+	int t_bits,bitval;
 
 	if (img[0]!='E') return -1;  // not espardino img format
 	if (img[1]!=1)   return -4;  // only version 1 supported
@@ -157,8 +157,9 @@ void BitmapLCD::gotoxy (int x, int y)
 int BitmapLCD::write(char c)
 {
 	unsigned int index;
-	unsigned char pages, tmp, i, j, xPos, yPos, xtmp,ibit;
+	unsigned int pages, tmp, i, j, xPos, yPos, xtmp,ibit;
 	unsigned char last;
+	int correct;
 
 	if (c=='\f')
 	{
@@ -189,6 +190,9 @@ int BitmapLCD::write(char c)
 
 	index = (unsigned int)(c) * f_width * pages;					// get the needed array index
 
+	if (pages==2) correct=2;
+	else 		  correct=0;
+
 	for(j = 0; j < pages; j++)
 	{
 		xtmp = xPos;
@@ -197,7 +201,7 @@ int BitmapLCD::write(char c)
 		for(i=j; i<= last; i += pages)
 		{
 			if (i==last) tmp = 0x00;
-			else 		 tmp = f_data[index + i];
+			else 		 tmp = f_data[index + i-correct];
 
 			if (m_inv)							// NORMAL = 0, INV = 1;
 				  tmp =~ tmp;						// Convert Data
