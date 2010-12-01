@@ -56,18 +56,18 @@
 
   typedef void(*ptVoidFunction)(void);
 
-	#include <digital_io.h>
-	#include <digital_bus.h>
-	#include <pwm_c++.h>
-	#include <ticker.h>
+	#include <digital_io.hpp>
+	#include <digital_bus.hpp>
+	#include <pwm_c++.hpp>
+	#include <ticker.hpp>
 	#include <servo.hpp>
-	#include <serial.h>
-	#include <dac.h>
-	#include <leds_c++.h>
-	#include <spi_c++.h>
-	#include <gfx/rle.h>
-	#include <gfx/bitmaplcd.h>
-	#include <gfx/ssd1308.h>
+	#include <serial.hpp>
+	#include <dac.hpp>
+	#include <leds_c++.hpp>
+	#include <spi_c++.hpp>
+	#include <gfx/rle.hpp>
+	#include <gfx/bitmaplcd.hpp>
+	#include <gfx/ssd1308.hpp>
 	
 #endif
 

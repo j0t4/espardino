@@ -33,7 +33,7 @@
 
 #include <micro214x.h>
 #include <LPC214x.h>
-#include <ticker.h>
+#include <ticker.hpp>
 
 void irq_handler_TIMER0 (void) __attribute__ ((interrupt("IRQ")));
 void irq_handler_TIMER1 (void) __attribute__ ((interrupt("IRQ")));

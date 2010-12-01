@@ -30,7 +30,7 @@
 /***************************************************************/
 
 
-#include <digital_bus.h>
+#include <digital_bus.hpp>
 #include <iolib.h>
 
 /** DigitalBus constructor.
@@ -99,6 +99,8 @@ void DigitalBus::writeFastByte(int data)
 	   on aligned 8bit ports, still unimplemented,
 	   the optimizable condition must be detected on
 	   attach(..) call */
+	   
+	(void) data;
 
 	return;
 }

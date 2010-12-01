@@ -2,7 +2,7 @@
 #define __DAC_H
 
 #include <LPC214x.h>
-#include <ticker.h>
+#include <ticker.hpp>
 
 class DAC
 {
