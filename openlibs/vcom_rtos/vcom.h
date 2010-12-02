@@ -13,8 +13,7 @@ int VCOM_kbhit(void);
 int VCOM_putchar(int c);
 int VCOM_putchar_nl(int c);
 int VCOM_getchar(void);
-int VCOM_init(void);   /* uses VIC 0 interrupt */
-int VCOM_RT_init(void);
+int VCOM_init(void);   
 void VCOM_puts(const char *str);
 
 #ifdef __cplusplus
