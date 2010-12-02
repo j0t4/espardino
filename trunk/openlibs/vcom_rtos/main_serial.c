@@ -518,7 +518,7 @@ static int usbHandleReset (U8 bDevStatus __attribute__ ((unused)))
 	main
 	====
 **************************************************************************/
-int VCOM_RT_init(void)
+int VCOM_init(void)
 {
 
 	portENTER_CRITICAL ();

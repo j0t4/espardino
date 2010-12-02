@@ -49,7 +49,7 @@ int main(void)
 	xTaskHandle xHandleA,xHandleB,xHandleC;
 
 	LEDS_init();	/* init the LEDs for this board  */
-	VCOM_RT_init();	/* init the USB Virtual COM port */
+	VCOM_init();	/* init the USB Virtual COM port */
 	                /* We link with vcom_rtos lib, that's better designed 
 						for use with freertos */
 	

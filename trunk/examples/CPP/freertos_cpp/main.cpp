@@ -21,17 +21,10 @@
 //
 
 #include <micro214x.h>
-#include <vcom.h>
-extern "C"
-{
-	#include <freertos/FreeRTOS.h>
-	#include <freertos/task.h>
-	int VCOM_RT_init();
-	int VCOM_init()
-	{
-		return VCOM_RT_init();
-	}
-}
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
+
 void vATaskFunction( void *pvParameters );
 void vBTaskFunction( void *pvParameters );
 void vCTaskFunction( void *pvParameters );
@@ -68,7 +61,7 @@ void vATaskFunction( void *pvParameters )
 		vTaskDelayUntil (&lastTickTime, 100);	/* wait until lastTickTime + 100ms */
 		led1.off();
 
-		xprintf("** [A] TICK: %d\r\n",(int)lastTickTime);
+		usb->printf("** [A] TICK: %d\r\n",(int)lastTickTime);
 
 		vTaskDelayUntil (&lastTickTime, 400);  /* wait until lastTickTime + 400ms */
 
@@ -114,6 +107,8 @@ void vBTaskFunction( void *pvParameters )
 		led3.on();
 		vTaskDelayUntil (&lastTickTime, 25);
 		led3.off();
+
+		usb->printf("** [C] TICK: %d\r\n",(int)lastTickTime);
 
 		vTaskDelayUntil (&lastTickTime, 400);
     }
