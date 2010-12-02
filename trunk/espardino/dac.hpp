@@ -11,7 +11,7 @@ class DACBuffer
 	signed short* buffer;
 	int buffer_size;
 	int buffer_p;
-	int buffer_p_play;
+	volatile int buffer_p_play;
 	int underruns;
 public:
 	static DACBuffer* singleton;
