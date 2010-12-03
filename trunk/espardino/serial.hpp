@@ -2,7 +2,7 @@
 #define __SERIAL_H
 
 #include <micro214x.h>
-#include <hasprintf.h>
+#include <hasprintf.hpp>
 
 #define USB_TX (-1)
 #define USB_RX (-2)
