@@ -1,7 +1,7 @@
 #ifndef __BITMAPLCD_H
 #define __BITMAPLCD_H
 #include <micro214x.h>
-#include <hasprintf.h>
+#include <hasprintf.hpp>
 
 #define FONT_8x16 1
 #define FONT_6x8  2
